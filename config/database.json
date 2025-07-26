@@ -1,6 +1,6 @@
 {
   "driver": "sqlite",
-  "database": "storage/database.db",
+  "database": "storage/database/pofuai_dev.db",
   "prefix": "",
   "options": {
     "foreign_keys": true

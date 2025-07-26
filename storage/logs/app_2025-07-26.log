@@ -11,3 +11,182 @@ INFO [2025-07-26 17:34:18,826] [logger.init:101]: Logger başlatıldı - Seviye:
 INFO [2025-07-26 17:34:19,008] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
 INFO [2025-07-26 17:34:39,597] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
 INFO [2025-07-26 17:34:39,775] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
+INFO [2025-07-26 17:57:16,576] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
+INFO [2025-07-26 17:57:16,787] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
+INFO [2025-07-26 17:58:20,335] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
+INFO [2025-07-26 17:59:39,166] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
+INFO [2025-07-26 18:00:38,673] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
+ERROR [2025-07-26 18:00:42,776] [BaseController.log:238]: Stats error: 'DatabaseConnection' object has no attribute 'cursor'
+ERROR [2025-07-26 18:00:43,828] [error_handler._log_error:193]: Hata: 'now' is undefined
+Traceback:
+Traceback (most recent call last):
+  File "/workspace/app/Controllers/HomeController.py", line 65, in index
+    return self.page_service.render_page('home/index', data)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/core/Services/PageService.py", line 404, in render_page
+    return self.render_template(page_name, data)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/workspace/core/Services/PageService.py", line 352, in render_template
+    return render_template(f"{template_name}.html", **merged_data)
+  File "/home/ubuntu/.local/lib/python3.13/site-packages/flask/templating.py", line 152, in render_template
+    return _render(app, template, context)
+  File "/home/ubuntu/.local/lib/python3.13/site-packages/flask/templating.py", line 133, in _render
+    rv = template.render(context)
+  File "/home/ubuntu/.local/lib/python3.13/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/ubuntu/.local/lib/python3.13/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/workspace/public/Views/home/index.html", line 2, in top-level template code
+    {% import "components/_macros.html" as components %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/public/Views/layouts/base_layout.html", line 41, in top-level template code
+    {% block body %}
+  File "/workspace/public/Views/layouts/base_layout.html", line 82, in block 'body'
+    {% block footer %}
+    ^^^^^^^^^^^^^
+  File "/workspace/public/Views/layouts/base_layout.html", line 83, in block 'footer'
+    {% include "components/footer.html" %}
+    ^^^^^^^^^
+  File "/workspace/public/Views/components/footer.html", line 4, in top-level template code
+    © {{ now.year|default('2025') }} {{ app_name|default('PofuAi') }} - Tüm hakları saklıdır.
+    ^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.local/lib/python3.13/site-packages/jinja2/environment.py", line 490, in getattr
+    return getattr(obj, attribute)
+jinja2.exceptions.UndefinedError: 'now' is undefined
+
+Request Info:
+  method: GET
+  path: /dashboard
+  remote_addr: 127.0.0.1
+  user_agent: curl/8.12.1
+  content_type: UNKNOWN
+
+ERROR [2025-07-26 18:00:43,828] [error_handler._handle_general_error:273]: Hata: 'now' is undefined
+ERROR [2025-07-26 18:00:43,829] [error_handler._handle_general_error:274]: Traceback:
+Traceback (most recent call last):
+  File "/workspace/app/Controllers/HomeController.py", line 65, in index
+    return self.page_service.render_page('home/index', data)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/core/Services/PageService.py", line 404, in render_page
+    return self.render_template(page_name, data)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/workspace/core/Services/PageService.py", line 352, in render_template
+    return render_template(f"{template_name}.html", **merged_data)
+  File "/home/ubuntu/.local/lib/python3.13/site-packages/flask/templating.py", line 152, in render_template
+    return _render(app, template, context)
+  File "/home/ubuntu/.local/lib/python3.13/site-packages/flask/templating.py", line 133, in _render
+    rv = template.render(context)
+  File "/home/ubuntu/.local/lib/python3.13/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/ubuntu/.local/lib/python3.13/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/workspace/public/Views/home/index.html", line 2, in top-level template code
+    {% import "components/_macros.html" as components %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/public/Views/layouts/base_layout.html", line 41, in top-level template code
+    {% block body %}
+  File "/workspace/public/Views/layouts/base_layout.html", line 82, in block 'body'
+    {% block footer %}
+    ^^^^^^^^^^^^^
+  File "/workspace/public/Views/layouts/base_layout.html", line 83, in block 'footer'
+    {% include "components/footer.html" %}
+    ^^^^^^^^^
+  File "/workspace/public/Views/components/footer.html", line 4, in top-level template code
+    © {{ now.year|default('2025') }} {{ app_name|default('PofuAi') }} - Tüm hakları saklıdır.
+    ^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.local/lib/python3.13/site-packages/jinja2/environment.py", line 490, in getattr
+    return getattr(obj, attribute)
+jinja2.exceptions.UndefinedError: 'now' is undefined
+
+INFO [2025-07-26 18:01:02,327] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
+INFO [2025-07-26 18:01:02,504] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
+ERROR [2025-07-26 18:01:05,266] [BaseController.log:238]: Stats error: 'DatabaseConnection' object has no attribute 'cursor'
+ERROR [2025-07-26 18:01:06,317] [error_handler._log_error:193]: Hata: 'now' is undefined
+Traceback:
+Traceback (most recent call last):
+  File "/workspace/app/Controllers/HomeController.py", line 65, in index
+    return self.page_service.render_page('home/index', data)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/core/Services/PageService.py", line 404, in render_page
+    return self.render_template(page_name, data)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/workspace/core/Services/PageService.py", line 352, in render_template
+    return render_template(f"{template_name}.html", **merged_data)
+  File "/home/ubuntu/.local/lib/python3.13/site-packages/flask/templating.py", line 152, in render_template
+    return _render(app, template, context)
+  File "/home/ubuntu/.local/lib/python3.13/site-packages/flask/templating.py", line 133, in _render
+    rv = template.render(context)
+  File "/home/ubuntu/.local/lib/python3.13/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/ubuntu/.local/lib/python3.13/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/workspace/public/Views/home/index.html", line 2, in top-level template code
+    {% import "components/_macros.html" as components %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/public/Views/layouts/base_layout.html", line 41, in top-level template code
+    {% block body %}
+  File "/workspace/public/Views/layouts/base_layout.html", line 82, in block 'body'
+    {% block footer %}
+    ^^^^^^^^^^^^^
+  File "/workspace/public/Views/layouts/base_layout.html", line 83, in block 'footer'
+    {% include "components/footer.html" %}
+    ^^^^^^^^^
+  File "/workspace/public/Views/components/footer.html", line 4, in top-level template code
+    © {{ now.year|default('2025') }} {{ app_name|default('PofuAi') }} - Tüm hakları saklıdır.
+    ^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.local/lib/python3.13/site-packages/jinja2/environment.py", line 490, in getattr
+    return getattr(obj, attribute)
+jinja2.exceptions.UndefinedError: 'now' is undefined
+
+Request Info:
+  method: GET
+  path: /dashboard
+  remote_addr: 127.0.0.1
+  user_agent: curl/8.12.1
+  content_type: UNKNOWN
+
+ERROR [2025-07-26 18:01:06,318] [error_handler._handle_general_error:273]: Hata: 'now' is undefined
+ERROR [2025-07-26 18:01:06,318] [error_handler._handle_general_error:274]: Traceback:
+Traceback (most recent call last):
+  File "/workspace/app/Controllers/HomeController.py", line 65, in index
+    return self.page_service.render_page('home/index', data)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/core/Services/PageService.py", line 404, in render_page
+    return self.render_template(page_name, data)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/workspace/core/Services/PageService.py", line 352, in render_template
+    return render_template(f"{template_name}.html", **merged_data)
+  File "/home/ubuntu/.local/lib/python3.13/site-packages/flask/templating.py", line 152, in render_template
+    return _render(app, template, context)
+  File "/home/ubuntu/.local/lib/python3.13/site-packages/flask/templating.py", line 133, in _render
+    rv = template.render(context)
+  File "/home/ubuntu/.local/lib/python3.13/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/ubuntu/.local/lib/python3.13/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/workspace/public/Views/home/index.html", line 2, in top-level template code
+    {% import "components/_macros.html" as components %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/public/Views/layouts/base_layout.html", line 41, in top-level template code
+    {% block body %}
+  File "/workspace/public/Views/layouts/base_layout.html", line 82, in block 'body'
+    {% block footer %}
+    ^^^^^^^^^^^^^
+  File "/workspace/public/Views/layouts/base_layout.html", line 83, in block 'footer'
+    {% include "components/footer.html" %}
+    ^^^^^^^^^
+  File "/workspace/public/Views/components/footer.html", line 4, in top-level template code
+    © {{ now.year|default('2025') }} {{ app_name|default('PofuAi') }} - Tüm hakları saklıdır.
+    ^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.local/lib/python3.13/site-packages/jinja2/environment.py", line 490, in getattr
+    return getattr(obj, attribute)
+jinja2.exceptions.UndefinedError: 'now' is undefined
+
+INFO [2025-07-26 18:01:54,977] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
+INFO [2025-07-26 18:03:08,617] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
+INFO [2025-07-26 18:03:08,786] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
+ERROR [2025-07-26 18:03:14,746] [BaseController.log:238]: Stats error: 'DatabaseConnection' object has no attribute 'cursor'
