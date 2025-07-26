@@ -16,6 +16,7 @@ def register_routes(app: Flask):
     home_controller = HomeController()
     
     app.add_url_rule('/', 'home.index', lambda: redirect('/auth/login'), methods=['GET'])
+    app.add_url_rule('/dashboard', 'dashboard.index', home_controller.index, methods=['GET'])
     
     # Auth route'ları
     from app.Controllers.AuthController import AuthController
@@ -52,12 +53,22 @@ def register_routes(app: Flask):
     api_blueprint.add_url_rule('/', 'index', api_controller.index, methods=['GET'])
     api_blueprint.add_url_rule('/test', 'test', api_controller.test, methods=['GET'])
     
+    # Dashboard API route'ları
+    api_blueprint.add_url_rule('/dashboard/stats', 'dashboard_stats', lambda: home_controller.index(), methods=['GET'])
+    api_blueprint.add_url_rule('/dashboard/activities', 'dashboard_activities', lambda: home_controller._get_recent_activities(), methods=['GET'])
+    api_blueprint.add_url_rule('/dashboard/system', 'dashboard_system', lambda: home_controller._get_system_info(), methods=['GET'])
+    
     # Admin route'ları
     from app.Controllers.AdminController import AdminController
     admin_controller = AdminController()
     
     admin_blueprint = Blueprint('admin', __name__, url_prefix='/admin')
     app.add_url_rule('/admin', 'admin.index', admin_controller.index, methods=['GET'])
+    admin_blueprint.add_url_rule('/users', 'users', admin_controller.users, methods=['GET'])
+    admin_blueprint.add_url_rule('/settings', 'settings', admin_controller.settings, methods=['GET', 'POST'])
+    admin_blueprint.add_url_rule('/activities', 'activities', lambda: admin_controller.index(), methods=['GET'])
+    admin_blueprint.add_url_rule('/content', 'content', lambda: admin_controller.index(), methods=['GET'])
+    admin_blueprint.add_url_rule('/reports', 'reports', lambda: admin_controller.index(), methods=['GET'])
     
     # Hata route'ları
     from app.Controllers.ErrorController import ErrorController

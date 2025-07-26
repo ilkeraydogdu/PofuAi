@@ -1,227 +1,423 @@
-{% extends "layouts/base_layout.html" %}
-{% import "components/_macros.html" as components %}
-
-{% block title %}{{ title|default('PofuAi | Dashboard') }}{% endblock %}
-
-{% block content %}
-<div class="page-content-wrapper">
-    <div class="page-content">
-        <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
-            <div class="breadcrumb-title pe-3">Dashboard</div>
-            <div class="ps-3">
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb mb-0 p-0">
-                        <li class="breadcrumb-item"><a href="/"><i class="bx bx-home-alt"></i></a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
-                    </ol>
-                </nav>
-            </div>
-        </div>
-        
-        <!-- İstatistik kartları -->
-        {% if stats and page and page.page_config.show_stats %}
-        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4">
-            <div class="col">
-                <div class="card radius-10">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div>
-                                <p class="mb-0 text-secondary">Toplam Kullanıcı</p>
-                                <h4 class="my-1">{{ stats.total_users }}</h4>
-                            </div>
-                            <div class="widget-icon-large bg-gradient-primary text-white ms-auto">
-                                <i class="bi bi-people"></i>
-                            </div>
+<!DOCTYPE html>
+<html lang="tr" data-bs-theme="blue-theme">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title|default('PofuAi | Dashboard') }}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="/static/assets/images/favicon-32x32.png" type="image/png">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Material+Icons+Outlined" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    
+    <!-- Bootstrap CSS -->
+    <link href="/static/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/assets/css/bootstrap-extended.css" rel="stylesheet">
+    
+    <!-- Plugin CSS -->
+    <link href="/static/assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css" rel="stylesheet">
+    <link href="/static/assets/plugins/metismenu/metisMenu.min.css" rel="stylesheet">
+    
+    <!-- Theme CSS -->
+    <link href="/static/sass/main.css" rel="stylesheet">
+    <link href="/static/sass/blue-theme.css" rel="stylesheet">
+    <link href="/static/sass/responsive.css" rel="stylesheet">
+    
+    <style>
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+        }
+        .stat-card-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+        .stat-card-warning {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            color: #333;
+        }
+        .stat-card-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .activity-item {
+            border-left: 3px solid #e9ecef;
+            padding-left: 15px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+        .activity-item::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 5px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #007bff;
+        }
+        .activity-item.success::before { background: #28a745; }
+        .activity-item.warning::before { background: #ffc107; }
+        .activity-item.info::before { background: #17a2b8; }
+        .activity-item.danger::before { background: #dc3545; }
+        .widget-icon-large {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Main Content -->
+        <div class="page-content-wrapper">
+            <div class="page-content">
+                <!-- Breadcrumb -->
+                <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+                    <div class="breadcrumb-title pe-3">Dashboard</div>
+                    <div class="ps-3">
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb mb-0 p-0">
+                                <li class="breadcrumb-item"><a href="/"><i class="bx bx-home-alt"></i></a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+                            </ol>
+                        </nav>
+                    </div>
+                    <div class="ms-auto">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-primary btn-sm" onclick="refreshDashboard()">
+                                <i class="bx bx-refresh"></i> Yenile
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
+                                <span class="visually-hidden">Toggle Dropdown</span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" onclick="exportData()">Verileri Dışa Aktar</a></li>
+                                <li><a class="dropdown-item" href="/admin/settings">Ayarlar</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="/admin/reports">Raporlar</a></li>
+                            </ul>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="col">
-                <div class="card radius-10">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div>
-                                <p class="mb-0 text-secondary">Aktif Kullanıcı</p>
-                                <h4 class="my-1">{{ stats.active_users }}</h4>
-                            </div>
-                            <div class="widget-icon-large bg-gradient-success text-white ms-auto">
-                                <i class="bi bi-person-check"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card radius-10">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div>
-                                <p class="mb-0 text-secondary">Toplam İçerik</p>
-                                <h4 class="my-1">{{ stats.total_posts }}</h4>
-                            </div>
-                            <div class="widget-icon-large bg-gradient-info text-white ms-auto">
-                                <i class="bi bi-file-earmark-text"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card radius-10">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div>
-                                <p class="mb-0 text-secondary">Yayınlanan İçerik</p>
-                                <h4 class="my-1">{{ stats.published_posts }}</h4>
-                            </div>
-                            <div class="widget-icon-large bg-gradient-warning text-white ms-auto">
-                                <i class="bi bi-file-earmark-check"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-        
-        <!-- Grafikler -->
-        {% if page and page.page_config.show_graphs %}
-        <div class="row">
-            <div class="col-12 col-lg-8">
-                {{ components.card(
-                    title=page.content_blocks.stats_title|default("Ziyaretçi İstatistikleri"),
-                    content='<div id="chart1"></div>
-                    <script>
-                        document.addEventListener("DOMContentLoaded", function() {
-                            var options = {
-                                series: [{
-                                    name: "Ziyaretçiler",
-                                    data: [89, 78, 95, 76, 85, 90, 74]
-                                }],
-                                chart: {
-                                    height: 350,
-                                    type: "area",
-                                    toolbar: {
-                                        show: false
-                                    }
-                                },
-                                dataLabels: {
-                                    enabled: false
-                                },
-                                stroke: {
-                                    curve: "smooth"
-                                },
-                                xaxis: {
-                                    categories: ["Pzt", "Sal", "Çar", "Per", "Cum", "Cts", "Paz"]
-                                },
-                                colors: ["#3461ff"]
-                            };
-                            var chart = new ApexCharts(document.querySelector("#chart1"), options);
-                            chart.render();
-                        });
-                    </script>'
-                ) }}
-            </div>
-            <div class="col-12 col-lg-4">
-                {{ components.card(
-                    title="İçerik Dağılımı",
-                    content='<div id="chart2"></div>
-                    <script>
-                        document.addEventListener("DOMContentLoaded", function() {
-                            var options = {
-                                series: [44, 55, 13, 43],
-                                chart: {
-                                    width: "100%",
-                                    type: "pie",
-                                },
-                                labels: ["Makale", "Video", "Podcast", "Galeri"],
-                                colors: ["#3461ff", "#14abef", "#ffc107", "#ff6632"],
-                                responsive: [{
-                                    breakpoint: 480,
-                                    options: {
-                                        chart: {
-                                            width: 200
-                                        },
-                                        legend: {
-                                            position: "bottom"
-                                        }
-                                    }
-                                }]
-                            };
-                            var chart = new ApexCharts(document.querySelector("#chart2"), options);
-                            chart.render();
-                        });
-                    </script>'
-                ) }}
-            </div>
-        </div>
-        {% endif %}
-        
-        <!-- Son aktiviteler -->
-        {% if recent_activities and page and page.page_config.show_recent_activities %}
-        <div class="row">
-            <div class="col-12">
-                {{ components.card(
-                    title=page.content_blocks.recent_activities_title|default("Son Aktiviteler"),
-                    content='<div class="timeline-vertical">
-                        {% for activity in recent_activities %}
-                        <div class="timeline-item">
-                            <div class="timeline-icon bg-primary">
-                                <i class="bi bi-file-earmark-text text-white"></i>
-                            </div>
-                            <div class="timeline-content">
-                                <h6 class="mb-0">{{ activity.title }}</h6>
-                                <p class="mb-0">{{ activity.user }} tarafından {{ activity.time }}</p>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>'
-                ) }}
-            </div>
-        </div>
-        {% endif %}
-        
-        <!-- Popüler içerikler -->
-        {% if popular_content and page and page.page_config.show_popular_content %}
-        <div class="row">
-            <div class="col-12">
-                {{ components.card(
-                    title=page.content_blocks.popular_content_title|default("Popüler İçerikler"),
-                    content='
-                        {% for content in popular_content %}
-                        <div class="card border shadow-none radius-10 mb-3">
+                
+                <!-- Ana İstatistik Kartları -->
+                <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 mb-4">
+                    <div class="col">
+                        <div class="card radius-10 stat-card">
                             <div class="card-body">
                                 <div class="d-flex align-items-center">
-                                    <div class="product-img">
-                                        <img src="/static/assets/images/gallery/01.png" class="p-1" alt="">
+                                    <div>
+                                        <p class="mb-0 text-white-50">Toplam Kullanıcı</p>
+                                        <h4 class="my-1 text-white">{{ stats.total_users }}</h4>
+                                        <p class="mb-0 text-white-50">
+                                            <span class="text-success"><i class="bx bx-up-arrow-alt"></i>+{{ stats.new_users_month }}</span> bu ay
+                                        </p>
                                     </div>
-                                    <div class="ms-3">
-                                        <h6 class="mb-0">{{ content.title }}</h6>
-                                        <p class="mb-0 text-secondary">{{ content.excerpt }}</p>
-                                    </div>
-                                    <div class="ms-auto">
-                                        <div class="d-flex align-items-center">
-                                            <div class="me-2">
-                                                <span class="badge bg-light text-dark"><i class="bi bi-eye me-1"></i>{{ content.views }}</span>
-                                            </div>
-                                            <div>
-                                                <span class="badge bg-light text-dark"><i class="bi bi-heart me-1"></i>{{ content.likes }}</span>
-                                            </div>
-                                        </div>
+                                    <div class="widget-icon-large bg-white bg-opacity-20 text-white ms-auto">
+                                        <i class="bx bx-group"></i>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        {% endfor %}
-                    '
-                ) }}
+                    </div>
+                    <div class="col">
+                        <div class="card radius-10 stat-card-success">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div>
+                                        <p class="mb-0 text-white-50">Aktif Kullanıcı</p>
+                                        <h4 class="my-1 text-white">{{ stats.active_users }}</h4>
+                                        <p class="mb-0 text-white-50">
+                                            <span class="text-white"><i class="bx bx-up-arrow-alt"></i>+{{ stats.new_users_today }}</span> bugün
+                                        </p>
+                                    </div>
+                                    <div class="widget-icon-large bg-white bg-opacity-20 text-white ms-auto">
+                                        <i class="bx bx-user-check"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card radius-10 stat-card-warning">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div>
+                                        <p class="mb-0 text-dark-50">Toplam İçerik</p>
+                                        <h4 class="my-1 text-dark">{{ stats.total_posts }}</h4>
+                                        <p class="mb-0 text-dark-50">
+                                            <span class="text-success"><i class="bx bx-check"></i>{{ stats.published_posts }}</span> yayında
+                                        </p>
+                                    </div>
+                                    <div class="widget-icon-large bg-white bg-opacity-20 text-dark ms-auto">
+                                        <i class="bx bx-file"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card radius-10 stat-card-info">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div>
+                                        <p class="mb-0 text-white-50">Toplam Görüntüleme</p>
+                                        <h4 class="my-1 text-white">{{ "{:,}".format(stats.total_views) }}</h4>
+                                        <p class="mb-0 text-white-50">
+                                            <span class="text-warning"><i class="bx bx-trending-up"></i>{{ stats.bounce_rate }}%</span> çıkış oranı
+                                        </p>
+                                    </div>
+                                    <div class="widget-icon-large bg-white bg-opacity-20 text-white ms-auto">
+                                        <i class="bx bx-show"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Grafikler ve Sistem Bilgileri -->
+                <div class="row mb-4">
+                    <div class="col-12 col-lg-8">
+                        <div class="card radius-10">
+                            <div class="card-header">
+                                <div class="d-flex align-items-center">
+                                    <div>
+                                        <h6 class="mb-0">Kullanıcı Aktiviteleri (Son 7 Gün)</h6>
+                                    </div>
+                                    <div class="dropdown ms-auto">
+                                        <a class="dropdown-toggle dropdown-toggle-nocaret" href="#" data-bs-toggle="dropdown">
+                                            <i class="bx bx-dots-horizontal-rounded"></i>
+                                        </a>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="#">Detayları Görüntüle</a></li>
+                                            <li><a class="dropdown-item" href="#">Rapor Al</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div id="userActivitiesChart"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-4">
+                        <div class="card radius-10">
+                            <div class="card-header">
+                                <h6 class="mb-0">Sistem Durumu</h6>
+                            </div>
+                            <div class="card-body">
+                                {% if system_info %}
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="text-secondary">CPU Kullanımı</span>
+                                        <span class="fw-bold">{{ "%.1f"|format(system_info.cpu_percent) }}%</span>
+                                    </div>
+                                    <div class="progress" style="height: 8px;">
+                                        <div class="progress-bar bg-primary" style="width: {{ system_info.cpu_percent }}%"></div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="text-secondary">RAM Kullanımı</span>
+                                        <span class="fw-bold">{{ system_info.memory_used }}GB / {{ system_info.memory_total }}GB</span>
+                                    </div>
+                                    <div class="progress" style="height: 8px;">
+                                        <div class="progress-bar bg-success" style="width: {{ system_info.memory_percent }}%"></div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="text-secondary">Disk Kullanımı</span>
+                                        <span class="fw-bold">{{ system_info.disk_used }}GB / {{ system_info.disk_total }}GB</span>
+                                    </div>
+                                    <div class="progress" style="height: 8px;">
+                                        <div class="progress-bar bg-warning" style="width: {{ system_info.disk_percent }}%"></div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-secondary">Platform:</span>
+                                    <span class="fw-bold">{{ system_info.platform }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-secondary">Python:</span>
+                                    <span class="fw-bold">{{ system_info.python_version }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-secondary">Çalışma Süresi:</span>
+                                    <span class="fw-bold">{{ system_info.uptime }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Son Aktiviteler ve Popüler İçerikler -->
+                <div class="row">
+                    <div class="col-12 col-lg-6">
+                        <div class="card radius-10">
+                            <div class="card-header">
+                                <div class="d-flex align-items-center">
+                                    <div>
+                                        <h6 class="mb-0">Son Aktiviteler</h6>
+                                    </div>
+                                    <div class="ms-auto">
+                                        <a href="/admin/activities" class="btn btn-outline-primary btn-sm">Tümünü Gör</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                {% if recent_activities %}
+                                {% for activity in recent_activities %}
+                                <div class="activity-item {{ activity.color }}">
+                                    <div class="d-flex align-items-center">
+                                        <div class="activity-icon me-3">
+                                            <i class="material-icons-outlined text-{{ activity.color }}">{{ activity.icon }}</i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-0">{{ activity.title }}</h6>
+                                            <p class="mb-0 text-secondary">{{ activity.user }}</p>
+                                            <small class="text-muted">{{ activity.time }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                                {% else %}
+                                <div class="text-center py-4">
+                                    <i class="bx bx-info-circle text-muted" style="font-size: 2rem;"></i>
+                                    <p class="text-muted mt-2">Henüz aktivite bulunmuyor.</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <div class="card radius-10">
+                            <div class="card-header">
+                                <div class="d-flex align-items-center">
+                                    <div>
+                                        <h6 class="mb-0">Popüler İçerikler</h6>
+                                    </div>
+                                    <div class="ms-auto">
+                                        <a href="/admin/content" class="btn btn-outline-primary btn-sm">Tümünü Gör</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                {% if popular_content %}
+                                {% for content in popular_content %}
+                                <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
+                                    <div class="product-img me-3">
+                                        <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                            <i class="bx bx-file-blank text-primary"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0">{{ content.title }}</h6>
+                                        <p class="mb-1 text-secondary small">{{ content.excerpt[:60] }}...</p>
+                                        <div class="d-flex align-items-center">
+                                            <span class="badge bg-light text-dark me-2">
+                                                <i class="bx bx-show me-1"></i>{{ content.views }}
+                                            </span>
+                                            <span class="badge bg-light text-dark me-2">
+                                                <i class="bx bx-heart me-1"></i>{{ content.likes }}
+                                            </span>
+                                            <span class="badge bg-light text-dark">
+                                                <i class="bx bx-comment me-1"></i>{{ content.comments }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                                {% else %}
+                                <div class="text-center py-4">
+                                    <i class="bx bx-file text-muted" style="font-size: 2rem;"></i>
+                                    <p class="text-muted mt-2">Henüz içerik bulunmuyor.</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        {% endif %}
     </div>
-</div>
-{% endblock %}
 
-{% block extra_js %}
-<script src="/static/assets/plugins/apexchart/apexcharts.min.js"></script>
-{% endblock %} 
+    <!-- Scripts -->
+    <script src="/static/assets/js/jquery.min.js"></script>
+    <script src="/static/assets/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/assets/plugins/apexchart/apexcharts.min.js"></script>
+    
+    <script>
+    // Kullanıcı aktiviteleri grafiği
+    document.addEventListener("DOMContentLoaded", function() {
+        {% if user_activities %}
+        var userActivitiesData = {{ user_activities | tojson }};
+        
+        var options = {
+            series: [{
+                name: 'Giriş',
+                data: userActivitiesData.map(item => item.logins)
+            }, {
+                name: 'Kayıt',
+                data: userActivitiesData.map(item => item.registrations)
+            }, {
+                name: 'İçerik',
+                data: userActivitiesData.map(item => item.posts)
+            }],
+            chart: {
+                height: 350,
+                type: 'area',
+                toolbar: {
+                    show: false
+                }
+            },
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                curve: 'smooth',
+                width: 2
+            },
+            xaxis: {
+                categories: userActivitiesData.map(item => item.day)
+            },
+            colors: ['#3461ff', '#14abef', '#ffc107'],
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    opacityFrom: 0.4,
+                    opacityTo: 0.1,
+                }
+            },
+            legend: {
+                position: 'top'
+            }
+        };
+        
+        var chart = new ApexCharts(document.querySelector("#userActivitiesChart"), options);
+        chart.render();
+        {% endif %}
+    });
+
+    // Dashboard yenileme fonksiyonu
+    function refreshDashboard() {
+        location.reload();
+    }
+
+    // Veri dışa aktarma fonksiyonu
+    function exportData() {
+        alert('Veri dışa aktarma özelliği yakında eklenecek!');
+    }
+    </script>
+</body>
+</html> 
