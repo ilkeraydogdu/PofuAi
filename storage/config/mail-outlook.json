@@ -1,0 +1,19 @@
+{
+  "driver": "smtp",
+  "host": "smtp-mail.outlook.com",
+  "port": 587,
+  "encryption": "tls",
+  "username": "your-email@outlook.com",
+  "password": "your-password",
+  "from": {
+    "address": "your-email@outlook.com",
+    "name": "PofuAi"
+  },
+  "reply_to": {
+    "address": "your-email@outlook.com",
+    "name": "PofuAi Team"
+  },
+  "templates_dir": "public/Views/emails",
+  "store_sent_emails": true,
+  "storage_dir": "storage/emails"
+} 
