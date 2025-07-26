@@ -264,3 +264,18 @@ jinja2.exceptions.TemplateNotFound: admin.content.index.html
 INFO [2025-07-26 18:41:21,652] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
 INFO [2025-07-26 18:41:30,691] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
 INFO [2025-07-26 18:41:30,854] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
+INFO [2025-07-26 19:03:37,602] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
+INFO [2025-07-26 19:03:47,004] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
+INFO [2025-07-26 19:03:47,212] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
+INFO [2025-07-26 19:04:35,895] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
+INFO [2025-07-26 19:04:35,934] [test_system.test_services:143]: Test log message
+INFO [2025-07-26 19:04:51,952] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
+INFO [2025-07-26 19:04:52,015] [test_system.test_services:146]: Test log message
+INFO [2025-07-26 19:05:49,261] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
+INFO [2025-07-26 19:05:49,324] [test_system.test_services:146]: Test log message
+INFO [2025-07-26 19:05:49,379] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
+INFO [2025-07-26 19:05:49,873] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
+INFO [2025-07-26 19:05:49,938] [test_system.test_services:146]: Test log message
+INFO [2025-07-26 19:05:49,992] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
+INFO [2025-07-26 19:06:08,303] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
+INFO [2025-07-26 19:06:08,360] [test_system.test_services:146]: Test log message
