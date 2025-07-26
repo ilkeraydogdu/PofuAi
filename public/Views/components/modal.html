@@ -1,0 +1,230 @@
+{% extends "admin/base_layout.html" %}
+
+{% block title %}Modal Components{% endblock %}
+
+{% block content %}
+<div class="page-breadcrumb d-flex align-items-center mb-3">
+    <div class="breadcrumb-title pe-3">Components</div>
+    <div class="ps-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0 p-0">
+                <li class="breadcrumb-item"><a href="/components"><i class="bx bx-home-alt"></i></a></li>
+                <li class="breadcrumb-item active" aria-current="page">Modals</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Basic Modals</h5>
+                <p class="card-text">Temel modal örnekleri.</p>
+                
+                <div class="row mt-4">
+                    <div class="col-md-4 mb-3">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#basicModal">
+                            Basic Modal
+                        </button>
+                        
+                        {% include "components/_modal.html" with {
+                            "id": "basicModal",
+                            "title": "Basic Modal",
+                            "content": "This is a basic modal dialog. Modals are used to display content in a layer above the app.",
+                            "footer": "<button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Close</button> <button type='button' class='btn btn-primary'>Save changes</button>"
+                        } %}
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#centeredModal">
+                            Centered Modal
+                        </button>
+                        
+                        {% include "components/_modal.html" with {
+                            "id": "centeredModal",
+                            "title": "Centered Modal",
+                            "content": "This modal is vertically centered in the viewport.",
+                            "footer": "<button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Close</button> <button type='button' class='btn btn-success'>Save changes</button>",
+                            "centered": true
+                        } %}
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#scrollableModal">
+                            Scrollable Modal
+                        </button>
+                        
+                        {% include "components/_modal.html" with {
+                            "id": "scrollableModal",
+                            "title": "Scrollable Modal",
+                            "content": "<p>This modal has a lot of content that will scroll.</p>" ~ 
+                                      "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, eget aliquam nisl nunc vel nisl. Nullam euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, eget aliquam nisl nunc vel nisl.</p>" ~
+                                      "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, eget aliquam nisl nunc vel nisl. Nullam euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, eget aliquam nisl nunc vel nisl.</p>" ~
+                                      "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, eget aliquam nisl nunc vel nisl. Nullam euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, eget aliquam nisl nunc vel nisl.</p>" ~
+                                      "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, eget aliquam nisl nunc vel nisl. Nullam euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, eget aliquam nisl nunc vel nisl.</p>",
+                            "footer": "<button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Close</button> <button type='button' class='btn btn-info'>Save changes</button>",
+                            "scrollable": true
+                        } %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Modal Sizes</h5>
+                <p class="card-text">Farklı boyutlarda modal örnekleri.</p>
+                
+                <div class="row mt-4">
+                    <div class="col-md-3 mb-3">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#smallModal">
+                            Small Modal
+                        </button>
+                        
+                        {% include "components/_modal.html" with {
+                            "id": "smallModal",
+                            "title": "Small Modal",
+                            "content": "This is a small modal dialog.",
+                            "footer": "<button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Close</button>",
+                            "size": "sm"
+                        } %}
+                    </div>
+                    
+                    <div class="col-md-3 mb-3">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#defaultModal">
+                            Default Modal
+                        </button>
+                        
+                        {% include "components/_modal.html" with {
+                            "id": "defaultModal",
+                            "title": "Default Modal",
+                            "content": "This is a default size modal dialog.",
+                            "footer": "<button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Close</button>"
+                        } %}
+                    </div>
+                    
+                    <div class="col-md-3 mb-3">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#largeModal">
+                            Large Modal
+                        </button>
+                        
+                        {% include "components/_modal.html" with {
+                            "id": "largeModal",
+                            "title": "Large Modal",
+                            "content": "This is a large modal dialog.",
+                            "footer": "<button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Close</button>",
+                            "size": "lg"
+                        } %}
+                    </div>
+                    
+                    <div class="col-md-3 mb-3">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#extraLargeModal">
+                            Extra Large Modal
+                        </button>
+                        
+                        {% include "components/_modal.html" with {
+                            "id": "extraLargeModal",
+                            "title": "Extra Large Modal",
+                            "content": "This is an extra large modal dialog.",
+                            "footer": "<button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Close</button>",
+                            "size": "xl"
+                        } %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Modal Styles</h5>
+                <p class="card-text">Farklı stil seçenekleri.</p>
+                
+                <div class="row mt-4">
+                    <div class="col-md-4 mb-3">
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#coloredHeaderModal">
+                            Colored Header Modal
+                        </button>
+                        
+                        {% include "components/_modal.html" with {
+                            "id": "coloredHeaderModal",
+                            "title": "Colored Header Modal",
+                            "content": "This modal has a colored header.",
+                            "footer": "<button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Close</button>",
+                            "header_bg": "bg-danger text-white"
+                        } %}
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#fullscreenModal">
+                            Fullscreen Modal
+                        </button>
+                        
+                        {% include "components/_modal.html" with {
+                            "id": "fullscreenModal",
+                            "title": "Fullscreen Modal",
+                            "content": "This modal takes up the entire screen.",
+                            "footer": "<button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Close</button>",
+                            "fullscreen": true
+                        } %}
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#staticBackdropModal">
+                            Static Backdrop Modal
+                        </button>
+                        
+                        {% include "components/_modal.html" with {
+                            "id": "staticBackdropModal",
+                            "title": "Static Backdrop Modal",
+                            "content": "This modal doesn't close when clicking outside.",
+                            "footer": "<button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Close</button>",
+                            "static_backdrop": true
+                        } %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Modal Usage</h5>
+                <p class="card-text">Modal bileşeninin kullanımı.</p>
+                
+                <div class="bg-light p-3 rounded">
+                    <pre><code>{% raw %}<!-- Button to trigger modal -->
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModal">
+    Open Modal
+</button>
+
+<!-- Modal Component -->
+{% include "components/_modal.html" with {
+    "id": "myModal",
+    "title": "Modal Title",
+    "content": "Modal content goes here.",
+    "footer": "<button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Close</button>",
+    "size": "", // Optional: sm, lg, xl
+    "centered": false, // Optional: true for vertically centered
+    "scrollable": false, // Optional: true for scrollable content
+    "fullscreen": false, // Optional: true for fullscreen modal
+    "static_backdrop": false, // Optional: true to prevent closing when clicking outside
+    "header_bg": "" // Optional: bg-primary, bg-success, etc. with text-white
+} %}{% endraw %}</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

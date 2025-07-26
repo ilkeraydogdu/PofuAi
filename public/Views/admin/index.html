@@ -1,0 +1,364 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Admin Panel - Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-content">
+  <!--breadcrumb-->
+  <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+    <div class="breadcrumb-title pe-3">Dashboard</div>
+    <div class="ps-3">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0 p-0">
+          <li class="breadcrumb-item"><a href="/"><i class="material-icons-outlined">home</i></a></li>
+          <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+  <!--end breadcrumb-->
+
+  <div class="row">
+    <div class="col-12 col-lg-8 col-xl-9">
+      <div class="card radius-10">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div>
+              <h5 class="mb-0">Site İstatistikleri</h5>
+            </div>
+            <div class="dropdown ms-auto">
+              <a class="dropdown-toggle dropdown-toggle-nocaret" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="material-icons-outlined">more_vert</i>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#">Action</a></li>
+                <li><a class="dropdown-item" href="#">Another action</a></li>
+                <li><a class="dropdown-item" href="#">Something else here</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="mt-3">
+            <div class="row">
+              <div class="col-12 col-lg-3 col-xl-3 col-xxl-3">
+                <div class="card radius-10 bg-primary">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <div class="">
+                        <p class="mb-1 text-white-50">Toplam Kullanıcı</p>
+                        <h4 class="mb-0 text-white">{{ stats.users or 0 }}</h4>
+                      </div>
+                      <div class="ms-auto fs-2 text-white">
+                        <i class="material-icons-outlined">people</i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 col-lg-3 col-xl-3 col-xxl-3">
+                <div class="card radius-10 bg-success">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <div class="">
+                        <p class="mb-1 text-white-50">Toplam İçerik</p>
+                        <h4 class="mb-0 text-white">{{ stats.posts or 0 }}</h4>
+                      </div>
+                      <div class="ms-auto fs-2 text-white">
+                        <i class="material-icons-outlined">article</i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 col-lg-3 col-xl-3 col-xxl-3">
+                <div class="card radius-10 bg-info">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <div class="">
+                        <p class="mb-1 text-white-50">Toplam Yorum</p>
+                        <h4 class="mb-0 text-white">{{ stats.comments or 0 }}</h4>
+                      </div>
+                      <div class="ms-auto fs-2 text-white">
+                        <i class="material-icons-outlined">comment</i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 col-lg-3 col-xl-3 col-xxl-3">
+                <div class="card radius-10 bg-warning">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center">
+                      <div class="">
+                        <p class="mb-1 text-white-50">Ziyaretçi</p>
+                        <h4 class="mb-0 text-white">{{ stats.visitors or 0 }}</h4>
+                      </div>
+                      <div class="ms-auto fs-2 text-white">
+                        <i class="material-icons-outlined">visibility</i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-lg-4 col-xl-3">
+      <div class="card radius-10">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div>
+              <h6 class="mb-0">Hızlı İşlemler</h6>
+            </div>
+          </div>
+          <div class="mt-3">
+            <div class="d-grid gap-2">
+              <a href="/admin/users/create" class="btn btn-primary">
+                <i class="material-icons-outlined me-2">person_add</i>
+                Yeni Kullanıcı
+              </a>
+              <a href="/admin/posts/create" class="btn btn-success">
+                <i class="material-icons-outlined me-2">add</i>
+                Yeni İçerik
+              </a>
+              <a href="/admin/settings" class="btn btn-info">
+                <i class="material-icons-outlined me-2">settings</i>
+                Ayarlar
+              </a>
+              <a href="/admin/logs" class="btn btn-warning">
+                <i class="material-icons-outlined me-2">description</i>
+                Loglar
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12 col-lg-8">
+      <div class="card radius-10">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div>
+              <h6 class="mb-0">Son Aktiviteler</h6>
+            </div>
+          </div>
+          <div class="mt-3">
+            {% if recent_activities %}
+            <div class="list-group list-group-flush">
+              {% for activity in recent_activities %}
+              <div class="list-group-item d-flex align-items-center">
+                <div class="flex-shrink-0">
+                  <img src="/static/assets/images/avatars/{{ activity.user_avatar or '01.png' }}" 
+                       class="rounded-circle" width="40" height="40" alt="Avatar">
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <div class="fw-bold">{{ activity.user_name }}</div>
+                  <div class="text-muted small">{{ activity.description }}</div>
+                  <div class="text-muted small">{{ activity.time }}</div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted">Henüz aktivite bulunmuyor.</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-lg-4">
+      <div class="card radius-10">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div>
+              <h6 class="mb-0">Popüler İçerikler</h6>
+            </div>
+          </div>
+          <div class="mt-3">
+            {% if popular_content %}
+            <div class="list-group list-group-flush">
+              {% for content in popular_content %}
+              <div class="list-group-item d-flex align-items-center">
+                <div class="flex-shrink-0">
+                  <i class="material-icons-outlined text-primary fs-4">article</i>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <div class="fw-bold">{{ content.title }}</div>
+                  <div class="text-muted small">{{ content.excerpt }}</div>
+                  <div class="text-muted small">
+                    <i class="material-icons-outlined me-1">visibility</i>{{ content.views }} görüntüleme
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted">Henüz popüler içerik bulunmuyor.</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/assets/js/chart.js"></script>
+<script>
+// Area Chart
+var ctx = document.getElementById("myAreaChart");
+if (ctx) {
+    var myLineChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran"],
+            datasets: [{
+                label: "Ziyaretçi",
+                lineTension: 0.3,
+                backgroundColor: "rgba(78, 115, 223, 0.05)",
+                borderColor: "rgba(78, 115, 223, 1)",
+                pointRadius: 3,
+                pointBackgroundColor: "rgba(78, 115, 223, 1)",
+                pointBorderColor: "rgba(78, 115, 223, 1)",
+                pointHoverRadius: 3,
+                pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
+                pointHoverBorderColor: "rgba(78, 115, 223, 1)",
+                pointHitRadius: 10,
+                pointBorderWidth: 2,
+                data: [0, 100, 500, 200, 300, 400],
+            }],
+        },
+        options: {
+            maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    left: 10,
+                    right: 25,
+                    top: 25,
+                    bottom: 0
+                }
+            },
+            scales: {
+                xAxes: [{
+                    time: {
+                        unit: 'date'
+                    },
+                    gridLines: {
+                        display: false,
+                        drawBorder: false
+                    },
+                    ticks: {
+                        maxTicksLimit: 7
+                    }
+                }],
+                yAxes: [{
+                    ticks: {
+                        maxTicksLimit: 5,
+                        padding: 10,
+                        callback: function(value, index, values) {
+                            return number_format(value);
+                        }
+                    },
+                    gridLines: {
+                        color: "rgb(234, 236, 244)",
+                        zeroLineColor: "rgb(234, 236, 244)",
+                        drawBorder: false,
+                        borderDash: [2],
+                        zeroLineBorderDash: [2]
+                    }
+                }],
+            },
+            legend: {
+                display: false
+            },
+            tooltips: {
+                backgroundColor: "rgb(255,255,255)",
+                bodyFontColor: "#858796",
+                titleMarginBottom: 10,
+                titleFontColor: '#6e707e',
+                titleFontSize: 14,
+                borderColor: '#dddfeb',
+                borderWidth: 1,
+                xPadding: 15,
+                yPadding: 15,
+                displayColors: false,
+                intersect: false,
+                mode: 'index',
+                caretPadding: 10,
+                callbacks: {
+                    label: function(tooltipItem, chart) {
+                        var datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
+                        return datasetLabel + ': ' + number_format(tooltipItem.yLabel);
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Pie Chart
+var ctx = document.getElementById("myPieChart");
+if (ctx) {
+    var myPieChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ["Makaleler", "Haberler", "Duyurular"],
+            datasets: [{
+                data: [55, 30, 15],
+                backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc'],
+                hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf'],
+                hoverBorderColor: "rgba(234, 236, 244, 1)",
+            }],
+        },
+        options: {
+            maintainAspectRatio: false,
+            tooltips: {
+                backgroundColor: "rgb(255,255,255)",
+                bodyFontColor: "#858796",
+                borderColor: '#dddfeb',
+                borderWidth: 1,
+                xPadding: 15,
+                yPadding: 15,
+                displayColors: false,
+                caretPadding: 10,
+            },
+            legend: {
+                display: false
+            },
+            cutoutPercentage: 80,
+        },
+    });
+}
+
+function number_format(number, decimals, dec_point, thousands_sep) {
+    number = (number + '').replace(',', '').replace(' ', '');
+    var n = !isFinite(+number) ? 0 : +number,
+        prec = !isFinite(+decimals) ? 0 : Math.abs(decimals),
+        sep = (typeof thousands_sep === 'undefined') ? ',' : thousands_sep,
+        dec = (typeof dec_point === 'undefined') ? '.' : dec_point,
+        s = '',
+        toFixedFix = function(n, prec) {
+            var k = Math.pow(10, prec);
+            return '' + Math.round(n * k) / k;
+        };
+    s = (prec ? toFixedFix(n, prec) : '' + Math.round(n)).split('.');
+    if ((sep.length > 0)) {
+        var i = s[0].length;
+        if (i % 3 !== 0) {
+            i += 3 - i % 3;
+        }
+        s[0] = s[0].padStart(i, '0');
+    }
+    if ((s[1] || '').length < prec) {
+        s[1] = s[1] || '';
+        s[1] += new Array(prec - s[1].length + 1).join('0');
+    }
+    return s.join(dec);
+}
+</script>
+{% endblock %} 

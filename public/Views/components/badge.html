@@ -1,0 +1,246 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Badge Component{% endblock %}
+
+{% block content %}
+<div class="page-content">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Badge Component</h5>
+                    <p class="card-subtitle">Bootstrap badge bileşenleri</p>
+                </div>
+                <div class="card-body">
+                    <h6 class="mb-3">Temel Badgeler</h6>
+                    
+                    <div class="mb-4">
+                        <h6 class="mt-3">Default Badge</h6>
+                        <span class="badge bg-primary">Primary</span>
+                        <span class="badge bg-secondary">Secondary</span>
+                        <span class="badge bg-success">Success</span>
+                        <span class="badge bg-danger">Danger</span>
+                        <span class="badge bg-warning text-dark">Warning</span>
+                        <span class="badge bg-info text-dark">Info</span>
+                        <span class="badge bg-light text-dark">Light</span>
+                        <span class="badge bg-dark">Dark</span>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6 class="mt-3">Gradient Badge</h6>
+                        <span class="badge bg-grd-primary">Primary</span>
+                        <span class="badge bg-grd-voilet">Secondary</span>
+                        <span class="badge bg-grd-success">Success</span>
+                        <span class="badge bg-grd-danger">Danger</span>
+                        <span class="badge bg-grd-warning text-dark">Warning</span>
+                        <span class="badge bg-grd-info text-dark">Info</span>
+                        <span class="badge bg-grd-royal">Royal</span>
+                        <span class="badge bg-grd-branding">Branding</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Pill Badges</h5>
+                    <p class="card-subtitle">Yuvarlak kenarlı rozetler</p>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <span class="badge rounded-pill bg-primary">Primary</span>
+                        <span class="badge rounded-pill bg-secondary">Secondary</span>
+                        <span class="badge rounded-pill bg-success">Success</span>
+                        <span class="badge rounded-pill bg-danger">Danger</span>
+                        <span class="badge rounded-pill bg-warning text-dark">Warning</span>
+                        <span class="badge rounded-pill bg-info text-dark">Info</span>
+                        <span class="badge rounded-pill bg-light text-dark">Light</span>
+                        <span class="badge rounded-pill bg-dark">Dark</span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <span class="badge rounded-pill bg-grd-primary">Primary</span>
+                        <span class="badge rounded-pill bg-grd-voilet">Secondary</span>
+                        <span class="badge rounded-pill bg-grd-success">Success</span>
+                        <span class="badge rounded-pill bg-grd-danger">Danger</span>
+                        <span class="badge rounded-pill bg-grd-warning text-dark">Warning</span>
+                        <span class="badge rounded-pill bg-grd-info text-dark">Info</span>
+                        <span class="badge rounded-pill bg-grd-royal">Royal</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Button İçinde Badgeler</h5>
+                    <p class="card-subtitle">Butonlar içinde rozet kullanımı</p>
+                </div>
+                <div class="card-body">
+                    <div class="row row-cols-auto g-3 mb-3">
+                        <div class="col">
+                            <button type="button" class="btn btn-grd-primary">
+                                Bildirimler <span class="badge bg-dark">8</span>
+                            </button>
+                        </div>
+                        <div class="col">
+                            <button type="button" class="btn btn-grd-danger">
+                                Mesajlar <span class="badge bg-dark">5</span>
+                            </button>
+                        </div>
+                        <div class="col">
+                            <button type="button" class="btn btn-grd-success">
+                                Görevler <span class="badge bg-dark">10</span>
+                            </button>
+                        </div>
+                        <div class="col">
+                            <button type="button" class="btn btn-grd-warning">
+                                Dosyalar <span class="badge bg-dark">6</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">İkon Badgeler</h5>
+                    <p class="card-subtitle">İkon ile birlikte rozetler</p>
+                </div>
+                <div class="card-body">
+                    <div class="row row-cols-auto g-4">
+                        <div class="col">
+                            <span class="badge-icon position-relative p-3 rounded-circle text-white bg-grd-primary">
+                                <span class="badge-number position-absolute top-0 end-0">8</span>
+                                <i class="material-icons-outlined">notifications</i>
+                            </span>
+                        </div>
+                        
+                        <div class="col">
+                            <span class="badge-icon position-relative p-3 rounded-circle text-white bg-grd-danger">
+                                <span class="badge-number position-absolute top-0 end-0">5</span>
+                                <i class="material-icons-outlined">report_gmailerrorred</i>
+                            </span>
+                        </div>
+                        
+                        <div class="col">
+                            <span class="badge-icon position-relative p-3 rounded-circle text-white bg-grd-success">
+                                <span class="badge-number position-absolute top-0 end-0">10</span>
+                                <i class="material-icons-outlined">verified_user</i>
+                            </span>
+                        </div>
+                        
+                        <div class="col">
+                            <span class="badge-icon position-relative p-3 rounded-circle text-white bg-grd-warning">
+                                <span class="badge-number position-absolute top-0 end-0">6</span>
+                                <i class="material-icons-outlined">home</i>
+                            </span>
+                        </div>
+                        
+                        <div class="col">
+                            <span class="badge-icon position-relative p-3 rounded-circle text-white bg-grd-info">
+                                <span class="badge-number position-absolute top-0 end-0">7</span>
+                                <i class="material-icons-outlined">notification_important</i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Konumlandırılmış Badgeler</h5>
+                    <p class="card-subtitle">Farklı konumlara yerleştirilmiş rozetler</p>
+                </div>
+                <div class="card-body">
+                    <div class="row row-cols-auto g-3">
+                        <div class="col">
+                            <button type="button" class="btn btn-dark position-relative d-flex gap-2">
+                                <i class="material-icons-outlined">chat_bubble_outline</i>
+                                Mesajlar
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    8
+                                    <span class="visually-hidden">okunmamış mesaj</span>
+                                </span>
+                            </button>
+                        </div>
+                        
+                        <div class="col">
+                            <button type="button" class="btn btn-dark position-relative d-flex gap-2">
+                                <i class="material-icons-outlined">chat_bubble_outline</i>
+                                Mesajlar
+                                <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-danger">
+                                    8
+                                    <span class="visually-hidden">okunmamış mesaj</span>
+                                </span>
+                            </button>
+                        </div>
+                        
+                        <div class="col">
+                            <button type="button" class="btn btn-dark position-relative d-flex gap-2">
+                                <i class="material-icons-outlined">chat_bubble_outline</i>
+                                Mesajlar
+                                <span class="position-absolute bottom-0 end-0 translate-middle badge rounded-pill bg-danger">
+                                    8
+                                    <span class="visually-hidden">okunmamış mesaj</span>
+                                </span>
+                            </button>
+                        </div>
+                        
+                        <div class="col">
+                            <button type="button" class="btn btn-dark position-relative d-flex gap-2">
+                                <i class="material-icons-outlined">chat_bubble_outline</i>
+                                Mesajlar
+                                <span class="position-absolute bottom-0 start-0 translate-middle badge rounded-pill bg-danger">
+                                    8
+                                    <span class="visually-hidden">okunmamış mesaj</span>
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 row row-cols-auto g-3">
+                        <div class="col">
+                            <button type="button" class="btn btn-primary position-relative">
+                                Bildirim
+                                <span class="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle">
+                                    <span class="visually-hidden">Yeni bildirimler</span>
+                                </span>
+                            </button>
+                        </div>
+                        
+                        <div class="col">
+                            <button type="button" class="btn btn-success position-relative">
+                                Profil
+                                <span class="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle">
+                                    <span class="visually-hidden">Yeni bildirimler</span>
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Badge özellikleri için fonksiyonlar buraya gelebilir
+</script>
+{% endblock %} 

@@ -1,0 +1,39 @@
+{# Card Component Template #}
+{# Kullanım: {% include "components/_card.html" with {...} %} #}
+
+{% set card_class = "card" %}
+{% if border %}{% set card_class = card_class ~ " border" %}{% endif %}
+{% if border_color %}{% set card_class = card_class ~ " border-" ~ border_color %}{% endif %}
+{% if shadow %}{% set card_class = card_class ~ " shadow" %}{% endif %}
+{% if bg_color %}{% set card_class = card_class ~ " " ~ bg_color %}{% endif %}
+
+<div class="{{ card_class }}">
+    {% if image and image_position == "top" %}
+    <img src="{{ image }}" class="card-img-top" alt="{{ title }}">
+    {% endif %}
+    
+    {% if overlay and image %}
+    <div class="card-img-overlay">
+        <h5 class="card-title {% if text_white %}text-white{% endif %}">{{ title }}</h5>
+        <p class="card-text {% if text_white %}text-white{% endif %}">{{ content }}</p>
+    </div>
+    <img src="{{ image }}" class="card-img" alt="{{ title }}">
+    {% else %}
+        {% if title or content %}
+        <div class="card-body {% if header_bg %}{{ header_bg }}{% endif %}">
+            {% if title %}<h5 class="card-title">{{ title }}</h5>{% endif %}
+            {% if content %}<p class="card-text">{{ content }}</p>{% endif %}
+        </div>
+        {% endif %}
+    {% endif %}
+    
+    {% if image and image_position == "bottom" %}
+    <img src="{{ image }}" class="card-img-bottom" alt="{{ title }}">
+    {% endif %}
+    
+    {% if footer %}
+    <div class="card-footer">
+        {{ footer|raw }}
+    </div>
+    {% endif %}
+</div> 

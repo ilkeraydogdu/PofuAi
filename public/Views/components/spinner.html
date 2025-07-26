@@ -1,0 +1,189 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Spinner Component{% endblock %}
+
+{% block content %}
+<div class="page-content">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Spinner Component</h5>
+                    <p class="card-subtitle">Bootstrap spinner bileşenleri</p>
+                </div>
+                <div class="card-body">
+                    <h6 class="mb-3">Temel Spinnerlar</h6>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Border Spinner</h6>
+                            <div class="mb-3">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Yükleniyor...</span>
+                                </div>
+                                <div class="spinner-border text-secondary" role="status">
+                                    <span class="visually-hidden">Yükleniyor...</span>
+                                </div>
+                                <div class="spinner-border text-success" role="status">
+                                    <span class="visually-hidden">Yükleniyor...</span>
+                                </div>
+                                <div class="spinner-border text-danger" role="status">
+                                    <span class="visually-hidden">Yükleniyor...</span>
+                                </div>
+                                <div class="spinner-border text-warning" role="status">
+                                    <span class="visually-hidden">Yükleniyor...</span>
+                                </div>
+                                <div class="spinner-border text-info" role="status">
+                                    <span class="visually-hidden">Yükleniyor...</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6>Grow Spinner</h6>
+                            <div class="mb-3">
+                                <div class="spinner-grow text-primary" role="status">
+                                    <span class="visually-hidden">Yükleniyor...</span>
+                                </div>
+                                <div class="spinner-grow text-secondary" role="status">
+                                    <span class="visually-hidden">Yükleniyor...</span>
+                                </div>
+                                <div class="spinner-grow text-success" role="status">
+                                    <span class="visually-hidden">Yükleniyor...</span>
+                                </div>
+                                <div class="spinner-grow text-danger" role="status">
+                                    <span class="visually-hidden">Yükleniyor...</span>
+                                </div>
+                                <div class="spinner-grow text-warning" role="status">
+                                    <span class="visually-hidden">Yükleniyor...</span>
+                                </div>
+                                <div class="spinner-grow text-info" role="status">
+                                    <span class="visually-hidden">Yükleniyor...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Spinner Boyutları</h5>
+                    <p class="card-subtitle">Farklı boyutlarda spinnerlar</p>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Border Spinner Boyutları</h6>
+                            <div class="mb-3">
+                                <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
+                                    <span class="visually-hidden">Yükleniyor...</span>
+                                </div>
+                                <div class="spinner-border text-primary me-2" role="status">
+                                    <span class="visually-hidden">Yükleniyor...</span>
+                                </div>
+                                <div class="spinner-border spinner-border-lg text-primary" role="status">
+                                    <span class="visually-hidden">Yükleniyor...</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6>Grow Spinner Boyutları</h6>
+                            <div class="mb-3">
+                                <div class="spinner-grow spinner-grow-sm text-primary me-2" role="status">
+                                    <span class="visually-hidden">Yükleniyor...</span>
+                                </div>
+                                <div class="spinner-grow text-primary me-2" role="status">
+                                    <span class="visually-hidden">Yükleniyor...</span>
+                                </div>
+                                <div class="spinner-grow spinner-grow-lg text-primary" role="status">
+                                    <span class="visually-hidden">Yükleniyor...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Butonlarda Spinnerlar</h5>
+                    <p class="card-subtitle">Butonlarda yükleme gösterimi</p>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <button class="btn btn-primary me-2" type="button" disabled>
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <span class="ms-1">Yükleniyor...</span>
+                        </button>
+                        
+                        <button class="btn btn-success me-2" type="button" disabled>
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <span class="ms-1">Yükleniyor...</span>
+                        </button>
+                        
+                        <button class="btn btn-danger me-2" type="button" disabled>
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <span class="ms-1">Yükleniyor...</span>
+                        </button>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <button class="btn btn-primary me-2" type="button" disabled>
+                            <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                            <span class="ms-1">Yükleniyor...</span>
+                        </button>
+                        
+                        <button class="btn btn-success me-2" type="button" disabled>
+                            <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                            <span class="ms-1">Yükleniyor...</span>
+                        </button>
+                        
+                        <button class="btn btn-danger me-2" type="button" disabled>
+                            <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                            <span class="ms-1">Yükleniyor...</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Özel Boyutlu Spinnerlar</h5>
+                    <p class="card-subtitle">Özel genişlik ve yüksekliğe sahip spinnerlar</p>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="spinner-border me-2" style="width: 3rem; height: 3rem;" role="status">
+                            <span class="visually-hidden">Yükleniyor...</span>
+                        </div>
+                        
+                        <div class="spinner-grow" style="width: 3rem; height: 3rem;" role="status">
+                            <span class="visually-hidden">Yükleniyor...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Spinner özellikleri için fonksiyonlar buraya gelebilir
+</script>
+{% endblock %} 

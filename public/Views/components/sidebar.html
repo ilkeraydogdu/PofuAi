@@ -1,0 +1,155 @@
+<!-- Sidebar -->
+<aside class="sidebar-wrapper" data-simplebar="true">
+    <div class="sidebar-header">
+        <div>
+            <img src="/static/assets/images/logo-icon.png" class="logo-icon" alt="logo icon">
+        </div>
+        <div>
+            <h4 class="logo-text">{{ app_name }}</h4>
+        </div>
+        <div class="toggle-icon ms-auto">
+            <i class="bi bi-list"></i>
+        </div>
+    </div>
+    
+    <!-- Sidebar Navigation -->
+    <ul class="metismenu" id="sidenav">
+        <!-- Dashboard -->
+        <li class="{{ 'mm-active' if active_menu == 'dashboard' else '' }}">
+            <a href="/">
+                <div class="parent-icon">
+                    <i class="bi bi-house-door"></i>
+                </div>
+                <div class="menu-title">{{ text.navigation.dashboard|default('Dashboard') }}</div>
+            </a>
+        </li>
+        
+        <!-- Kullanıcılar -->
+        <li class="{{ 'mm-active' if active_menu == 'users' else '' }}">
+            <a href="javascript:;" class="has-arrow">
+                <div class="parent-icon">
+                    <i class="bi bi-people"></i>
+                </div>
+                <div class="menu-title">{{ text.navigation.users|default('Kullanıcılar') }}</div>
+            </a>
+            <ul>
+                <li>
+                    <a href="/users">
+                        <i class="bi bi-circle"></i> Tüm Kullanıcılar
+                    </a>
+                </li>
+                <li>
+                    <a href="/users/create">
+                        <i class="bi bi-circle"></i> Yeni Kullanıcı
+                    </a>
+                </li>
+                <li>
+                    <a href="/users/roles">
+                        <i class="bi bi-circle"></i> Roller ve İzinler
+                    </a>
+                </li>
+            </ul>
+        </li>
+        
+        <!-- İçerikler -->
+        <li class="{{ 'mm-active' if active_menu == 'posts' else '' }}">
+            <a href="javascript:;" class="has-arrow">
+                <div class="parent-icon">
+                    <i class="bi bi-file-earmark-text"></i>
+                </div>
+                <div class="menu-title">{{ text.navigation.posts|default('İçerikler') }}</div>
+            </a>
+            <ul>
+                <li>
+                    <a href="/posts">
+                        <i class="bi bi-circle"></i> Tüm İçerikler
+                    </a>
+                </li>
+                <li>
+                    <a href="/posts/create">
+                        <i class="bi bi-circle"></i> Yeni İçerik
+                    </a>
+                </li>
+                <li>
+                    <a href="/categories">
+                        <i class="bi bi-circle"></i> Kategoriler
+                    </a>
+                </li>
+                <li>
+                    <a href="/tags">
+                        <i class="bi bi-circle"></i> Etiketler
+                    </a>
+                </li>
+            </ul>
+        </li>
+        
+        <!-- Ürünler -->
+        <li class="{{ 'mm-active' if active_menu == 'products' else '' }}">
+            <a href="javascript:;" class="has-arrow">
+                <div class="parent-icon">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+                <div class="menu-title">{{ text.navigation.products|default('Ürünler') }}</div>
+            </a>
+            <ul>
+                <li>
+                    <a href="/products">
+                        <i class="bi bi-circle"></i> Tüm Ürünler
+                    </a>
+                </li>
+                <li>
+                    <a href="/products/create">
+                        <i class="bi bi-circle"></i> Yeni Ürün
+                    </a>
+                </li>
+                <li>
+                    <a href="/products/categories">
+                        <i class="bi bi-circle"></i> Kategoriler
+                    </a>
+                </li>
+            </ul>
+        </li>
+        
+        <!-- Siparişler -->
+        <li class="{{ 'mm-active' if active_menu == 'orders' else '' }}">
+            <a href="/orders">
+                <div class="parent-icon">
+                    <i class="bi bi-cart"></i>
+                </div>
+                <div class="menu-title">{{ text.navigation.orders|default('Siparişler') }}</div>
+            </a>
+        </li>
+        
+        <!-- Ayarlar -->
+        <li class="{{ 'mm-active' if active_menu == 'settings' else '' }}">
+            <a href="javascript:;" class="has-arrow">
+                <div class="parent-icon">
+                    <i class="bi bi-gear"></i>
+                </div>
+                <div class="menu-title">{{ text.navigation.settings|default('Ayarlar') }}</div>
+            </a>
+            <ul>
+                <li>
+                    <a href="/settings/general">
+                        <i class="bi bi-circle"></i> Genel Ayarlar
+                    </a>
+                </li>
+                <li>
+                    <a href="/settings/appearance">
+                        <i class="bi bi-circle"></i> Görünüm
+                    </a>
+                </li>
+                <li>
+                    <a href="/settings/mail">
+                        <i class="bi bi-circle"></i> E-posta Ayarları
+                    </a>
+                </li>
+                <li>
+                    <a href="/settings/notifications">
+                        <i class="bi bi-circle"></i> Bildirim Ayarları
+                    </a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</aside> 

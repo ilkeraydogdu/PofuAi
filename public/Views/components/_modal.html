@@ -1,0 +1,29 @@
+{# Modal Component Template #}
+{# Kullanım: {% include "components/_modal.html" with {...} %} #}
+
+{% set modal_class = "modal fade" %}
+{% set modal_dialog_class = "modal-dialog" %}
+
+{% if centered %}{% set modal_dialog_class = modal_dialog_class ~ " modal-dialog-centered" %}{% endif %}
+{% if scrollable %}{% set modal_dialog_class = modal_dialog_class ~ " modal-dialog-scrollable" %}{% endif %}
+{% if size %}{% set modal_dialog_class = modal_dialog_class ~ " modal-" ~ size %}{% endif %}
+{% if fullscreen %}{% set modal_dialog_class = modal_dialog_class ~ " modal-fullscreen" %}{% endif %}
+
+<div class="{{ modal_class }}" id="{{ id }}" tabindex="-1" aria-labelledby="{{ id }}Label" aria-hidden="true" {% if static_backdrop %}data-bs-backdrop="static" data-bs-keyboard="false"{% endif %}>
+    <div class="{{ modal_dialog_class }}">
+        <div class="modal-content">
+            <div class="modal-header {% if header_bg %}{{ header_bg }}{% endif %}">
+                <h5 class="modal-title" id="{{ id }}Label">{{ title }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {{ content|raw }}
+            </div>
+            {% if footer %}
+            <div class="modal-footer">
+                {{ footer|raw }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div> 

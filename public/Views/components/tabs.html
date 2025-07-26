@@ -1,0 +1,251 @@
+{% extends "admin/base_layout.html" %}
+
+{% block title %}Tabs Components{% endblock %}
+
+{% block content %}
+<div class="page-breadcrumb d-flex align-items-center mb-3">
+    <div class="breadcrumb-title pe-3">Components</div>
+    <div class="ps-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0 p-0">
+                <li class="breadcrumb-item"><a href="/components"><i class="bx bx-home-alt"></i></a></li>
+                <li class="breadcrumb-item active" aria-current="page">Tabs</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Basic Tabs</h5>
+                <p class="card-text">Temel tabs örnekleri.</p>
+                
+                <div class="mt-4">
+                    {% set tabs_data = {
+                        "id": "basicTabs",
+                        "items": [
+                            {
+                                "id": "home",
+                                "title": "Home",
+                                "content": "This is the home tab content. Raw denim you probably haven't heard of them jean shorts Austin. Nesciunt tofu stumptown aliqua, retro synth master cleanse."
+                            },
+                            {
+                                "id": "profile",
+                                "title": "Profile",
+                                "content": "This is the profile tab content. Food truck fixie locavore, accusamus mcsweeney's marfa nulla single-origin coffee squid."
+                            },
+                            {
+                                "id": "contact",
+                                "title": "Contact",
+                                "content": "This is the contact tab content. Etsy mixtape wayfarers, ethical wes anderson tofu before they sold out mcsweeney's organic lomo retro fanny pack."
+                            }
+                        ],
+                        "active_tab": "home"
+                    } %}
+                    
+                    {% include "components/_tabs.html" with tabs_data %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Tabs with Icons</h5>
+                <p class="card-text">İkonlu tabs örnekleri.</p>
+                
+                <div class="mt-4">
+                    {% set tabs_data = {
+                        "id": "iconTabs",
+                        "items": [
+                            {
+                                "id": "home",
+                                "title": "Home",
+                                "icon": "bx bx-home-alt",
+                                "content": "This is the home tab content with icon."
+                            },
+                            {
+                                "id": "profile",
+                                "title": "Profile",
+                                "icon": "bx bx-user",
+                                "content": "This is the profile tab content with icon."
+                            },
+                            {
+                                "id": "messages",
+                                "title": "Messages",
+                                "icon": "bx bx-message",
+                                "content": "This is the messages tab content with icon."
+                            },
+                            {
+                                "id": "settings",
+                                "title": "Settings",
+                                "icon": "bx bx-cog",
+                                "content": "This is the settings tab content with icon."
+                            }
+                        ],
+                        "active_tab": "home"
+                    } %}
+                    
+                    {% include "components/_tabs.html" with tabs_data %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Tab Styles</h5>
+                <p class="card-text">Farklı stil seçenekleri.</p>
+                
+                <div class="mt-4">
+                    <h6>Pills Style</h6>
+                    {% set tabs_data = {
+                        "id": "pillsTabs",
+                        "items": [
+                            {
+                                "id": "home",
+                                "title": "Home",
+                                "content": "This is the home tab content in pills style."
+                            },
+                            {
+                                "id": "profile",
+                                "title": "Profile",
+                                "content": "This is the profile tab content in pills style."
+                            },
+                            {
+                                "id": "messages",
+                                "title": "Messages",
+                                "content": "This is the messages tab content in pills style."
+                            }
+                        ],
+                        "active_tab": "home",
+                        "style": "pills"
+                    } %}
+                    
+                    {% include "components/_tabs.html" with tabs_data %}
+                    
+                    <h6 class="mt-4">Vertical Pills</h6>
+                    {% set tabs_data = {
+                        "id": "verticalTabs",
+                        "items": [
+                            {
+                                "id": "home",
+                                "title": "Home",
+                                "content": "This is the home tab content in vertical pills style."
+                            },
+                            {
+                                "id": "profile",
+                                "title": "Profile",
+                                "content": "This is the profile tab content in vertical pills style."
+                            },
+                            {
+                                "id": "messages",
+                                "title": "Messages",
+                                "content": "This is the messages tab content in vertical pills style."
+                            }
+                        ],
+                        "active_tab": "home",
+                        "style": "pills",
+                        "vertical": true
+                    } %}
+                    
+                    {% include "components/_tabs.html" with tabs_data %}
+                    
+                    <h6 class="mt-4">Bordered Tabs</h6>
+                    {% set tabs_data = {
+                        "id": "borderedTabs",
+                        "items": [
+                            {
+                                "id": "home",
+                                "title": "Home",
+                                "content": "This is the home tab content with bordered style."
+                            },
+                            {
+                                "id": "profile",
+                                "title": "Profile",
+                                "content": "This is the profile tab content with bordered style."
+                            },
+                            {
+                                "id": "messages",
+                                "title": "Messages",
+                                "content": "This is the messages tab content with bordered style."
+                            }
+                        ],
+                        "active_tab": "home",
+                        "bordered": true
+                    } %}
+                    
+                    {% include "components/_tabs.html" with tabs_data %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Tabs Usage</h5>
+                <p class="card-text">Tabs bileşeninin kullanımı.</p>
+                
+                <div class="bg-light p-3 rounded">
+                    <pre><code>{% raw %}{% set tabs_data = {
+    "id": "myTabs",
+    "items": [
+        {
+            "id": "tab1",
+            "title": "Tab 1",
+            "icon": "bx bx-home", // Optional
+            "content": "Tab 1 content goes here."
+        },
+        {
+            "id": "tab2",
+            "title": "Tab 2",
+            "icon": "bx bx-user", // Optional
+            "content": "Tab 2 content goes here."
+        }
+    ],
+    "active_tab": "tab1",
+    "style": "", // Optional: pills
+    "vertical": false, // Optional: true for vertical tabs
+    "bordered": false // Optional: true for bordered tabs
+} %}
+
+{% include "components/_tabs.html" with tabs_data %}{% endraw %}</code></pre>
+                </div>
+                
+                <div class="mt-4">
+                    <p>Alternatif olarak, UI Service'i kullanarak tabs verisi oluşturabilirsiniz:</p>
+                    
+                    <div class="bg-light p-3 rounded">
+                        <pre><code>{% raw %}from core.services.ui_service import get_ui_service
+
+# UI Service'den tabs verisi oluştur
+ui_service = get_ui_service()
+tabs_data = ui_service.create_tabs(
+    items=[
+        {'id': 'home', 'title': 'Ana Sayfa', 'content': 'Ana sayfa içeriği'},
+        {'id': 'profile', 'title': 'Profil', 'content': 'Profil içeriği'},
+        {'id': 'messages', 'title': 'Mesajlar', 'content': 'Mesajlar içeriği'}
+    ],
+    active_tab='home'
+)
+
+# Template'e aktar
+return render_template('my_page.html', tabs=tabs_data){% endraw %}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

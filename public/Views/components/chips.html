@@ -1,0 +1,225 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Chips Component{% endblock %}
+
+{% block content %}
+<div class="page-content">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Chips Component</h5>
+                    <p class="card-subtitle">Chips/Tags bileşenleri</p>
+                </div>
+                <div class="card-body">
+                    <h6 class="mb-3">Temel Chips</h6>
+                    
+                    <div class="mb-4">
+                        <div class="chip bg-primary text-white">Primary</div>
+                        <div class="chip bg-secondary text-white">Secondary</div>
+                        <div class="chip bg-success text-white">Success</div>
+                        <div class="chip bg-danger text-white">Danger</div>
+                        <div class="chip bg-warning text-white">Warning</div>
+                        <div class="chip bg-info text-white">Info</div>
+                        <div class="chip bg-light text-dark">Light</div>
+                        <div class="chip bg-dark text-white">Dark</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Boyut Seçenekleri</h5>
+                    <p class="card-subtitle">Farklı boyutlarda chips</p>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="mb-2">Küçük Chips</h6>
+                        <div class="chip chip-sm bg-primary text-white">Small</div>
+                        <div class="chip chip-sm bg-success text-white">Small</div>
+                        <div class="chip chip-sm bg-info text-white">Small</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 class="mb-2">Orta Chips</h6>
+                        <div class="chip chip-md bg-primary text-white">Medium</div>
+                        <div class="chip chip-md bg-success text-white">Medium</div>
+                        <div class="chip chip-md bg-info text-white">Medium</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 class="mb-2">Büyük Chips</h6>
+                        <div class="chip chip-lg bg-primary text-white">Large</div>
+                        <div class="chip chip-lg bg-success text-white">Large</div>
+                        <div class="chip chip-lg bg-info text-white">Large</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Kapatılabilir Chips</h5>
+                    <p class="card-subtitle">Kapatma butonuna sahip chips</p>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="chip bg-primary text-white">
+                            Primary
+                            <span class="closebtn" onclick="this.parentElement.style.display='none'">×</span>
+                        </div>
+                        <div class="chip bg-success text-white">
+                            Success
+                            <span class="closebtn" onclick="this.parentElement.style.display='none'">×</span>
+                        </div>
+                        <div class="chip bg-danger text-white">
+                            Danger
+                            <span class="closebtn" onclick="this.parentElement.style.display='none'">×</span>
+                        </div>
+                        <div class="chip bg-warning text-white">
+                            Warning
+                            <span class="closebtn" onclick="this.parentElement.style.display='none'">×</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Resimli Chips</h5>
+                    <p class="card-subtitle">Avatar görsellerine sahip chips</p>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="chip bg-primary text-white">
+                            <img src="/public/static/assets/images/avatars/01.png" alt="Contact Person">
+                            John Doe
+                        </div>
+                        <div class="chip bg-success text-white">
+                            <img src="/public/static/assets/images/avatars/02.png" alt="Contact Person">
+                            Jane Smith
+                        </div>
+                        <div class="chip bg-danger text-white">
+                            <img src="/public/static/assets/images/avatars/03.png" alt="Contact Person">
+                            Mark Johnson
+                        </div>
+                        <div class="chip bg-warning text-white">
+                            <img src="/public/static/assets/images/avatars/04.png" alt="Contact Person">
+                            Emma Wilson
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Resimli ve Kapatılabilir Chips</h5>
+                    <p class="card-subtitle">Avatar ve kapatma butonuna sahip chips</p>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="chip bg-primary text-white">
+                            <img src="/public/static/assets/images/avatars/01.png" alt="Contact Person">
+                            John Doe
+                            <span class="closebtn" onclick="this.parentElement.style.display='none'">×</span>
+                        </div>
+                        <div class="chip bg-success text-white">
+                            <img src="/public/static/assets/images/avatars/02.png" alt="Contact Person">
+                            Jane Smith
+                            <span class="closebtn" onclick="this.parentElement.style.display='none'">×</span>
+                        </div>
+                        <div class="chip bg-danger text-white">
+                            <img src="/public/static/assets/images/avatars/03.png" alt="Contact Person">
+                            Mark Johnson
+                            <span class="closebtn" onclick="this.parentElement.style.display='none'">×</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Kullanım Örnekleri</h5>
+                    <p class="card-subtitle">Gerçek dünya uygulamalarında chip kullanımı</p>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h6 class="mb-2">Kişi Etiketleri</h6>
+                        <div class="mb-3">
+                            <div class="chip bg-light text-dark">
+                                <img src="/public/static/assets/images/avatars/01.png" alt="Contact Person">
+                                John Doe
+                                <span class="closebtn" onclick="this.parentElement.style.display='none'">×</span>
+                            </div>
+                            <div class="chip bg-light text-dark">
+                                <img src="/public/static/assets/images/avatars/02.png" alt="Contact Person">
+                                Jane Smith
+                                <span class="closebtn" onclick="this.parentElement.style.display='none'">×</span>
+                            </div>
+                            <div class="chip bg-light text-dark">
+                                <img src="/public/static/assets/images/avatars/03.png" alt="Contact Person">
+                                Mark Johnson
+                                <span class="closebtn" onclick="this.parentElement.style.display='none'">×</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6 class="mb-2">Kategori Etiketleri</h6>
+                        <div class="mb-3">
+                            <div class="chip chip-sm bg-primary text-white">Teknoloji</div>
+                            <div class="chip chip-sm bg-success text-white">Yazılım</div>
+                            <div class="chip chip-sm bg-info text-white">Tasarım</div>
+                            <div class="chip chip-sm bg-warning text-white">Eğitim</div>
+                            <div class="chip chip-sm bg-danger text-white">Pazarlama</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6 class="mb-2">Filtre Etiketleri</h6>
+                        <div class="mb-3">
+                            <div class="chip bg-dark text-white">
+                                Fiyat: ₺100-₺500
+                                <span class="closebtn" onclick="this.parentElement.style.display='none'">×</span>
+                            </div>
+                            <div class="chip bg-dark text-white">
+                                Kategori: Elektronik
+                                <span class="closebtn" onclick="this.parentElement.style.display='none'">×</span>
+                            </div>
+                            <div class="chip bg-dark text-white">
+                                Marka: Apple
+                                <span class="closebtn" onclick="this.parentElement.style.display='none'">×</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Chips özellikleri için fonksiyonlar buraya gelebilir
+</script>
+{% endblock %} 

@@ -1,0 +1,89 @@
+{% extends "layouts/auth_layout.html" %}
+
+{% block title %}PofuAi | Kayıt{% endblock %}
+
+{% block auth_bg_color %}bg-grd-info{% endblock %}
+{% block auth_image %}/static/assets/images/auth/register1.png{% endblock %}
+
+{% block head_extra %}
+<link rel="stylesheet" href="/static/assets/css/register-form.css">
+{% endblock %}
+
+{% block auth_form %}
+<img src="/static/assets/images/logo1.png" class="mb-4" width="145" alt="">
+<h4 class="fw-bold">{{ messages.form_title }}</h4>
+<p class="mb-0">{{ messages.form_subtitle }}</p>
+
+<!-- Bilgilendirme mesajı -->
+{% if messages.info_title and messages.info_message %}
+<div class="alert alert-info border-0 bg-info alert-dismissible fade show py-2 mt-3">
+    <div class="d-flex align-items-center">
+        <div class="font-35 text-white"><i class="bi bi-envelope-check"></i></div>
+        <div class="ms-3">
+            <h6 class="mb-0 text-white">{{ messages.info_title }}</h6>
+            <div class="text-white">{{ messages.info_message }}</div>
+        </div>
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endif %}
+
+<div class="form-body mt-4">
+    <form class="row g-3" method="POST" action="/auth/register" id="registerForm">
+        <div class="col-12">
+            <label for="inputName" class="form-label">Ad Soyad</label>
+            <input type="text" class="form-control" id="inputName" name="name" placeholder="Ad Soyad" required>
+            <div class="validation-message" id="nameValidation"></div>
+        </div>
+        <div class="col-12">
+            <label for="inputEmailAddress" class="form-label">E-posta</label>
+            <input type="email" class="form-control" id="inputEmailAddress" name="email" placeholder="ornek@email.com" required>
+            <div class="validation-message" id="emailValidation"></div>
+        </div>
+        <div class="col-12">
+            <label for="inputPhone" class="form-label">Telefon Numarası</label>
+            <input type="tel" class="form-control" id="inputPhone" name="phone" placeholder="05XX XXX XX XX" required>
+            <div class="validation-message" id="phoneValidation"></div>
+        </div>
+        
+        <!-- Spam Koruması - Basit Doğrulama -->
+        <div class="col-12 mt-3" id="securityVerification" style="display: none;">
+            <div class="captcha-container">
+                <div class="input-group">
+                    <span class="input-group-text bg-info text-white" id="captchaQuestionLabel">
+                        Hesaplayın
+                    </span>
+                    <input type="text" class="form-control" id="captchaAnswer" name="captcha_answer" placeholder="Cevabınız" required>
+                    <input type="hidden" id="captchaExpectedAnswer" name="captcha_expected">
+                    <input type="hidden" id="captchaOperation" name="captcha_operation">
+                </div>
+                <div class="form-text">
+                    <i class="bi bi-shield-check"></i> 
+                    Güvenlik doğrulaması
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12">
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" name="terms" required>
+                <label class="form-check-label" for="flexSwitchCheckChecked">Kullanım koşullarını okudum ve kabul ediyorum</label>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="d-grid">
+                <button type="submit" class="btn btn-grd-info" id="submitButton">{{ messages.submit_button }}</button>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="text-start">
+                <p class="mb-0">Zaten hesabınız var mı? <a href="/auth/login" class="fw-bold text-info">Giriş yapın</a></p>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/assets/js/register-form.js"></script>
+{% endblock %} 

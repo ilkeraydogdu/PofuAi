@@ -1,0 +1,127 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}PofuAI Components{% endblock %}
+
+{% block content %}
+<div class="page-content">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">PofuAI Component Kitaplığı</h5>
+                    <p class="card-subtitle">Projede kullanılan tüm componentler</p>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="m-0">Temel Componentler</h6>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-group">
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <a href="{{ url_for('components.show_component', component_name='alert') }}">Alert</a>
+                                            <span class="badge bg-primary rounded-pill">Hazır</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <a href="{{ url_for('components.show_component', component_name='badge') }}">Badge</a>
+                                            <span class="badge bg-primary rounded-pill">Hazır</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <a href="{{ url_for('components.show_component', component_name='button') }}">Button</a>
+                                            <span class="badge bg-primary rounded-pill">Hazır</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <a href="{{ url_for('components.show_component', component_name='card') }}">Card</a>
+                                            <span class="badge bg-primary rounded-pill">Hazır</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <a href="{{ url_for('components.show_component', component_name='spinner') }}">Spinner</a>
+                                            <span class="badge bg-primary rounded-pill">Hazır</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="m-0">Gelişmiş Componentler</h6>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-group">
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <a href="{{ url_for('components.show_component', component_name='chips') }}">Chips</a>
+                                            <span class="badge bg-primary rounded-pill">Hazır</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <a href="{{ url_for('components.show_component', component_name='modal') }}">Modal</a>
+                                            <span class="badge bg-primary rounded-pill">Hazır</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <a href="{{ url_for('components.show_component', component_name='pagination') }}">Pagination</a>
+                                            <span class="badge bg-primary rounded-pill">Hazır</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <a href="{{ url_for('components.show_component', component_name='progress_bars') }}">Progress Bars</a>
+                                            <span class="badge bg-primary rounded-pill">Hazır</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <a href="{{ url_for('components.show_component', component_name='tabs') }}">Tabs</a>
+                                            <span class="badge bg-primary rounded-pill">Hazır</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="m-0">Component Kullanım Rehberi</h6>
+                                </div>
+                                <div class="card-body">
+                                    <h5>Component Kullanımı</h5>
+                                    <p>PofuAI componentlerini kullanmak için iki adım izleyin:</p>
+                                    
+                                    <h6 class="mt-4">1. Controller'da Component Verisi Hazırlama</h6>
+                                    <pre class="bg-light p-3 rounded"><code>from core.Services.UIService import UIService
+
+def render_page():
+    ui = UIService()
+    
+    # Component verisini hazırla
+    alert_data = ui.create_alert(
+        message="İşlem başarıyla tamamlandı",
+        type="success",
+        dismissible=True
+    )
+    
+    # Sayfayı render et
+    return render_template('page.html', alert=alert_data)</code></pre>
+                                    
+                                    <h6 class="mt-4">2. Şablonda Component Çağırma</h6>
+                                    <pre class="bg-light p-3 rounded"><code>{% raw %}{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <!-- Alert componentini çağır -->
+        {% include "components/_alert.html" %}
+    </div>
+</div>
+{% endblock %}{% endraw %}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

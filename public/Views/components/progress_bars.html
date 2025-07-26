@@ -1,0 +1,170 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Progress Bars Component{% endblock %}
+
+{% block content %}
+<div class="page-content">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Progress Bars Component</h5>
+                    <p class="card-subtitle">Bootstrap progress bar bileşenleri</p>
+                </div>
+                <div class="card-body">
+                    <h6 class="mb-3">Temel Progress Barlar</h6>
+                    
+                    <div class="mb-4">
+                        <h6 class="mt-3">Default Progress Bar</h6>
+                        <div class="progress mb-3">
+                            <div class="progress-bar bg-primary" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        
+                        <div class="progress mb-3">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        
+                        <div class="progress mb-3">
+                            <div class="progress-bar bg-info" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        
+                        <div class="progress mb-3">
+                            <div class="progress-bar bg-danger" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6 class="mt-3">Gradient Progress Bar</h6>
+                        <div class="progress mb-3">
+                            <div class="progress-bar bg-grd-primary" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        
+                        <div class="progress mb-3">
+                            <div class="progress-bar bg-grd-success" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        
+                        <div class="progress mb-3">
+                            <div class="progress-bar bg-grd-info" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        
+                        <div class="progress mb-3">
+                            <div class="progress-bar bg-grd-danger" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Progress Bar Yükseklikleri</h5>
+                    <p class="card-subtitle">Farklı yüksekliklere sahip progress barlar</p>
+                </div>
+                <div class="card-body">
+                    <div class="progress mb-3" style="height: 5px;">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    
+                    <div class="progress mb-3" style="height: 10px;">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    
+                    <div class="progress mb-3" style="height: 15px;">
+                        <div class="progress-bar bg-info" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    
+                    <div class="progress mb-3" style="height: 20px;">
+                        <div class="progress-bar bg-warning" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Progress Bar Çeşitleri</h5>
+                    <p class="card-subtitle">Çizgili ve animasyonlu progress barlar</p>
+                </div>
+                <div class="card-body">
+                    <h6 class="mb-2">Çizgili Progress Bar</h6>
+                    <div class="progress mb-3">
+                        <div class="progress-bar progress-bar-striped bg-primary" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    
+                    <div class="progress mb-3">
+                        <div class="progress-bar progress-bar-striped bg-success" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    
+                    <h6 class="mt-4 mb-2">Animasyonlu Progress Bar</h6>
+                    <div class="progress mb-3">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    
+                    <div class="progress mb-3">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Progress Bar Etiketleri</h5>
+                    <p class="card-subtitle">Etiketli progress barlar</p>
+                </div>
+                <div class="card-body">
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">25%</div>
+                    </div>
+                    
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">50%</div>
+                    </div>
+                    
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-info" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">75%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Çoklu Progress Bar</h5>
+                    <p class="card-subtitle">Aynı çubuğa sahip birden fazla progress bar</p>
+                </div>
+                <div class="card-body">
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: 15%" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100">15%</div>
+                        <div class="progress-bar bg-info" role="progressbar" style="width: 30%" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100">30%</div>
+                        <div class="progress-bar bg-warning" role="progressbar" style="width: 20%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">20%</div>
+                    </div>
+                    
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-grd-success" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">25%</div>
+                        <div class="progress-bar bg-grd-danger" role="progressbar" style="width: 35%" aria-valuenow="35" aria-valuemin="0" aria-valuemax="100">35%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Progress bar özellikleri için fonksiyonlar buraya gelebilir
+</script>
+{% endblock %} 

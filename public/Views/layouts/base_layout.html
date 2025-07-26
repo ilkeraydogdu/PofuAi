@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="tr" data-bs-theme="{{ theme|default('light') }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% if page and page.title %}{{ page.title }} | {{ app_name }}{% else %}{{ app_name }}{% endif %}{% endblock %}</title>
+    
+    {% if page and page.description %}<meta name="description" content="{{ page.description }}">{% endif %}
+    
+    {% if page and page.meta_tags %}
+        {% for name, content in page.meta_tags.items() %}
+        <meta name="{{ name }}" content="{{ content }}">
+        {% endfor %}
+    {% endif %}
+    
+    <!-- Favicon -->
+    <link rel="icon" href="/static/assets/images/favicon-32x32.png" type="image/png">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Material+Icons+Outlined" rel="stylesheet">
+    
+    <!-- Bootstrap CSS -->
+    <link href="/static/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/assets/css/bootstrap-extended.css" rel="stylesheet">
+    
+    <!-- Plugin CSS -->
+    <link href="/static/assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css" rel="stylesheet">
+    <link href="/static/assets/plugins/metismenu/metisMenu.min.css" rel="stylesheet">
+    <link href="/static/assets/plugins/metismenu/mm-vertical.css" rel="stylesheet">
+    
+    <!-- Theme CSS -->
+    <link href="/static/sass/main.css" rel="stylesheet">
+    <link href="/static/sass/blue-theme.css" rel="stylesheet">
+    <link href="/static/sass/dark-theme.css" rel="stylesheet">
+    <link href="/static/sass/responsive.css" rel="stylesheet">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% block body %}
+    <div class="wrapper">
+        {% block sidebar %}
+            {% include "components/sidebar.html" %}
+        {% endblock %}
+        
+        <main class="page-content">
+            {% block header %}
+                {% include "components/navbar.html" %}
+            {% endblock %}
+            
+            {% if page and page.content_blocks and page.content_blocks.welcome_message %}
+            <div class="alert alert-light border-0 bg-light alert-dismissible fade show py-2 mb-4">
+                <div class="d-flex align-items-center">
+                    <div class="font-35 text-info"><i class="bi bi-info-circle-fill"></i></div>
+                    <div class="ms-3">
+                        <div class="text-info">{{ page.content_blocks.welcome_message }}</div>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endif %}
+            
+            {% if page and page.subtitle %}
+            <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+                <div class="breadcrumb-title pe-3">{{ page.title }}</div>
+                <div class="ps-3">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0 p-0">
+                            <li class="breadcrumb-item"><a href="/"><i class="bx bx-home-alt"></i></a></li>
+                            <li class="breadcrumb-item active" aria-current="page">{{ page.subtitle }}</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% block content %}
+            <!-- Ana içerik buraya gelecek -->
+            {% endblock %}
+            
+            {% block footer %}
+                {% include "components/footer.html" %}
+            {% endblock %}
+        </main>
+    </div>
+    {% endblock %}
+    
+    <!-- jQuery -->
+    <script src="/static/assets/js/jquery.min.js"></script>
+    
+    <!-- Bootstrap Bundle JS -->
+    <script src="/static/assets/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Plugin JS -->
+    <script src="/static/assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js"></script>
+    <script src="/static/assets/plugins/metismenu/metisMenu.min.js"></script>
+    
+    <!-- Theme JS -->
+    <script src="/static/assets/js/main.js"></script>
+    
+    {% block extra_js %}{% endblock %}
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize metisMenu
+            if (typeof $ !== 'undefined' && $.fn.metisMenu) {
+                $("#sidenav").metisMenu();
+            }
+            
+            // Initialize perfect scrollbar
+            if (typeof PerfectScrollbar !== 'undefined') {
+                const sidebarNav = document.querySelector(".sidebar-nav");
+                if (sidebarNav) {
+                    new PerfectScrollbar(sidebarNav);
+                }
+            }
+            
+            // Toggle sidebar
+            const toggleBtn = document.querySelector('.btn-toggle');
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', function() {
+                    document.querySelector('.wrapper').classList.toggle('toggled');
+                });
+            }
+        });
+    </script>
+</body>
+</html> 

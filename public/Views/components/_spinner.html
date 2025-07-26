@@ -1,0 +1,8 @@
+{% if spinner %}
+<div class="spinner-{{ spinner.type or 'border' }} {% if spinner.size %}spinner-{{ spinner.type or 'border' }}-{{ spinner.size }}{% endif %} {% if spinner.color %}text-{{ spinner.color }}{% endif %}" 
+     role="{{ spinner.role or 'status' }}"
+     {% if spinner.aria_hidden %}aria-hidden="true"{% endif %}
+     {% if spinner.custom_style %}style="{{ spinner.custom_style }}"{% endif %}>
+    <span class="visually-hidden">{{ spinner.text or 'Yükleniyor...' }}</span>
+</div>
+{% endif %} 

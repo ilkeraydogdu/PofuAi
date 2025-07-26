@@ -1,0 +1,208 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Alert Component{% endblock %}
+
+{% block content %}
+<div class="page-content">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Alert Component</h5>
+                    <p class="card-subtitle">Bootstrap alert bileşenleri</p>
+                </div>
+                <div class="card-body">
+                    <h6 class="mb-3">Temel Alertler</h6>
+                    
+                    <div class="alert alert-primary" role="alert">
+                        <strong>Primary Alert</strong> - Bu bir primary alert mesajıdır.
+                    </div>
+                    
+                    <div class="alert alert-secondary" role="alert">
+                        <strong>Secondary Alert</strong> - Bu bir secondary alert mesajıdır.
+                    </div>
+                    
+                    <div class="alert alert-success" role="alert">
+                        <strong>Success Alert</strong> - Bu bir success alert mesajıdır.
+                    </div>
+                    
+                    <div class="alert alert-danger" role="alert">
+                        <strong>Danger Alert</strong> - Bu bir danger alert mesajıdır.
+                    </div>
+                    
+                    <div class="alert alert-warning" role="alert">
+                        <strong>Warning Alert</strong> - Bu bir warning alert mesajıdır.
+                    </div>
+                    
+                    <div class="alert alert-info" role="alert">
+                        <strong>Info Alert</strong> - Bu bir info alert mesajıdır.
+                    </div>
+                    
+                    <div class="alert alert-light" role="alert">
+                        <strong>Light Alert</strong> - Bu bir light alert mesajıdır.
+                    </div>
+                    
+                    <div class="alert alert-dark" role="alert">
+                        <strong>Dark Alert</strong> - Bu bir dark alert mesajıdır.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Kapatılabilir Alertler</h5>
+                    <p class="card-subtitle">Kapatma butonu ile alertler</p>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-primary alert-dismissible fade show" role="alert">
+                        <strong>Primary Alert</strong> - Bu bir kapatılabilir alert mesajıdır.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <strong>Success Alert</strong> - Bu bir kapatılabilir alert mesajıdır.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong>Danger Alert</strong> - Bu bir kapatılabilir alert mesajıdır.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">İkonlu Alertler</h5>
+                    <p class="card-subtitle">İkon içeren alertler</p>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-primary d-flex align-items-center" role="alert">
+                        <i class="material-icons-outlined me-2">info</i>
+                        <div>
+                            <strong>Primary Alert</strong> - Bu bir ikonlu alert mesajıdır.
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-success d-flex align-items-center" role="alert">
+                        <i class="material-icons-outlined me-2">check_circle</i>
+                        <div>
+                            <strong>Success Alert</strong> - Bu bir ikonlu alert mesajıdır.
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-danger d-flex align-items-center" role="alert">
+                        <i class="material-icons-outlined me-2">error</i>
+                        <div>
+                            <strong>Danger Alert</strong> - Bu bir ikonlu alert mesajıdır.
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-warning d-flex align-items-center" role="alert">
+                        <i class="material-icons-outlined me-2">warning</i>
+                        <div>
+                            <strong>Warning Alert</strong> - Bu bir ikonlu alert mesajıdır.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Gradient Alertler</h5>
+                    <p class="card-subtitle">Gradient arka plana sahip alertler</p>
+                </div>
+                <div class="card-body">
+                    <div class="alert border-0 bg-grd-primary text-white" role="alert">
+                        <strong>Primary Gradient</strong> - Bu bir gradient alert mesajıdır.
+                    </div>
+                    
+                    <div class="alert border-0 bg-grd-success text-white" role="alert">
+                        <strong>Success Gradient</strong> - Bu bir gradient alert mesajıdır.
+                    </div>
+                    
+                    <div class="alert border-0 bg-grd-danger text-white" role="alert">
+                        <strong>Danger Gradient</strong> - Bu bir gradient alert mesajıdır.
+                    </div>
+                    
+                    <div class="alert border-0 bg-grd-warning text-dark" role="alert">
+                        <strong>Warning Gradient</strong> - Bu bir gradient alert mesajıdır.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Border Alertler</h5>
+                    <p class="card-subtitle">Sol kenarda renkli border içeren alertler</p>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-border-primary" role="alert">
+                        <strong>Primary Border</strong> - Bu bir border alert mesajıdır.
+                    </div>
+                    
+                    <div class="alert alert-border-success" role="alert">
+                        <strong>Success Border</strong> - Bu bir border alert mesajıdır.
+                    </div>
+                    
+                    <div class="alert alert-border-danger" role="alert">
+                        <strong>Danger Border</strong> - Bu bir border alert mesajıdır.
+                    </div>
+                    
+                    <div class="alert alert-border-warning" role="alert">
+                        <strong>Warning Border</strong> - Bu bir border alert mesajıdır.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Alert örneği oluşturmak için fonksiyon
+    function createAlert(type, message, title = null, dismissible = true) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type}`;
+        
+        if (dismissible) {
+            alertDiv.className += ' alert-dismissible fade show';
+        }
+        
+        alertDiv.setAttribute('role', 'alert');
+        
+        let content = '';
+        if (title) {
+            content += `<strong>${title}</strong> - `;
+        }
+        content += message;
+        
+        alertDiv.innerHTML = content;
+        
+        if (dismissible) {
+            alertDiv.innerHTML += `
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+        }
+        
+        return alertDiv;
+    }
+</script>
+{% endblock %} 

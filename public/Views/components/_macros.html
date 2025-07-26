@@ -1,0 +1,253 @@
+{% macro alert(type="info", message="", title=None, dismissible=True, icon=None) %}
+<div class="alert alert-{{ type }}{% if dismissible %} alert-dismissible fade show{% endif %}" role="alert">
+    {% if icon %}
+    <i class="material-icons-outlined me-2">{{ icon }}</i>
+    {% endif %}
+    
+    {% if title %}
+    <strong>{{ title }}</strong>{% if message %} - {% endif %}
+    {% endif %}
+    
+    {{ message }}
+    
+    {% if dismissible %}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    {% endif %}
+</div>
+{% endmacro %}
+
+{% macro button(text="", style="basic", class_name="btn-primary", size=None, icon=None, icon_position="left",
+                disabled=False, loading=False, full_width=False, rounded=False, href=None, target=None, 
+                id=None, custom_classes="", attributes={}, type="button") %}
+{% set btn_tag = "a" if href else "button" %}
+
+<{{ btn_tag }} 
+    {% if href %}href="{{ href }}"{% endif %}
+    {% if target %}target="{{ target }}"{% endif %}
+    {% if not href %}type="{{ type }}"{% endif %}
+    class="btn 
+        {% if style == 'basic' %}{{ class_name }}{% endif %}
+        {% if style == 'gradient' %}btn-grd {{ class_name }}{% endif %}
+        {% if style == 'outline' %}{{ class_name }}{% endif %}
+        {% if style == 'inverse' %}{{ class_name }}{% endif %}
+        {% if style == 'raised' %}{{ class_name }} shadow{% endif %}
+        {% if size %} btn-{{ size }}{% endif %}
+        {% if disabled %} disabled{% endif %}
+        {% if loading %} loading{% endif %}
+        {% if full_width %} w-100{% endif %}
+        {% if rounded %} rounded-pill{% endif %}
+        {% if icon %} d-flex gap-2{% endif %}
+        {{ custom_classes }}
+    "
+    {% if id %}id="{{ id }}"{% endif %}
+    {% if disabled %}disabled{% endif %}
+    {% for attr_name, attr_value in attributes.items() %}
+        {{ attr_name }}="{{ attr_value }}"
+    {% endfor %}
+>
+    {% if icon and icon_position != 'right' %}
+    <i class="material-icons-outlined">{{ icon }}</i>
+    {% endif %}
+    
+    {{ text }}
+    
+    {% if icon and icon_position == 'right' %}
+    <i class="material-icons-outlined">{{ icon }}</i>
+    {% endif %}
+</{{ btn_tag }}>
+{% endmacro %}
+
+{% macro card(title=None, subtitle=None, content=None, header=True, footer=None, class_name="", 
+             header_class="", body_class="", footer_class="") %}
+<div class="card {{ class_name }}">
+    {% if header and title %}
+    <div class="card-header {{ header_class }}">
+        <h5 class="card-title mb-0">{{ title }}</h5>
+        {% if subtitle %}
+        <p class="card-subtitle mb-0">{{ subtitle }}</p>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    <div class="card-body {{ body_class }}">
+        {{ content|safe }}
+    </div>
+    
+    {% if footer %}
+    <div class="card-footer {{ footer_class }}">
+        {{ footer|safe }}
+    </div>
+    {% endif %}
+</div>
+{% endmacro %}
+
+{% macro badge(text, style="basic", class_name="bg-primary", position="top-right", 
+              icon=None, button_text=None, button_class=None, rounded=True, sr_text=None) %}
+{% if style == "basic" %}
+<span class="badge {{ class_name }} {% if rounded %}rounded-pill{% endif %}">
+    {% if icon %}<i class="material-icons-outlined">{{ icon }}</i> {% endif %}
+    {{ text }}
+</span>
+{% elif style == "pill" %}
+<span class="badge {{ class_name }} rounded-pill">{{ text }}</span>
+{% elif style == "button" %}
+<button type="button" class="btn {{ button_class|default('btn-primary') }}">
+    {{ button_text|default('Button') }} <span class="badge {{ class_name }} {% if rounded %}rounded-pill{% endif %}">{{ text }}</span>
+</button>
+{% elif style == "positioned" %}
+<div class="position-relative">
+    <button type="button" class="btn {{ button_class|default('btn-primary') }}">{{ button_text|default('Notifications') }}</button>
+    <span class="position-absolute badge {{ class_name }} {% if rounded %}rounded-pill{% endif %} {{ position }}">
+        {{ text }}
+        {% if sr_text %}<span class="visually-hidden">{{ sr_text }}</span>{% endif %}
+    </span>
+</div>
+{% endif %}
+{% endmacro %}
+
+{% macro pagination(current_page, total_pages, size=None, alignment="start", with_arrows=True, with_numbers=True, url_pattern=None) %}
+<nav aria-label="Page navigation">
+    <ul class="pagination {% if size %}pagination-{{ size }}{% endif %} justify-content-{{ alignment }}">
+        {% if with_arrows %}
+        <li class="page-item {% if current_page <= 1 %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_pattern|replace('{page}', (current_page - 1)|string) if url_pattern and current_page > 1 else '#' }}" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+        {% endif %}
+        
+        {% if with_numbers %}
+            {% set start_page = [1, current_page - 2]|max %}
+            {% set end_page = [total_pages, start_page + 4]|min %}
+            {% if end_page - start_page < 4 %}
+                {% set start_page = [1, end_page - 4]|max %}
+            {% endif %}
+            
+            {% for page in range(start_page, end_page + 1) %}
+            <li class="page-item {% if page == current_page %}active{% endif %}">
+                <a class="page-link" href="{{ url_pattern|replace('{page}', page|string) if url_pattern and page != current_page else '#' }}">{{ page }}</a>
+            </li>
+            {% endfor %}
+        {% endif %}
+        
+        {% if with_arrows %}
+        <li class="page-item {% if current_page >= total_pages %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_pattern|replace('{page}', (current_page + 1)|string) if url_pattern and current_page < total_pages else '#' }}" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endmacro %}
+
+{% macro modal(id, title, content=None, size=None, centered=False, scrollable=False, 
+               static=False, footer=None, close_button=True, primary_button=None, secondary_button=None) %}
+<div class="modal fade" id="{{ id }}" tabindex="-1" aria-labelledby="{{ id }}Label" aria-hidden="true" 
+    {% if static %}data-bs-backdrop="static" data-bs-keyboard="false"{% endif %}>
+    <div class="modal-dialog {% if size %}modal-{{ size }}{% endif %} {% if centered %}modal-dialog-centered{% endif %} {% if scrollable %}modal-dialog-scrollable{% endif %}">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="{{ id }}Label">{{ title }}</h5>
+                {% if close_button %}
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                {% endif %}
+            </div>
+            <div class="modal-body">
+                {{ content|safe }}
+            </div>
+            {% if footer or primary_button or secondary_button %}
+            <div class="modal-footer">
+                {% if footer %}
+                    {{ footer|safe }}
+                {% else %}
+                    {% if secondary_button %}
+                    <button type="button" class="btn {{ secondary_button.class|default('btn-secondary') }}" 
+                            {% if secondary_button.dismiss|default(true) %}data-bs-dismiss="modal"{% endif %}>
+                        {{ secondary_button.text|default('Close') }}
+                    </button>
+                    {% endif %}
+                    
+                    {% if primary_button %}
+                    <button type="button" class="btn {{ primary_button.class|default('btn-primary') }}" 
+                            {% if primary_button.id %}id="{{ primary_button.id }}"{% endif %}>
+                        {{ primary_button.text|default('Save changes') }}
+                    </button>
+                    {% endif %}
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endmacro %}
+
+{% macro progress_bar(bars, height=None, mb=3) %}
+<div class="progress {% if height %}progress-{{ height }}{% endif %} mb-{{ mb }}">
+    {% for bar in bars %}
+    <div class="progress-bar {{ bar.style|default('bg-primary') }}" role="progressbar" 
+         style="width: {{ bar.width|default(bar.value) }}%{% if height %}; height: {{ height }}{% endif %}" 
+         aria-valuenow="{{ bar.value }}" aria-valuemin="0" aria-valuemax="100">
+        {% if bar.label %}{{ bar.label }}{% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endmacro %}
+
+{% macro spinner(type="border", size=None, color="primary", text="Yükleniyor...", 
+                role="status", aria_hidden=True, custom_style=None) %}
+<div class="spinner-{{ type }} text-{{ color }} {% if size %}spinner-{{ type }}-{{ size }}{% endif %}" 
+     role="{{ role }}" {% if aria_hidden %}aria-hidden="true"{% endif %}
+     {% if custom_style %}style="{{ custom_style }}"{% endif %}>
+    {% if text %}
+    <span class="visually-hidden">{{ text }}</span>
+    {% endif %}
+</div>
+{% endmacro %}
+
+{% macro tabs(id, tabs, active_tab=0, style="tabs", fill=False, justified=False, vertical=False) %}
+{% if vertical %}
+<div class="d-flex">
+    <div class="nav flex-column nav-{{ style }} me-3" id="{{ id }}-tab" role="tablist" aria-orientation="vertical">
+        {% for tab in tabs %}
+        <button class="nav-link {% if loop.index0 == active_tab %}active{% endif %}" 
+                id="{{ tab.id }}-tab" data-bs-toggle="tab" data-bs-target="#{{ tab.id }}" 
+                type="button" role="tab" aria-controls="{{ tab.id }}" 
+                aria-selected="{% if loop.index0 == active_tab %}true{% else %}false{% endif %}">
+            {{ tab.title }}
+        </button>
+        {% endfor %}
+    </div>
+    <div class="tab-content" id="{{ id }}-tabContent">
+        {% for tab in tabs %}
+        <div class="tab-pane fade {% if loop.index0 == active_tab %}show active{% endif %}" 
+             id="{{ tab.id }}" role="tabpanel" aria-labelledby="{{ tab.id }}-tab">
+            {{ tab.content|safe }}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% else %}
+<ul class="nav nav-{{ style }} {% if fill %}nav-fill{% endif %} {% if justified %}nav-justified{% endif %}" 
+    id="{{ id }}-tab" role="tablist">
+    {% for tab in tabs %}
+    <li class="nav-item" role="presentation">
+        <button class="nav-link {% if loop.index0 == active_tab %}active{% endif %}" 
+                id="{{ tab.id }}-tab" data-bs-toggle="tab" data-bs-target="#{{ tab.id }}" 
+                type="button" role="tab" aria-controls="{{ tab.id }}" 
+                aria-selected="{% if loop.index0 == active_tab %}true{% else %}false{% endif %}">
+            {{ tab.title }}
+        </button>
+    </li>
+    {% endfor %}
+</ul>
+<div class="tab-content" id="{{ id }}-tabContent">
+    {% for tab in tabs %}
+    <div class="tab-pane fade {% if loop.index0 == active_tab %}show active{% endif %}" 
+         id="{{ tab.id }}" role="tabpanel" aria-labelledby="{{ tab.id }}-tab">
+        {{ tab.content|safe }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endmacro %} 

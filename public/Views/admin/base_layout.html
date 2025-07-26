@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="tr" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PofuAI Admin{% endblock %}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="/static/assets/images/favicon-32x32.png" type="image/png">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Material+Icons+Outlined" rel="stylesheet">
+    
+    <!-- Bootstrap CSS -->
+    <link href="/static/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/assets/css/bootstrap-extended.css" rel="stylesheet">
+    
+    <!-- Plugin CSS -->
+    <link href="/static/assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css" rel="stylesheet">
+    <link href="/static/assets/plugins/metismenu/metisMenu.min.css" rel="stylesheet">
+    <link href="/static/assets/plugins/metismenu/mm-vertical.css" rel="stylesheet">
+    
+    <!-- Theme CSS -->
+    <link href="/static/sass/main.css" rel="stylesheet">
+    <link href="/static/sass/blue-theme.css" rel="stylesheet">
+    <link href="/static/sass/dark-theme.css" rel="stylesheet">
+    <link href="/static/sass/responsive.css" rel="stylesheet">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar-wrapper" data-simplebar="true">
+            <div class="sidebar-header">
+                <div>
+                    <img src="/static/assets/images/logo-icon.png" class="logo-icon" alt="logo icon">
+                </div>
+                <div>
+                    <h4 class="logo-text">PofuAI</h4>
+                </div>
+                <div class="toggle-icon ms-auto">
+                    <i class="material-icons-outlined">close</i>
+                </div>
+            </div>
+            <!-- Sidebar Navigation -->
+            <ul class="metismenu" id="sidenav">
+                <li>
+                    <a href="/admin">
+                        <div class="parent-icon"><i class="material-icons-outlined">dashboard</i></div>
+                        <div class="menu-title">Dashboard</div>
+                    </a>
+                </li>
+                <li>
+                    <a href="/components">
+                        <div class="parent-icon"><i class="material-icons-outlined">widgets</i></div>
+                        <div class="menu-title">Components</div>
+                    </a>
+                </li>
+                <li>
+                    <a href="/admin/users">
+                        <div class="parent-icon"><i class="material-icons-outlined">people</i></div>
+                        <div class="menu-title">Users</div>
+                    </a>
+                </li>
+                <li>
+                    <a href="/admin/settings">
+                        <div class="parent-icon"><i class="material-icons-outlined">settings</i></div>
+                        <div class="menu-title">Settings</div>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+        
+        <!-- Page Content -->
+        <main class="page-content">
+            <!-- Header -->
+            <header class="top-header">
+                <nav class="navbar navbar-expand gap-3">
+                    <div class="toggle-icon">
+                        <i class="material-icons-outlined">menu</i>
+                    </div>
+                    <div class="top-navbar-right ms-auto">
+                        <ul class="navbar-nav align-items-center">
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" href="#" data-bs-toggle="dropdown">
+                                    <div class="user-setting d-flex align-items-center">
+                                        <img src="/static/assets/images/avatars/01.png" class="user-img" alt="">
+                                        <div class="user-name d-none d-sm-block">Admin</div>
+                                    </div>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item" href="/admin/profile">
+                                            <i class="material-icons-outlined">account_circle</i>
+                                            <span>Profile</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="/admin/settings">
+                                            <i class="material-icons-outlined">settings</i>
+                                            <span>Settings</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="/auth/logout">
+                                            <i class="material-icons-outlined">logout</i>
+                                            <span>Logout</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </header>
+            
+            <!-- Main Content -->
+            <div class="page-content-wrapper">
+                {% block content %}
+                <!-- Content will be inserted here -->
+                {% endblock %}
+            </div>
+            
+            <!-- Footer -->
+            <footer class="footer">
+                <div class="footer-text">
+                    Copyright © 2025. All right reserved.
+                </div>
+            </footer>
+        </main>
+    </div>
+    
+    <!-- jQuery -->
+    <script src="/static/assets/js/jquery.min.js"></script>
+    
+    <!-- Bootstrap Bundle JS -->
+    <script src="/static/assets/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Plugin JS -->
+    <script src="/static/assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js"></script>
+    <script src="/static/assets/plugins/metismenu/metisMenu.min.js"></script>
+    
+    <!-- Theme JS -->
+    <script src="/static/assets/js/main.js"></script>
+    
+    {% block extra_js %}{% endblock %}
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize metisMenu
+            if (typeof $ !== 'undefined' && $.fn.metisMenu) {
+                $("#sidenav").metisMenu();
+            }
+            
+            // Initialize perfect scrollbar
+            if (typeof PerfectScrollbar !== 'undefined') {
+                const sidebarNav = document.querySelector(".sidebar-wrapper");
+                if (sidebarNav) {
+                    new PerfectScrollbar(sidebarNav);
+                }
+            }
+            
+            // Toggle sidebar
+            const toggleIcon = document.querySelector('.toggle-icon');
+            if (toggleIcon) {
+                toggleIcon.addEventListener('click', function() {
+                    document.querySelector('.wrapper').classList.toggle('toggled');
+                });
+            }
+        });
+    </script>
+</body>
+</html> 

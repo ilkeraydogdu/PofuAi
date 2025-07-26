@@ -1,0 +1,191 @@
+{% extends "admin/base_layout.html" %}
+
+{% block title %}Card Components{% endblock %}
+
+{% block content %}
+<div class="page-breadcrumb d-flex align-items-center mb-3">
+    <div class="breadcrumb-title pe-3">Components</div>
+    <div class="ps-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0 p-0">
+                <li class="breadcrumb-item"><a href="/components"><i class="bx bx-home-alt"></i></a></li>
+                <li class="breadcrumb-item active" aria-current="page">Cards</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Basic Cards</h5>
+                <p class="card-text">Temel kart örnekleri.</p>
+                
+                <div class="row mt-4">
+                    <div class="col-md-4 mb-3">
+                        {% include "components/_card.html" with {
+                            "title": "Basic Card",
+                            "content": "This is a basic card with title and content. Cards can be used for various purposes like displaying information, creating panels, etc."
+                        } %}
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        {% include "components/_card.html" with {
+                            "title": "Card with Header Background",
+                            "content": "This card has a colored header background.",
+                            "header_bg": "bg-primary text-white"
+                        } %}
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        {% include "components/_card.html" with {
+                            "title": "Card with Footer",
+                            "content": "This card includes a footer section that can contain actions or additional information.",
+                            "footer": "<button class='btn btn-sm btn-primary'>Action</button> <button class='btn btn-sm btn-secondary'>Cancel</button>"
+                        } %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Image Cards</h5>
+                <p class="card-text">Resim içeren kart örnekleri.</p>
+                
+                <div class="row mt-4">
+                    <div class="col-md-4 mb-3">
+                        {% include "components/_card.html" with {
+                            "title": "Card with Top Image",
+                            "content": "This card has an image at the top.",
+                            "image": "/static/assets/images/gallery/01.png",
+                            "image_position": "top"
+                        } %}
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        {% include "components/_card.html" with {
+                            "title": "Card with Bottom Image",
+                            "content": "This card has an image at the bottom.",
+                            "image": "/static/assets/images/gallery/02.png",
+                            "image_position": "bottom"
+                        } %}
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        {% include "components/_card.html" with {
+                            "title": "Card with Overlay Image",
+                            "content": "This card has text overlaid on an image.",
+                            "image": "/static/assets/images/gallery/03.png",
+                            "overlay": true,
+                            "text_white": true
+                        } %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Card Styles</h5>
+                <p class="card-text">Farklı stil seçenekleri.</p>
+                
+                <div class="row mt-4">
+                    <div class="col-md-4 mb-3">
+                        {% include "components/_card.html" with {
+                            "title": "Bordered Card",
+                            "content": "This card has a border style.",
+                            "border": true,
+                            "border_color": "primary"
+                        } %}
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        {% include "components/_card.html" with {
+                            "title": "Shadow Card",
+                            "content": "This card has a shadow effect.",
+                            "shadow": true
+                        } %}
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        {% include "components/_card.html" with {
+                            "title": "Colored Card",
+                            "content": "This card has a background color.",
+                            "bg_color": "bg-info text-white"
+                        } %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Card Groups</h5>
+                <p class="card-text">Kart grupları.</p>
+                
+                <div class="card-group">
+                    {% include "components/_card.html" with {
+                        "title": "Card Group 1",
+                        "content": "This is the first card in a card group.",
+                        "footer": "Last updated 3 mins ago"
+                    } %}
+                    
+                    {% include "components/_card.html" with {
+                        "title": "Card Group 2",
+                        "content": "This is the second card in a card group.",
+                        "footer": "Last updated 5 mins ago"
+                    } %}
+                    
+                    {% include "components/_card.html" with {
+                        "title": "Card Group 3",
+                        "content": "This is the third card in a card group.",
+                        "footer": "Last updated 10 mins ago"
+                    } %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Card Usage</h5>
+                <p class="card-text">Kart bileşeninin kullanımı.</p>
+                
+                <div class="bg-light p-3 rounded">
+                    <pre><code>{% raw %}{% include "components/_card.html" with {
+    "title": "Card Title",
+    "content": "Card content goes here.",
+    "image": "/path/to/image.jpg",  // Optional
+    "footer": "Card footer content", // Optional
+    "header_bg": "bg-primary text-white", // Optional
+    "image_position": "top", // Optional: top, bottom
+    "overlay": false, // Optional: true for image overlay
+    "text_white": false, // Optional: true for white text
+    "border": false, // Optional: true for border
+    "border_color": "primary", // Optional: primary, secondary, etc.
+    "shadow": false, // Optional: true for shadow
+    "bg_color": "" // Optional: bg-primary, bg-success, etc.
+} %}{% endraw %}</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

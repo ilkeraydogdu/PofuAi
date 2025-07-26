@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Merhaba {{ user.name }},</h2>
+<p>{{ app_name }}'ye hoş geldiniz! Hesabınız başarıyla oluşturuldu.</p>
+
+{% if password %}
+<div style="background-color: #f5f5f5; padding: 15px; border-radius: 4px; margin: 20px 0; border: 1px solid #ddd;">
+    <h3 style="margin-top: 0;">Giriş Bilgileriniz</h3>
+    <p><strong>E-posta:</strong> {{ user.email }}</p>
+    <p><strong>Geçici Şifreniz:</strong> <span style="font-family: monospace; background-color: #eee; padding: 2px 6px; border-radius: 3px;">{{ password }}</span></p>
+    <p style="color: #d63031; font-size: 14px;"><strong>Önemli:</strong> Güvenliğiniz için bu geçici şifreyi ilk girişinizde değiştirmenizi önemle tavsiye ederiz.</p>
+    <p style="color: #e17055; font-size: 13px;"><strong>Not:</strong> Bu geçici şifre {{ expires_in }} süreyle geçerlidir.</p>
+</div>
+
+<p>Güvenliğiniz için:</p>
+<ul>
+    <li>Bu şifreyi kimseyle paylaşmayın</li>
+    <li>Şifrenizi güvenli bir yerde saklayın</li>
+    <li>İlk girişinizde hemen şifrenizi değiştirin</li>
+</ul>
+
+<p>Şifrenizi değiştirmek için aşağıdaki bağlantıyı kullanabilirsiniz:</p>
+<a href="{{ reset_url }}" class="button" style="background-color: #3461ff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block; margin: 10px 0;">Şifremi Değiştir</a>
+<p style="color: #636e72; font-size: 13px;">Bu bağlantı 2 saat süreyle geçerlidir.</p>
+{% endif %}
+
+<p>{{ app_name }} ile yapabilecekleriniz:</p>
+<ul>
+    <li>İçerik oluşturma ve yönetme</li>
+    <li>Yapay zeka araçlarını kullanma</li>
+    <li>Analizleri takip etme</li>
+    <li>Ve çok daha fazlası...</li>
+</ul>
+
+<p>Platformumuza giriş yapmak için:</p>
+<a href="{{ login_url }}" class="button" style="background-color: #3461ff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block; margin: 10px 0;">Giriş Yap</a>
+
+<p>Herhangi bir sorunuz olursa, destek ekibimizle iletişime geçebilirsiniz.</p>
+
+<p>Teşekkürler,<br>{{ app_name }} Ekibi</p>
+{% endblock %}
+
+{% block footer_extra %}
+<p style="font-size: 12px; color: #777;">Bu e-posta {{ user.email }} adresine {{ app_name }} üyeliğiniz nedeniyle gönderilmiştir.</p>
+{% endblock %}

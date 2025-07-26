@@ -1,0 +1,168 @@
+{% extends "admin/base_layout.html" %}
+
+{% block title %}Pagination Components{% endblock %}
+
+{% block content %}
+<div class="page-breadcrumb d-flex align-items-center mb-3">
+    <div class="breadcrumb-title pe-3">Components</div>
+    <div class="ps-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0 p-0">
+                <li class="breadcrumb-item"><a href="/components"><i class="bx bx-home-alt"></i></a></li>
+                <li class="breadcrumb-item active" aria-current="page">Pagination</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Basic Pagination</h5>
+                <p class="card-text">Temel pagination örnekleri.</p>
+                
+                <div class="mt-4">
+                    {% set pagination_data = {
+                        "current_page": 3,
+                        "total_pages": 10,
+                        "pages": [
+                            {"number": 1, "url": "?page=1", "active": false},
+                            {"number": 2, "url": "?page=2", "active": false},
+                            {"number": 3, "url": "?page=3", "active": true},
+                            {"number": 4, "url": "?page=4", "active": false},
+                            {"number": 5, "url": "?page=5", "active": false}
+                        ],
+                        "has_previous": true,
+                        "has_next": true,
+                        "previous_page": 2,
+                        "next_page": 4
+                    } %}
+                    
+                    {% include "components/_pagination.html" with pagination_data %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Pagination Sizes</h5>
+                <p class="card-text">Farklı boyutlarda pagination örnekleri.</p>
+                
+                <div class="mt-4">
+                    <h6>Small Pagination</h6>
+                    {% include "components/_pagination.html" with pagination_data|merge({"size": "sm"}) %}
+                    
+                    <h6 class="mt-4">Default Pagination</h6>
+                    {% include "components/_pagination.html" with pagination_data %}
+                    
+                    <h6 class="mt-4">Large Pagination</h6>
+                    {% include "components/_pagination.html" with pagination_data|merge({"size": "lg"}) %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Pagination Alignment</h5>
+                <p class="card-text">Farklı hizalama seçenekleri.</p>
+                
+                <div class="mt-4">
+                    <h6>Left Aligned (Default)</h6>
+                    {% include "components/_pagination.html" with pagination_data %}
+                    
+                    <h6 class="mt-4">Centered</h6>
+                    {% include "components/_pagination.html" with pagination_data|merge({"alignment": "center"}) %}
+                    
+                    <h6 class="mt-4">Right Aligned</h6>
+                    {% include "components/_pagination.html" with pagination_data|merge({"alignment": "end"}) %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Pagination Styles</h5>
+                <p class="card-text">Farklı stil seçenekleri.</p>
+                
+                <div class="mt-4">
+                    <h6>Default Style</h6>
+                    {% include "components/_pagination.html" with pagination_data %}
+                    
+                    <h6 class="mt-4">Rounded Style</h6>
+                    {% include "components/_pagination.html" with pagination_data|merge({"rounded": true}) %}
+                    
+                    <h6 class="mt-4">With First/Last Buttons</h6>
+                    {% include "components/_pagination.html" with pagination_data|merge({"show_first_last": true}) %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Pagination Usage</h5>
+                <p class="card-text">Pagination bileşeninin kullanımı.</p>
+                
+                <div class="bg-light p-3 rounded">
+                    <pre><code>{% raw %}{% set pagination_data = {
+    "current_page": 3,
+    "total_pages": 10,
+    "pages": [
+        {"number": 1, "url": "?page=1", "active": false},
+        {"number": 2, "url": "?page=2", "active": false},
+        {"number": 3, "url": "?page=3", "active": true},
+        {"number": 4, "url": "?page=4", "active": false},
+        {"number": 5, "url": "?page=5", "active": false}
+    ],
+    "has_previous": true,
+    "has_next": true,
+    "previous_page": 2,
+    "next_page": 4,
+    "size": "", // Optional: sm, lg
+    "alignment": "", // Optional: center, end
+    "rounded": false, // Optional: true for rounded style
+    "show_first_last": false // Optional: true to show first/last buttons
+} %}
+
+{% include "components/_pagination.html" with pagination_data %}{% endraw %}</code></pre>
+                </div>
+                
+                <div class="mt-4">
+                    <p>Alternatif olarak, UI Service'i kullanarak pagination verisi oluşturabilirsiniz:</p>
+                    
+                    <div class="bg-light p-3 rounded">
+                        <pre><code>{% raw %}from core.services.ui_service import get_ui_service
+
+# UI Service'den pagination verisi oluştur
+ui_service = get_ui_service()
+pagination_data = ui_service.create_pagination(
+    current_page=3,
+    total_pages=10,
+    url_pattern="?page={page}"
+)
+
+# Template'e aktar
+return render_template('my_page.html', pagination=pagination_data){% endraw %}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,265 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Button Component{% endblock %}
+
+{% block content %}
+<div class="page-content">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Button Component</h5>
+                    <p class="card-subtitle">Bootstrap button bileşenleri</p>
+                </div>
+                <div class="card-body">
+                    <h6 class="mb-3">Temel Butonlar</h6>
+                    
+                    <div class="d-flex flex-wrap gap-2 mb-4">
+                        <button type="button" class="btn btn-primary">Primary</button>
+                        <button type="button" class="btn btn-secondary">Secondary</button>
+                        <button type="button" class="btn btn-success">Success</button>
+                        <button type="button" class="btn btn-danger">Danger</button>
+                        <button type="button" class="btn btn-warning">Warning</button>
+                        <button type="button" class="btn btn-info">Info</button>
+                        <button type="button" class="btn btn-light">Light</button>
+                        <button type="button" class="btn btn-dark">Dark</button>
+                    </div>
+                    
+                    <h6 class="mb-3 mt-5">Outline Butonlar</h6>
+                    
+                    <div class="d-flex flex-wrap gap-2 mb-4">
+                        <button type="button" class="btn btn-outline-primary">Primary</button>
+                        <button type="button" class="btn btn-outline-secondary">Secondary</button>
+                        <button type="button" class="btn btn-outline-success">Success</button>
+                        <button type="button" class="btn btn-outline-danger">Danger</button>
+                        <button type="button" class="btn btn-outline-warning">Warning</button>
+                        <button type="button" class="btn btn-outline-info">Info</button>
+                        <button type="button" class="btn btn-outline-light">Light</button>
+                        <button type="button" class="btn btn-outline-dark">Dark</button>
+                    </div>
+                    
+                    <h6 class="mb-3 mt-5">Gradient Butonlar</h6>
+                    
+                    <div class="d-flex flex-wrap gap-2 mb-4">
+                        <button type="button" class="btn btn-grd-primary">Primary</button>
+                        <button type="button" class="btn btn-grd-secondary">Secondary</button>
+                        <button type="button" class="btn btn-grd-success">Success</button>
+                        <button type="button" class="btn btn-grd-danger">Danger</button>
+                        <button type="button" class="btn btn-grd-warning">Warning</button>
+                        <button type="button" class="btn btn-grd-info">Info</button>
+                        <button type="button" class="btn btn-grd-dark">Dark</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Buton Boyutları</h5>
+                    <p class="card-subtitle">Farklı boyutlarda butonlar</p>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-2 align-items-center mb-4">
+                        <button type="button" class="btn btn-primary btn-lg">Large Button</button>
+                        <button type="button" class="btn btn-primary">Default Button</button>
+                        <button type="button" class="btn btn-primary btn-sm">Small Button</button>
+                    </div>
+                    
+                    <div class="d-flex flex-wrap gap-2 align-items-center">
+                        <button type="button" class="btn btn-outline-primary btn-lg">Large Button</button>
+                        <button type="button" class="btn btn-outline-primary">Default Button</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm">Small Button</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">İkonlu Butonlar</h5>
+                    <p class="card-subtitle">İkon içeren butonlar</p>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-2 mb-4">
+                        <button type="button" class="btn btn-primary d-flex align-items-center gap-2">
+                            <i class="material-icons-outlined">home</i>
+                            <span>Home</span>
+                        </button>
+                        
+                        <button type="button" class="btn btn-success d-flex align-items-center gap-2">
+                            <i class="material-icons-outlined">check_circle</i>
+                            <span>Success</span>
+                        </button>
+                        
+                        <button type="button" class="btn btn-danger d-flex align-items-center gap-2">
+                            <i class="material-icons-outlined">delete</i>
+                            <span>Delete</span>
+                        </button>
+                        
+                        <button type="button" class="btn btn-warning d-flex align-items-center gap-2">
+                            <i class="material-icons-outlined">warning</i>
+                            <span>Warning</span>
+                        </button>
+                    </div>
+                    
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="button" class="btn btn-outline-primary d-flex align-items-center gap-2">
+                            <span>Settings</span>
+                            <i class="material-icons-outlined">settings</i>
+                        </button>
+                        
+                        <button type="button" class="btn btn-outline-success d-flex align-items-center gap-2">
+                            <span>Upload</span>
+                            <i class="material-icons-outlined">upload</i>
+                        </button>
+                        
+                        <button type="button" class="btn btn-outline-info d-flex align-items-center gap-2">
+                            <span>Info</span>
+                            <i class="material-icons-outlined">info</i>
+                        </button>
+                        
+                        <button type="button" class="btn btn-outline-dark d-flex align-items-center gap-2">
+                            <span>Download</span>
+                            <i class="material-icons-outlined">download</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Buton Durumları</h5>
+                    <p class="card-subtitle">Aktif, devre dışı ve yükleniyor durumları</p>
+                </div>
+                <div class="card-body">
+                    <h6 class="mb-3">Aktif ve Devre Dışı</h6>
+                    
+                    <div class="d-flex flex-wrap gap-2 mb-4">
+                        <button type="button" class="btn btn-primary active">Active</button>
+                        <button type="button" class="btn btn-primary" disabled>Disabled</button>
+                        <button type="button" class="btn btn-outline-primary active">Active</button>
+                        <button type="button" class="btn btn-outline-primary" disabled>Disabled</button>
+                    </div>
+                    
+                    <h6 class="mb-3 mt-4">Yükleniyor</h6>
+                    
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="button" class="btn btn-primary d-flex align-items-center gap-2">
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <span>Loading...</span>
+                        </button>
+                        
+                        <button type="button" class="btn btn-success d-flex align-items-center gap-2">
+                            <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                            <span>Loading...</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Buton Grupları</h5>
+                    <p class="card-subtitle">Buton grupları ve toolbar</p>
+                </div>
+                <div class="card-body">
+                    <h6 class="mb-3">Temel Buton Grubu</h6>
+                    
+                    <div class="btn-group mb-4" role="group" aria-label="Basic example">
+                        <button type="button" class="btn btn-primary">Left</button>
+                        <button type="button" class="btn btn-primary">Middle</button>
+                        <button type="button" class="btn btn-primary">Right</button>
+                    </div>
+                    
+                    <h6 class="mb-3 mt-4">Outline Buton Grubu</h6>
+                    
+                    <div class="btn-group mb-4" role="group" aria-label="Basic outline example">
+                        <button type="button" class="btn btn-outline-primary">Left</button>
+                        <button type="button" class="btn btn-outline-primary">Middle</button>
+                        <button type="button" class="btn btn-outline-primary">Right</button>
+                    </div>
+                    
+                    <h6 class="mb-3 mt-4">Buton Toolbar</h6>
+                    
+                    <div class="btn-toolbar mb-4" role="toolbar" aria-label="Toolbar with button groups">
+                        <div class="btn-group me-2" role="group" aria-label="First group">
+                            <button type="button" class="btn btn-primary">1</button>
+                            <button type="button" class="btn btn-primary">2</button>
+                            <button type="button" class="btn btn-primary">3</button>
+                        </div>
+                        <div class="btn-group me-2" role="group" aria-label="Second group">
+                            <button type="button" class="btn btn-secondary">4</button>
+                            <button type="button" class="btn btn-secondary">5</button>
+                        </div>
+                        <div class="btn-group" role="group" aria-label="Third group">
+                            <button type="button" class="btn btn-info">6</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Sayfa üzerindeki butonları dinamik olarak yönetmek için kullanılabilecek kodlar
+    document.addEventListener('DOMContentLoaded', function() {
+        // Butonlara tıklanınca ripple efekti ekleyebiliriz
+        const buttons = document.querySelectorAll('.btn');
+        
+        buttons.forEach(function(button) {
+            button.addEventListener('click', function(e) {
+                if (!this.classList.contains('btn-outline-light') && 
+                    !this.classList.contains('btn-light') && 
+                    !this.disabled) {
+                    
+                    const ripple = document.createElement('span');
+                    const diameter = Math.max(this.clientWidth, this.clientHeight);
+                    
+                    ripple.style.width = ripple.style.height = `${diameter}px`;
+                    ripple.style.position = 'absolute';
+                    ripple.style.top = `${e.clientY - this.offsetTop - diameter/2}px`;
+                    ripple.style.left = `${e.clientX - this.offsetLeft - diameter/2}px`;
+                    ripple.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+                    ripple.style.borderRadius = '50%';
+                    ripple.style.transform = 'scale(0)';
+                    ripple.style.animation = 'ripple 0.6s linear';
+                    
+                    this.style.position = 'relative';
+                    this.style.overflow = 'hidden';
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                }
+            });
+        });
+    });
+</script>
+
+<style>
+    @keyframes ripple {
+        to {
+            transform: scale(2);
+            opacity: 0;
+        }
+    }
+</style>
+{% endblock %} 

@@ -1,0 +1,19 @@
+{
+  "driver": "smtp",
+  "host": "ilkeraydogdu.com.tr",
+  "port": 465,
+  "encryption": "ssl",
+  "username": "mail@ilkeraydogdu.com.tr",
+  "password": "ilkN.2801",
+  "from": {
+    "address": "mail@ilkeraydogdu.com.tr",
+    "name": "İLKER AYDOĞDU"
+  },
+  "reply_to": {
+    "address": "mail@ilkeraydogdu.com.tr",
+    "name": "PofuAi Team"
+  },
+  "templates_dir": "public/Views/emails",
+  "store_sent_emails": true,
+  "storage_dir": "storage/emails"
+} 

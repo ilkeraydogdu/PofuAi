@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>İletişim Formu Mesajı</h2>
+
+<div style="margin-top: 20px;">
+    <p><strong>İsim:</strong> {{ name }}</p>
+    <p><strong>E-posta:</strong> {{ email }}</p>
+    <p><strong>Konu:</strong> {{ subject }}</p>
+    <p><strong>Mesaj:</strong></p>
+    <div style="background-color: #f9f9f9; padding: 15px; border-radius: 4px; margin: 10px 0;">
+        {{ message }}
+    </div>
+    <p><strong>Tarih:</strong> {{ timestamp }}</p>
+</div>
+
+{% if app_url %}
+<p>
+    <a href="{{ app_url }}/admin/contacts" class="button">Tüm İletişim Mesajlarını Görüntüle</a>
+</p>
+{% endif %}
+{% endblock %}

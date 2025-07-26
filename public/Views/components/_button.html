@@ -1,0 +1,40 @@
+{% if button %}
+{% set btn_tag = "a" if button.href else "button" %}
+{% set btn_style = button.style|default('basic') %}
+{% set btn_size = button.size|default('') %}
+
+<{{ btn_tag }} 
+    {% if button.href %}href="{{ button.href }}"{% endif %}
+    {% if button.target %}target="{{ button.target }}"{% endif %}
+    {% if not button.href %}type="{{ button.type|default('button') }}"{% endif %}
+    class="btn 
+        {% if btn_style == 'basic' %}{{ button.class|default('btn-primary') }}{% endif %}
+        {% if btn_style == 'gradient' %}btn-grd {{ button.class|default('btn-grd-primary') }}{% endif %}
+        {% if btn_style == 'outline' %}{{ button.class|default('btn-outline-primary') }}{% endif %}
+        {% if btn_style == 'inverse' %}{{ button.class|default('btn-inverse-primary') }}{% endif %}
+        {% if btn_style == 'raised' %}{{ button.class|default('btn-primary shadow') }}{% endif %}
+        {% if btn_size %} btn-{{ btn_size }}{% endif %}
+        {% if button.disabled %} disabled{% endif %}
+        {% if button.loading %} loading{% endif %}
+        {% if button.full_width %} w-100{% endif %}
+        {% if button.rounded %} rounded-pill{% endif %}
+        {% if button.icon %} d-flex gap-2{% endif %}
+        {{ button.custom_classes|default('') }}
+    "
+    {% if button.id %}id="{{ button.id }}"{% endif %}
+    {% if button.disabled %}disabled{% endif %}
+    {% for attr_name, attr_value in button.attributes|default({})|items %}
+        {{ attr_name }}="{{ attr_value }}"
+    {% endfor %}
+>
+    {% if button.icon and button.icon_position != 'right' %}
+    <i class="material-icons-outlined">{{ button.icon }}</i>
+    {% endif %}
+    
+    {{ button.text }}
+    
+    {% if button.icon and button.icon_position == 'right' %}
+    <i class="material-icons-outlined">{{ button.icon }}</i>
+    {% endif %}
+</{{ btn_tag }}>
+{% endif %} 

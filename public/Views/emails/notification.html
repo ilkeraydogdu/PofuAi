@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Merhaba {{ user.name }},</h2>
+
+<p>{{ notification.message }}</p>
+
+{% if notification.action_url %}
+<a href="{{ notification.action_url }}" class="button">{{ notification.action_text|default('Detayları Görüntüle') }}</a>
+{% endif %}
+
+<p>{{ app_name }}'yi kullandığınız için teşekkür ederiz.</p>
+
+<p>Saygılarımızla,<br>{{ app_name }} Ekibi</p>
+{% endblock %}
+
+{% block footer_extra %}
+<p>Bildirim e-postalarını almak istemiyorsanız, <a href="{{ app_url }}/settings/notifications">bildirim ayarlarınızı</a> güncelleyebilirsiniz.</p>
+{% endblock %}

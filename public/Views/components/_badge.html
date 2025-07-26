@@ -1,0 +1,33 @@
+{% if badge %}
+{% set badge_style = badge.style|default('basic') %}
+{% set position = badge.position|default('top-right') %}
+
+{% if badge_style == 'basic' or badge_style == 'pill' %}
+    <span class="badge{% if badge_style == 'pill' %} rounded-pill{% endif %} {{ badge.class|default('bg-primary') }}">
+        {{ badge.text }}
+    </span>
+{% elif badge_style == 'button' %}
+    <button type="button" class="btn {{ badge.button_class|default('btn-primary') }}">
+        {{ badge.button_text|default('Button') }} <span class="badge {{ badge.class|default('bg-dark') }}">{{ badge.text }}</span>
+    </button>
+{% elif badge_style == 'icon' %}
+    <span class="badge-icon position-relative p-3 rounded-circle text-white {{ badge.class|default('bg-grd-primary') }}">
+        <span class="badge-number position-absolute top-0 end-0">{{ badge.text }}</span>
+        <i class="material-icons-outlined">{{ badge.icon|default('notifications') }}</i>
+    </span>
+{% elif badge_style == 'positioned' %}
+    <button type="button" class="btn {{ badge.button_class|default('btn-dark') }} position-relative d-flex gap-2">
+        <i class="material-icons-outlined">{{ badge.icon|default('chat_bubble_outline') }}</i>
+        {{ badge.button_text|default('Button') }}
+        <span class="position-absolute 
+            {% if position == 'top-right' %}top-0 start-100 translate-middle{% endif %}
+            {% if position == 'top-left' %}top-0 start-0 translate-middle{% endif %}
+            {% if position == 'bottom-right' %}bottom-0 end-0 translate-middle{% endif %}
+            {% if position == 'bottom-left' %}bottom-0 start-0 translate-middle{% endif %} 
+            badge {% if badge.rounded|default(true) %}rounded-pill{% endif %} {{ badge.class|default('bg-danger') }}">
+            {{ badge.text }}
+            <span class="visually-hidden">{{ badge.sr_text|default('unread messages') }}</span>
+        </span>
+    </button>
+{% endif %}
+{% endif %} 

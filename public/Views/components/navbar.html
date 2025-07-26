@@ -1,0 +1,133 @@
+<!-- Navbar -->
+<header class="top-header">
+    <nav class="navbar navbar-expand gap-3">
+        <div class="toggle-icon ms-2">
+            <i class="bi bi-list"></i>
+        </div>
+        
+        <!-- Search -->
+        <div class="search-container position-relative">
+            <div class="position-absolute search-icon-search"><i class="bi bi-search"></i></div>
+            <form action="/search" method="get">
+                <input type="text" name="q" class="form-control form-control-sm ps-5" placeholder="{{ text.common.search|default('Ara') }}...">
+            </form>
+        </div>
+        
+        <!-- Navbar Toolbar -->
+        <div class="navbar-nav align-items-center ms-auto">
+            <!-- Language Toggle -->
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle-nocaret" href="javascript:;" data-bs-toggle="dropdown">
+                    <i class="bi bi-translate fs-5"></i>
+                </a>
+                <div class="dropdown-menu dropdown-menu-end">
+                    <a href="?lang=tr" class="dropdown-item d-flex align-items-center">
+                        <span>Türkçe</span>
+                    </a>
+                    <a href="?lang=en" class="dropdown-item d-flex align-items-center">
+                        <span>English</span>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Theme Toggle -->
+            <div class="nav-item theme-toggle">
+                <a class="nav-link" href="javascript:;">
+                    <i class="bi bi-sun-fill fs-5"></i>
+                </a>
+            </div>
+
+                <!-- Notifications -->
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle-nocaret position-relative" href="javascript:;" data-bs-toggle="dropdown">
+                    <i class="bi bi-bell-fill fs-5"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge bg-danger rounded-pill">3</span>
+                </a>
+                <div class="dropdown-menu dropdown-notify dropdown-menu-end">
+                    <div class="dropdown-header d-flex align-items-center py-2 border-bottom">
+                        <h6 class="mb-0">Bildirimler</h6>
+                        <a href="javascript:;" class="ms-auto">
+                            <i class="bi bi-check-all"></i> Tümünü Okundu İşaretle
+                        </a>
+                    </div>
+                    <div class="notification-list">
+                        <a class="dropdown-item border-bottom py-2" href="javascript:;">
+                            <div class="d-flex align-items-center">
+                                <div class="user-online">
+                                    <img src="/static/assets/images/avatars/01.png" class="msg-avatar" alt="user avatar">
+                                </div>
+                                <div class="message-content ms-2">
+                                    <h6 class="mb-0">Ahmet Yılmaz</h6>
+                                    <p class="mb-0 fs-6">Mesajınızı yanıtladı</p>
+                                    <small>5 dakika önce</small>
+                                </div>
+                            </div>
+                        </a>
+                        <a class="dropdown-item border-bottom py-2" href="javascript:;">
+                            <div class="d-flex align-items-center">
+                                <div class="notify bg-light-success text-success">
+                                    <i class="bi bi-file-check"></i>
+                                </div>
+                                <div class="message-content ms-2">
+                                    <h6 class="mb-0">Yeni sipariş</h6>
+                                    <p class="mb-0 fs-6">Yeni bir sipariş verildi</p>
+                                    <small>2 saat önce</small>
+                                </div>
+                            </div>
+                        </a>
+                        <a class="dropdown-item py-2" href="javascript:;">
+                            <div class="d-flex align-items-center">
+                                <div class="notify bg-light-warning text-warning">
+                                    <i class="bi bi-graph-up"></i>
+                                </div>
+                                <div class="message-content ms-2">
+                                    <h6 class="mb-0">Raporlar</h6>
+                                    <p class="mb-0 fs-6">Aylık rapor hazır</p>
+                                    <small>1 gün önce</small>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="text-center py-2">
+                        <a href="/notifications">Tüm Bildirimler</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- User Profile -->
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle-nocaret" href="javascript:;" data-bs-toggle="dropdown">
+                    <div class="d-flex align-items-center">
+                        <img src="/static/assets/images/avatars/01.png" class="rounded-circle me-0" height="30" alt="user avatar">
+                    </div>
+                </a>
+                <div class="dropdown-menu dropdown-menu-end">
+                    <div class="dropdown-user-details">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar">
+                                <img src="/static/assets/images/avatars/01.png" class="rounded-circle" height="50" alt="user avatar">
+                            </div>
+                            <div class="user-info ms-3">
+                                <h6 class="mb-0">{{ current_user.name|default('Kullanıcı') }}</h6>
+                                <small>{{ current_user.email|default('user@example.com') }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    <a class="dropdown-item" href="/profile">
+                        <i class="bi bi-person-circle"></i>
+                        <span>{{ text.navigation.profile|default('Profil') }}</span>
+                    </a>
+                    <a class="dropdown-item" href="/settings">
+                        <i class="bi bi-gear"></i>
+                        <span>{{ text.navigation.settings|default('Ayarlar') }}</span>
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="/auth/logout">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span>{{ text.navigation.logout|default('Çıkış') }}</span>
+                    </a>
+                </div>
+            </div>
+    </div>
+</nav> 
+</header> 

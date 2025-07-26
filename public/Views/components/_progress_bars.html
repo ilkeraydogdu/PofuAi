@@ -1,0 +1,15 @@
+{% if progress_bar %}
+<div class="progress {% if progress_bar.mb %}mb-{{ progress_bar.mb }}{% endif %}" 
+     {% if progress_bar.height %}style="height: {{ progress_bar.height }};"{% endif %}>
+    {% for bar in progress_bar.bars %}
+    <div class="progress-bar {% if bar.style %}{{ bar.style }}{% endif %} {% if bar.striped %}progress-bar-striped{% endif %} {% if bar.animated %}progress-bar-animated{% endif %}" 
+         role="progressbar" 
+         style="width: {{ bar.width or '0' }}%" 
+         aria-valuenow="{{ bar.value or '0' }}" 
+         aria-valuemin="{{ bar.min_value or '0' }}" 
+         aria-valuemax="{{ bar.max_value or '100' }}">
+         {% if bar.label %}{{ bar.label }}{% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endif %} 

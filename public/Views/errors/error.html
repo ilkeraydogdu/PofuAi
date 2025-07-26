@@ -1,0 +1,57 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}{{ title or 'Hata' }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="text-center mt-5">
+                <!-- Error Icon -->
+                <div class="mb-4">
+                    {% if status_code == 404 %}
+                        <i class="bx bx-error-circle text-warning" style="font-size: 5rem;"></i>
+                    {% elif status_code == 403 %}
+                        <i class="bx bx-lock text-danger" style="font-size: 5rem;"></i>
+                    {% elif status_code == 401 %}
+                        <i class="bx bx-user-x text-info" style="font-size: 5rem;"></i>
+                    {% else %}
+                        <i class="bx bx-error text-danger" style="font-size: 5rem;"></i>
+                    {% endif %}
+                </div>
+
+                <!-- Error Code -->
+                <h1 class="display-1 fw-bold text-muted">{{ status_code }}</h1>
+
+                <!-- Error Title -->
+                <h2 class="h3 mb-3">{{ title or 'Bir Hata Oluştu' }}</h2>
+
+                <!-- Error Message -->
+                <p class="text-muted mb-4">{{ message or 'İsteğiniz işlenirken bir hata oluştu.' }}</p>
+
+                <!-- Action Buttons -->
+                <div class="d-grid gap-2 d-md-block">
+                    <a href="/" class="btn btn-primary">
+                        <i class="bx bx-home-alt me-2"></i>
+                        Ana Sayfa
+                    </a>
+                    <a href="javascript:history.back()" class="btn btn-outline-secondary">
+                        <i class="bx bx-arrow-back me-2"></i>
+                        Geri Dön
+                    </a>
+                </div>
+
+                <!-- Debug Info (only in debug mode) -->
+                {% if config.DEBUG and traceback %}
+                <div class="mt-4">
+                    <details>
+                        <summary class="text-muted">Teknik Detaylar</summary>
+                        <pre class="mt-2 p-3 bg-light rounded small">{{ traceback }}</pre>
+                    </details>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

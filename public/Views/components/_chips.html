@@ -1,0 +1,17 @@
+{% if chip %}
+<div class="chip 
+    {% if chip.size %}chip-{{ chip.size }}{% endif %} 
+    {% if chip.style %}{{ chip.style }}{% endif %}"
+    {% if chip.id %}id="{{ chip.id }}"{% endif %}>
+    
+    {% if chip.image_src %}
+    <img src="{{ chip.image_src }}" alt="{{ chip.image_alt|default('Contact Person') }}">
+    {% endif %}
+    
+    {{ chip.text }}
+    
+    {% if chip.closable %}
+    <span class="closebtn" onclick="this.parentElement.style.display='none'">×</span>
+    {% endif %}
+</div>
+{% endif %} 

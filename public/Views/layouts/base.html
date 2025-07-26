@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="tr" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PofuAI{% endblock %}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="/static/assets/images/favicon-32x32.png" type="image/png">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Material+Icons+Outlined" rel="stylesheet">
+    
+    <!-- Bootstrap CSS -->
+    <link href="/static/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/assets/css/bootstrap-extended.css" rel="stylesheet">
+    
+    <!-- Plugin CSS -->
+    <link href="/static/assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css" rel="stylesheet">
+    <link href="/static/assets/plugins/metismenu/metisMenu.min.css" rel="stylesheet">
+    <link href="/static/assets/plugins/metismenu/mm-vertical.css" rel="stylesheet">
+    
+    <!-- Theme CSS -->
+    <link href="/static/sass/main.css" rel="stylesheet">
+    <link href="/static/sass/blue-theme.css" rel="stylesheet">
+    <link href="/static/sass/dark-theme.css" rel="stylesheet">
+    <link href="/static/sass/responsive.css" rel="stylesheet">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% block body %}
+    <div class="wrapper">
+        {% block sidebar %}
+        <!-- Sidebar will be included here -->
+        {% endblock %}
+        
+        <main class="page-content">
+            {% block header %}
+            <!-- Header will be included here -->
+            {% endblock %}
+            
+            {% block content %}
+            <!-- Main content will be included here -->
+            {% endblock %}
+            
+            {% block footer %}
+            <footer class="footer fixed-bottom d-block py-3 bg-white shadow-sm text-center">
+                <div class="mb-1 text-dark">
+                    <a href="/" class="text-dark">PofuAi</a>
+                </div>
+                <div>
+                    <small>© 2025 - Tüm hakları saklıdır.</small>
+                </div>
+            </footer>
+            {% endblock %}
+        </main>
+    </div>
+    {% endblock %}
+    
+    <!-- jQuery -->
+    <script src="/static/assets/js/jquery.min.js"></script>
+    
+    <!-- Bootstrap Bundle JS -->
+    <script src="/static/assets/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Plugin JS -->
+    <script src="/static/assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js"></script>
+    <script src="/static/assets/plugins/metismenu/metisMenu.min.js"></script>
+    
+    <!-- Theme JS -->
+    <script src="/static/assets/js/main.js"></script>
+    
+    {% block extra_js %}{% endblock %}
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize metisMenu
+            if (typeof $ !== 'undefined' && $.fn.metisMenu) {
+                $("#sidenav").metisMenu();
+            }
+            
+            // Initialize perfect scrollbar
+            if (typeof PerfectScrollbar !== 'undefined') {
+                const sidebarNav = document.querySelector(".sidebar-nav");
+                if (sidebarNav) {
+                    new PerfectScrollbar(sidebarNav);
+                }
+            }
+            
+            // Toggle sidebar
+            const toggleBtn = document.querySelector('.btn-toggle');
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', function() {
+                    document.querySelector('.wrapper').classList.toggle('toggled');
+                });
+            }
+        });
+    </script>
+</body>
+</html> 
