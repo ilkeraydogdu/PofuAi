@@ -190,3 +190,77 @@ INFO [2025-07-26 18:01:54,977] [logger.init:101]: Logger başlatıldı - Seviye:
 INFO [2025-07-26 18:03:08,617] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
 INFO [2025-07-26 18:03:08,786] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
 ERROR [2025-07-26 18:03:14,746] [BaseController.log:238]: Stats error: 'DatabaseConnection' object has no attribute 'cursor'
+INFO [2025-07-26 18:36:39,108] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
+INFO [2025-07-26 18:36:52,577] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
+INFO [2025-07-26 18:37:10,121] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
+INFO [2025-07-26 18:37:10,330] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
+INFO [2025-07-26 18:38:29,869] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
+INFO [2025-07-26 18:40:06,682] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
+INFO [2025-07-26 18:40:23,036] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
+INFO [2025-07-26 18:40:23,201] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
+ERROR [2025-07-26 18:40:29,284] [error_handler._log_error:193]: Hata: admin.content.index.html
+Traceback:
+Traceback (most recent call last):
+  File "/workspace/app/Controllers/ContentController.py", line 47, in index
+    return self.view('admin.content.index', data)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/app/Controllers/BaseController.py", line 194, in view
+    return render_template(f"{template}.html", **data)
+  File "/home/ubuntu/.local/lib/python3.13/site-packages/flask/templating.py", line 149, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "/home/ubuntu/.local/lib/python3.13/site-packages/jinja2/environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.local/lib/python3.13/site-packages/jinja2/environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.local/lib/python3.13/site-packages/jinja2/environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "/home/ubuntu/.local/lib/python3.13/site-packages/jinja2/loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.local/lib/python3.13/site-packages/flask/templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.local/lib/python3.13/site-packages/flask/templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: admin.content.index.html
+
+Request Info:
+  method: GET
+  path: /admin/content
+  remote_addr: 127.0.0.1
+  user_agent: curl/8.12.1
+  content_type: UNKNOWN
+
+ERROR [2025-07-26 18:40:29,285] [error_handler._handle_general_error:273]: Hata: admin.content.index.html
+ERROR [2025-07-26 18:40:29,285] [error_handler._handle_general_error:274]: Traceback:
+Traceback (most recent call last):
+  File "/workspace/app/Controllers/ContentController.py", line 47, in index
+    return self.view('admin.content.index', data)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/app/Controllers/BaseController.py", line 194, in view
+    return render_template(f"{template}.html", **data)
+  File "/home/ubuntu/.local/lib/python3.13/site-packages/flask/templating.py", line 149, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "/home/ubuntu/.local/lib/python3.13/site-packages/jinja2/environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.local/lib/python3.13/site-packages/jinja2/environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.local/lib/python3.13/site-packages/jinja2/environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "/home/ubuntu/.local/lib/python3.13/site-packages/jinja2/loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.local/lib/python3.13/site-packages/flask/templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/.local/lib/python3.13/site-packages/flask/templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: admin.content.index.html
+
+INFO [2025-07-26 18:41:21,652] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
+INFO [2025-07-26 18:41:30,691] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log
+INFO [2025-07-26 18:41:30,854] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-26.log

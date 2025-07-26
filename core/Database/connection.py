@@ -3,8 +3,13 @@ MySQL Veritabanı Bağlantı Yöneticisi
 Connection pool ve hata yönetimi ile güvenli bağlantı
 """
 
-import mysql.connector
-from mysql.connector import pooling
+try:
+    import mysql.connector
+    from mysql.connector import pooling
+    MYSQL_AVAILABLE = True
+except ImportError:
+    MYSQL_AVAILABLE = False
+
 import logging
 import os
 import sqlite3
@@ -76,7 +81,7 @@ class DatabaseConnection:
     def _create_connection(self):
         """Veritabanı bağlantısı oluştur"""
         try:
-            if self._driver == 'mysql':
+            if self._driver == 'mysql' and MYSQL_AVAILABLE:
                 self._create_pool()
             else:  # sqlite
                 db_path = self._config['database']
@@ -138,6 +143,11 @@ class DatabaseConnection:
     
     def _create_pool(self):
         """MySQL connection pool oluştur"""
+        if not MYSQL_AVAILABLE:
+            logging.warning("MySQL connector not available, falling back to SQLite")
+            self._driver = 'sqlite'
+            return
+            
         try:
             self._pool = mysql.connector.pooling.MySQLConnectionPool(**self._config)
             logging.info("MySQL connection pool başarıyla oluşturuldu")
@@ -147,6 +157,18 @@ class DatabaseConnection:
             self._driver = 'memory'
             self._pool = None
     
+    def get_raw_connection(self):
+        """Ham bağlantı döndür"""
+        if self._driver == 'sqlite' and self._conn:
+            return self._conn
+        return None
+
+    def get_cursor(self):
+        """Basit cursor döndür (SQLite için)"""
+        if self._driver == 'sqlite' and self._conn:
+            return self._conn.cursor()
+        return None
+
     @contextmanager
     def get_connection(self):
         """Güvenli bağlantı context manager"""
@@ -290,4 +312,5 @@ def get_db_connection() -> DatabaseConnection:
 
 def get_connection():
     """Veritabanı bağlantısı al (geriye dönük uyumluluk için)"""
-    return get_db_connection() 
+    db = get_db_connection()
+    return db.get_raw_connection() 

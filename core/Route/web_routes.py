@@ -58,6 +58,23 @@ def register_routes(app: Flask):
     api_blueprint.add_url_rule('/dashboard/activities', 'dashboard_activities', lambda: home_controller._get_recent_activities(), methods=['GET'])
     api_blueprint.add_url_rule('/dashboard/system', 'dashboard_system', lambda: home_controller._get_system_info(), methods=['GET'])
     
+    # Notification API route'ları
+    from app.Controllers.NotificationController import NotificationController
+    notification_controller = NotificationController()
+    
+    api_blueprint.add_url_rule('/notifications', 'notifications_index', notification_controller.index, methods=['GET'])
+    api_blueprint.add_url_rule('/notifications/unread-count', 'notifications_unread_count', notification_controller.get_unread_count, methods=['GET'])
+    api_blueprint.add_url_rule('/notifications/<int:notification_id>/read', 'notifications_mark_read', notification_controller.mark_as_read, methods=['POST'])
+    api_blueprint.add_url_rule('/notifications/mark-all-read', 'notifications_mark_all_read', notification_controller.mark_all_as_read, methods=['POST'])
+    api_blueprint.add_url_rule('/notifications/<int:notification_id>/delete', 'notifications_delete', notification_controller.delete, methods=['DELETE'])
+    
+    # Search API route'ları
+    from app.Controllers.SearchController import SearchController
+    search_controller = SearchController()
+    
+    api_blueprint.add_url_rule('/search', 'search', search_controller.search, methods=['GET'])
+    api_blueprint.add_url_rule('/search/suggestions', 'search_suggestions', search_controller.suggestions, methods=['GET'])
+    
     # Admin route'ları
     from app.Controllers.AdminController import AdminController
     admin_controller = AdminController()
@@ -67,8 +84,18 @@ def register_routes(app: Flask):
     admin_blueprint.add_url_rule('/users', 'users', admin_controller.users, methods=['GET'])
     admin_blueprint.add_url_rule('/settings', 'settings', admin_controller.settings, methods=['GET', 'POST'])
     admin_blueprint.add_url_rule('/activities', 'activities', lambda: admin_controller.index(), methods=['GET'])
-    admin_blueprint.add_url_rule('/content', 'content', lambda: admin_controller.index(), methods=['GET'])
     admin_blueprint.add_url_rule('/reports', 'reports', lambda: admin_controller.index(), methods=['GET'])
+    
+    # Content Management route'ları
+    from app.Controllers.ContentController import ContentController
+    content_controller = ContentController()
+    
+    admin_blueprint.add_url_rule('/content', 'content_index', content_controller.index, methods=['GET'])
+    admin_blueprint.add_url_rule('/content/create', 'content_create', content_controller.create, methods=['GET', 'POST'])
+    admin_blueprint.add_url_rule('/content/<int:content_id>/edit', 'content_edit', content_controller.edit, methods=['GET', 'POST'])
+    admin_blueprint.add_url_rule('/content/<int:content_id>/delete', 'content_delete', content_controller.delete, methods=['DELETE'])
+    admin_blueprint.add_url_rule('/content/<int:content_id>/publish', 'content_publish', content_controller.publish, methods=['POST'])
+    admin_blueprint.add_url_rule('/content/<int:content_id>/unpublish', 'content_unpublish', content_controller.unpublish, methods=['POST'])
     
     # Hata route'ları
     from app.Controllers.ErrorController import ErrorController
