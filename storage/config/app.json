@@ -1,0 +1,10 @@
+{
+  "name": "PofuAi",
+  "env": "development",
+  "debug": true,
+  "url": "http://localhost:5000",
+  "timezone": "Europe/Istanbul",
+  "locale": "tr",
+  "secret_key": "YOUR_SECRET_KEY_HERE",
+  "default_currency": "TRY"
+} 

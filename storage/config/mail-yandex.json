@@ -1,0 +1,19 @@
+{
+  "driver": "smtp",
+  "host": "smtp.yandex.com",
+  "port": 465,
+  "encryption": "ssl",
+  "username": "your-email@yandex.com",
+  "password": "your-app-password",
+  "from": {
+    "address": "your-email@yandex.com",
+    "name": "PofuAi"
+  },
+  "reply_to": {
+    "address": "your-email@yandex.com",
+    "name": "PofuAi Team"
+  },
+  "templates_dir": "public/Views/emails",
+  "store_sent_emails": true,
+  "storage_dir": "storage/emails"
+} 

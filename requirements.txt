@@ -2,12 +2,12 @@
 # MySQL bağlantısı için
 mysql-connector-python==8.2.0
 
-# SQLite için
-sqlite3==2.6.0
+# SQLite için (built-in Python module)
+# sqlite3 is built into Python, no separate installation needed
 
 # Gelişmiş veri işleme için
-pandas==2.1.4
-numpy==1.24.3
+pandas>=2.2.0
+numpy>=1.26.0
 
 # Web framework (opsiyonel)
 flask==3.0.0

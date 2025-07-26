@@ -40,14 +40,14 @@ class TokenService(BaseService):
     def _create_token_table(self):
         """Token tablosunu oluştur (MySQL uyumlu)"""
         try:
-            # Token tablosu var mı kontrol et (MySQL)
-            table_check = self.db.execute_query("SHOW TABLES LIKE 'tokens';")
+            # Token tablosu var mı kontrol et (SQLite uyumlu)
+            table_check = self.db.execute_query("SELECT name FROM sqlite_master WHERE type='table' AND name='tokens';")
 
             if not table_check:
                 # Tablo yoksa oluştur (MySQL uyumlu)
                 self.db.execute_query('''
                 CREATE TABLE IF NOT EXISTS tokens (
-                    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
                     user_id INTEGER NOT NULL,
                     token TEXT NOT NULL UNIQUE,
                     type TEXT NOT NULL,

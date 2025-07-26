@@ -580,7 +580,7 @@ class AuthPageService:
                     // Check email validation
                     form.find('input[type="email"]').each(function() {{
                         var email = $(this).val();
-                        var emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{{2,}}$/;
+                        var emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{{2,}}$/;
                         if (email && !emailRegex.test(email)) {{
                             isValid = false;
                             $(this).addClass('is-invalid');
