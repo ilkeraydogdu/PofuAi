@@ -43,4 +43,58 @@ jinja2==3.1.2
 werkzeug>=3.0.0
 requests==2.31.0
 email-validator==2.0.0
-python-dateutil==2.8.2 
+python-dateutil==2.8.2
+
+# AI ve Machine Learning bağımlılıkları
+torch>=2.0.0
+torchvision>=0.15.0
+transformers>=4.30.0
+pillow>=10.0.0
+opencv-python>=4.8.0
+scikit-learn>=1.3.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+tensorflow>=2.13.0
+keras>=2.13.0
+
+# Görsel işleme ve tanıma
+ultralytics>=8.0.0  # YOLO v8
+face-recognition>=1.3.0
+mediapipe>=0.10.0
+albumentations>=1.3.0
+
+# Doğal dil işleme
+spacy>=3.6.0
+nltk>=3.8.0
+textblob>=0.17.0
+
+# Veritabanı ve depolama
+redis>=4.6.0
+elasticsearch>=8.9.0
+pymongo>=4.5.0
+
+# API ve servisler
+celery>=5.3.0
+flower>=2.0.0
+fastapi>=0.100.0
+uvicorn>=0.23.0
+
+# Görsel meta veri ve EXIF
+exifread>=3.0.0
+pyexiv2>=2.8.0
+
+# Clustering ve benzerlik analizi
+faiss-cpu>=1.7.4
+sentence-transformers>=2.2.0
+
+# Dosya işleme
+python-magic>=0.4.27
+mimetypes
+
+# Async işlemler
+aiofiles>=23.0.0
+aiohttp>=3.8.0
+
+# Monitoring ve metrics
+prometheus-client>=0.17.0
+grafana-api>=1.0.3 
