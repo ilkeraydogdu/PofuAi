@@ -12,6 +12,7 @@ from flask import Flask, render_template, session, request, send_from_directory,
 from werkzeug.exceptions import HTTPException
 from werkzeug.middleware.proxy_fix import ProxyFix
 from core.Route.web_routes import router as web_router
+from core.Route.ai_routes import ai_bp
 from core.Services.logger import LoggerService
 from core.Services.error_handler import error_handler
 from app.Middleware.SessionMiddleware import SessionMiddleware
@@ -55,6 +56,9 @@ app.before_request(AuthMiddleware.handle)
 
 # Route'ları kaydet
 web_router['register_routes'](app)
+
+# AI Blueprint'i kaydet
+app.register_blueprint(ai_bp)
 
 # Hata yönetimini aktifleştir
 app.register_error_handler(Exception, error_handler.handle_error)

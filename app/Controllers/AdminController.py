@@ -1617,3 +1617,13 @@ class AdminController(BaseController):
             return self.redirect('/admin/backup', {'message': 'Yedekleme başarıyla oluşturuldu'})
         except Exception as e:
             return error_handler.handle_error(e, self.request) 
+
+    def ai_dashboard(self):
+        """AI yönetim paneli"""
+        if not self.is_admin():
+            return self.redirect('/login')
+        
+        return self.render('admin/ai_dashboard.html', {
+            'title': 'AI Yönetim Paneli',
+            'page': 'ai_dashboard'
+        }) 
