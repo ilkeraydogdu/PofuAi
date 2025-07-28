@@ -85,6 +85,7 @@ def register_routes(app: Flask):
     admin_blueprint.add_url_rule('/settings', 'settings', admin_controller.settings, methods=['GET', 'POST'])
     admin_blueprint.add_url_rule('/activities', 'activities', lambda: admin_controller.index(), methods=['GET'])
     admin_blueprint.add_url_rule('/reports', 'reports', lambda: admin_controller.index(), methods=['GET'])
+    admin_blueprint.add_url_rule('/ai-dashboard', 'ai_dashboard', admin_controller.ai_dashboard, methods=['GET'])
     
     # Content Management route'ları
     from app.Controllers.ContentController import ContentController

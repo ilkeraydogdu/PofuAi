@@ -9,6 +9,7 @@ AI sistemi için ana controller
 - Kullanıcı bazlı içerik yönetimi
 - Akıllı depolama işlemleri
 - AI sistem yönetimi
+- Gelişmiş AI özellikleri (ürün düzenleme, şablon üretimi)
 """
 
 import os
@@ -24,6 +25,7 @@ from core.AI.image_recognition import ImageRecognitionService
 from core.AI.content_categorizer import ContentCategorizerService
 from core.AI.user_content_manager import UserContentManagerService
 from core.AI.smart_storage import SmartStorageService
+from core.AI.ai_advanced_features import advanced_ai_features
 
 
 class AIController:
@@ -39,8 +41,15 @@ class AIController:
         self.content_categorizer = ContentCategorizerService()
         self.user_content_manager = UserContentManagerService()
         self.smart_storage = SmartStorageService()
+        self.advanced_features = advanced_ai_features
         
         self.logger.info("AI Controller başlatıldı")
+    
+    def _get_user_role(self) -> str:
+        """Kullanıcı rolünü al"""
+        # Session'dan kullanıcı bilgisini al
+        user = session.get('user', {})
+        return user.get('role', 'guest')
     
     async def process_image(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -348,14 +357,251 @@ class AIController:
                 'code': 'USER_RECOMMENDATIONS_ERROR'
             }
     
+    async def ai_product_editor(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        AI destekli ürün düzenleme endpoint'i
+        
+        Args:
+            request_data: İstek verileri
+            
+        Returns:
+            Düzenleme sonuçları
+        """
+        try:
+            user_id = request_data.get('user_id', session.get('user_id', 1))
+            user_role = self._get_user_role()
+            
+            # Admin kontrolü
+            if user_role != 'admin':
+                return {
+                    'success': False,
+                    'error': 'Bu özellik sadece admin kullanıcılar için aktif',
+                    'code': 'ADMIN_ONLY'
+                }
+            
+            # Gelişmiş AI özelliklerini kullan
+            result = await self.advanced_features.ai_product_editor(
+                user_id=user_id,
+                user_role=user_role,
+                product_data=request_data.get('product_data', {})
+            )
+            
+            return result
+            
+        except Exception as e:
+            self.logger.error(f"AI ürün düzenleme hatası: {e}")
+            return {
+                'success': False,
+                'error': str(e),
+                'code': 'AI_PRODUCT_EDIT_ERROR'
+            }
+    
+    async def generate_social_template(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Sosyal medya şablonu üretme endpoint'i
+        
+        Args:
+            request_data: İstek verileri
+            
+        Returns:
+            Şablon verileri
+        """
+        try:
+            user_id = request_data.get('user_id', session.get('user_id', 1))
+            user_role = self._get_user_role()
+            
+            # Gelişmiş AI özelliklerini kullan
+            result = await self.advanced_features.generate_social_media_template(
+                user_id=user_id,
+                user_role=user_role,
+                template_request=request_data
+            )
+            
+            return result
+            
+        except Exception as e:
+            self.logger.error(f"Şablon üretimi hatası: {e}")
+            return {
+                'success': False,
+                'error': str(e),
+                'code': 'TEMPLATE_GENERATION_ERROR'
+            }
+    
+    async def ai_content_management(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        AI destekli içerik yönetimi endpoint'i
+        
+        Args:
+            request_data: İstek verileri
+            
+        Returns:
+            İçerik yönetimi sonuçları
+        """
+        try:
+            user_id = request_data.get('user_id', session.get('user_id', 1))
+            user_role = self._get_user_role()
+            action = request_data.get('action', 'analyze')
+            content_data = request_data.get('content_data', {})
+            
+            # Gelişmiş AI özelliklerini kullan
+            result = await self.advanced_features.ai_content_manager(
+                user_id=user_id,
+                user_role=user_role,
+                action=action,
+                content_data=content_data
+            )
+            
+            return result
+            
+        except Exception as e:
+            self.logger.error(f"AI içerik yönetimi hatası: {e}")
+            return {
+                'success': False,
+                'error': str(e),
+                'code': 'AI_CONTENT_MANAGEMENT_ERROR'
+            }
+    
+    async def get_user_ai_capabilities(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Kullanıcının AI yeteneklerini al
+        
+        Args:
+            request_data: İstek verileri
+            
+        Returns:
+            Kullanıcı AI yetenekleri
+        """
+        try:
+            user_id = request_data.get('user_id', session.get('user_id', 1))
+            user_role = self._get_user_role()
+            
+            # Kullanıcı AI servis seviyesini al
+            service_config = await self.advanced_features.get_user_ai_service_level(
+                user_id, user_role
+            )
+            
+            # Kullanıcı AI istatistikleri
+            user_stats = await self._get_user_ai_stats(user_id)
+            
+            return {
+                'success': True,
+                'data': {
+                    'role': user_role,
+                    'service_level': service_config.service_level.value,
+                    'features': service_config.features,
+                    'limits': service_config.limits,
+                    'permissions': service_config.permissions,
+                    'usage_stats': user_stats,
+                    'available_actions': self._get_available_actions(service_config.permissions)
+                }
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Kullanıcı AI yetenekleri alma hatası: {e}")
+            return {
+                'success': False,
+                'error': str(e),
+                'code': 'USER_AI_CAPABILITIES_ERROR'
+            }
+    
+    async def _get_user_ai_stats(self, user_id: int) -> Dict[str, Any]:
+        """Kullanıcı AI kullanım istatistikleri"""
+        try:
+            from core.Database.connection import DatabaseConnection
+            db = DatabaseConnection()
+            
+            with db.get_connection() as conn:
+                cursor = conn.cursor(dictionary=True)
+                
+                # Bugünkü kullanım
+                cursor.execute("""
+                    SELECT COUNT(*) as daily_usage
+                    FROM user_ai_interactions
+                    WHERE user_id = %s AND DATE(created_at) = CURDATE()
+                """, (user_id,))
+                daily_usage = cursor.fetchone()['daily_usage']
+                
+                # Toplam kullanım
+                cursor.execute("""
+                    SELECT 
+                        COUNT(*) as total_interactions,
+                        COUNT(DISTINCT interaction_type) as unique_features_used
+                    FROM user_ai_interactions
+                    WHERE user_id = %s
+                """, (user_id,))
+                total_stats = cursor.fetchone()
+                
+                return {
+                    'daily_usage': daily_usage,
+                    'total_interactions': total_stats['total_interactions'],
+                    'unique_features_used': total_stats['unique_features_used']
+                }
+                
+        except Exception as e:
+            self.logger.error(f"Kullanıcı AI istatistikleri alma hatası: {e}")
+            return {
+                'daily_usage': 0,
+                'total_interactions': 0,
+                'unique_features_used': 0
+            }
+    
+    def _get_available_actions(self, permissions: List[str]) -> List[Dict[str, str]]:
+        """İzinlere göre kullanılabilir aksiyonlar"""
+        action_map = {
+            'product_edit': {
+                'name': 'AI Ürün Düzenleme',
+                'endpoint': '/api/ai/product-editor',
+                'description': 'Ürünlerinizi AI ile düzenleyin ve zenginleştirin'
+            },
+            'template_generation': {
+                'name': 'Şablon Üretimi',
+                'endpoint': '/api/ai/generate-template',
+                'description': 'Sosyal medya için AI destekli şablon oluşturun'
+            },
+            'bulk_operations': {
+                'name': 'Toplu İşlemler',
+                'endpoint': '/api/ai/batch-process',
+                'description': 'Birden fazla görseli aynı anda işleyin'
+            },
+            'ai_training': {
+                'name': 'AI Eğitimi',
+                'endpoint': '/api/ai/train-model',
+                'description': 'AI modellerini özel verilerinizle eğitin'
+            },
+            'own_content_edit': {
+                'name': 'Kendi İçeriğini Düzenle',
+                'endpoint': '/api/ai/content-edit',
+                'description': 'Kendi içeriklerinizi AI ile düzenleyin'
+            },
+            'template_use': {
+                'name': 'Şablon Kullanımı',
+                'endpoint': '/api/ai/use-template',
+                'description': 'Hazır şablonları kullanarak içerik oluşturun'
+            }
+        }
+        
+        available = []
+        for permission in permissions:
+            if permission in action_map:
+                available.append(action_map[permission])
+            elif permission == '*':
+                # Admin - tüm aksiyonlar
+                available = list(action_map.values())
+                break
+        
+        return available
+    
     def get_ai_system_status(self) -> Dict[str, Any]:
         """
-        AI sistem durumu
+        AI sistem durumu (güncellendi)
         
         Returns:
             Sistem durumu
         """
         try:
+            # Mevcut sistem durumu
+            base_status = super().get_ai_system_status() if hasattr(super(), 'get_ai_system_status') else {}
+            
             # AI Core durumu
             ai_core_info = ai_core.get_model_info()
             ai_core_metrics = ai_core.get_metrics()
@@ -366,6 +612,14 @@ class AIController:
             # Depolama özeti
             storage_summary = self.smart_storage.get_storage_summary()
             
+            # Gelişmiş özellik durumu
+            advanced_status = {
+                'product_editor': 'active',
+                'template_generator': 'active',
+                'content_manager': 'active',
+                'role_based_access': 'active'
+            }
+            
             return {
                 'success': True,
                 'data': {
@@ -375,9 +629,10 @@ class AIController:
                     },
                     'categorization': category_stats,
                     'storage': storage_summary,
+                    'advanced_features': advanced_status,
                     'system_health': {
                         'status': 'healthy',
-                        'uptime': 'N/A',  # Bu kısım sistem başlangıcından itibaren hesaplanabilir
+                        'uptime': 'N/A',
                         'last_check': datetime.now().isoformat()
                     }
                 }

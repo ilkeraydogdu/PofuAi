@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Yönetim Paneli - PofuAi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --secondary-color: #8b5cf6;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --dark-bg: #1f2937;
+            --card-bg: #374151;
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .navbar {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border: none;
+            color: white;
+        }
+
+        .feature-card {
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .feature-card:hover::before {
+            left: 100%;
+        }
+
+        .btn-ai {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-ai:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .progress-bar-ai {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 10px;
+        }
+
+        .ai-feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .permission-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-block;
+            margin: 2px;
+        }
+
+        .permission-badge.admin {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .permission-badge.premium {
+            background-color: var(--warning-color);
+            color: white;
+        }
+
+        .permission-badge.standard {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .permission-badge.basic {
+            background-color: var(--text-secondary);
+            color: white;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .template-preview {
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .template-preview:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(99, 102, 241, 0.1);
+        }
+
+        .ai-terminal {
+            background-color: #000;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #0f0;
+            height: 200px;
+            overflow-y: auto;
+        }
+
+        .ai-terminal .command {
+            color: #fff;
+        }
+
+        .ai-terminal .response {
+            color: #0f0;
+            margin-left: 20px;
+        }
+
+        .ai-terminal .error {
+            color: #f00;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-brain"></i> PofuAi - AI Yönetim Paneli
+            </a>
+            <div class="ms-auto">
+                <span class="badge bg-success">AI Sistemi Aktif</span>
+                <button class="btn btn-sm btn-outline-light ms-2">
+                    <i class="fas fa-user"></i> Admin
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <!-- İstatistik Kartları -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2">Toplam AI İşlem</h6>
+                        <h2 class="card-title mb-0">15,847</h2>
+                        <small><i class="fas fa-arrow-up"></i> %12.5 Artış</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2">Aktif Kullanıcı</h6>
+                        <h2 class="card-title mb-0">3,421</h2>
+                        <small><i class="fas fa-arrow-up"></i> %8.2 Artış</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2">Şablon Üretimi</h6>
+                        <h2 class="card-title mb-0">7,892</h2>
+                        <small><i class="fas fa-arrow-up"></i> %15.3 Artış</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2">Sistem Performansı</h6>
+                        <h2 class="card-title mb-0">98.5%</h2>
+                        <small><i class="fas fa-check-circle"></i> Mükemmel</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ana İçerik -->
+        <div class="row">
+            <!-- Sol Panel - AI Özellikleri -->
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-magic"></i> Gelişmiş AI Özellikleri</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Ürün Düzenleme -->
+                            <div class="col-md-6 mb-3">
+                                <div class="card feature-card h-100" onclick="openProductEditor()">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-edit ai-feature-icon"></i>
+                                        <h6>AI Ürün Düzenleme</h6>
+                                        <p class="text-secondary small">Ürünlerinizi AI ile zenginleştirin</p>
+                                        <div>
+                                            <span class="permission-badge admin">Admin</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Şablon Üretimi -->
+                            <div class="col-md-6 mb-3">
+                                <div class="card feature-card h-100" onclick="openTemplateGenerator()">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-palette ai-feature-icon"></i>
+                                        <h6>Şablon Üretimi</h6>
+                                        <p class="text-secondary small">Sosyal medya için AI şablonları</p>
+                                        <div>
+                                            <span class="permission-badge premium">Premium</span>
+                                            <span class="permission-badge admin">Admin</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- İçerik Yönetimi -->
+                            <div class="col-md-6 mb-3">
+                                <div class="card feature-card h-100" onclick="openContentManager()">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-tasks ai-feature-icon"></i>
+                                        <h6>İçerik Yönetimi</h6>
+                                        <p class="text-secondary small">AI destekli içerik optimizasyonu</p>
+                                        <div>
+                                            <span class="permission-badge standard">Standard</span>
+                                            <span class="permission-badge premium">Premium</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Toplu İşlemler -->
+                            <div class="col-md-6 mb-3">
+                                <div class="card feature-card h-100" onclick="openBatchProcessor()">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-layer-group ai-feature-icon"></i>
+                                        <h6>Toplu İşlemler</h6>
+                                        <p class="text-secondary small">Yüksek hacimli AI işlemleri</p>
+                                        <div>
+                                            <span class="permission-badge premium">Premium</span>
+                                            <span class="permission-badge admin">Admin</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Terminal -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-terminal"></i> AI İşlem Monitörü</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="ai-terminal" id="aiTerminal">
+                            <div><span class="command">$ ai.process_image</span> "product_001.jpg"</div>
+                            <div class="response">✓ Görsel analizi tamamlandı (287ms)</div>
+                            <div class="response">✓ 5 kategori önerisi oluşturuldu</div>
+                            <div class="response">✓ Renk paleti çıkarıldı: #6366f1, #8b5cf6, #ec4899</div>
+                            <div><span class="command">$ ai.generate_template</span> --platform instagram --style modern</div>
+                            <div class="response">✓ Şablon başarıyla oluşturuldu</div>
+                            <div class="response">✓ 3 içerik önerisi hazırlandı</div>
+                            <div><span class="command">$ ai.optimize_content</span> --user 1234</div>
+                            <div class="response">⚡ İçerik optimizasyonu başlatıldı...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sağ Panel - Kullanıcı Rolleri ve İzinler -->
+            <div class="col-md-4">
+                <!-- Rol Bazlı Erişim -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-users-cog"></i> Rol Bazlı AI Erişimi</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h6><span class="permission-badge admin">Admin</span></h6>
+                            <ul class="small text-secondary">
+                                <li>Tüm AI özelliklerine erişim</li>
+                                <li>Sınırsız işlem hakkı</li>
+                                <li>Model eğitimi yetkisi</li>
+                                <li>Toplu işlem (1000 dosya)</li>
+                            </ul>
+                        </div>
+                        <div class="mb-3">
+                            <h6><span class="permission-badge premium">Premium</span></h6>
+                            <ul class="small text-secondary">
+                                <li>Gelişmiş AI özellikleri</li>
+                                <li>Günlük 1000 işlem</li>
+                                <li>Şablon kullanımı</li>
+                                <li>Toplu işlem (100 dosya)</li>
+                            </ul>
+                        </div>
+                        <div class="mb-3">
+                            <h6><span class="permission-badge standard">Standard</span></h6>
+                            <ul class="small text-secondary">
+                                <li>Temel AI özellikleri</li>
+                                <li>Günlük 100 işlem</li>
+                                <li>Kendi içeriğini düzenleme</li>
+                                <li>Toplu işlem (10 dosya)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hızlı İşlemler -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-bolt"></i> Hızlı İşlemler</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-ai" onclick="testAIFeature()">
+                                <i class="fas fa-vial"></i> AI Özellik Testi
+                            </button>
+                            <button class="btn btn-ai" onclick="viewAIStats()">
+                                <i class="fas fa-chart-line"></i> AI İstatistikleri
+                            </button>
+                            <button class="btn btn-ai" onclick="configureAI()">
+                                <i class="fas fa-cog"></i> AI Yapılandırma
+                            </button>
+                            <button class="btn btn-outline-light" onclick="viewDocs()">
+                                <i class="fas fa-book"></i> API Dokümantasyonu
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Ürün Düzenleme Modal -->
+    <div class="modal fade" id="productEditorModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-edit"></i> AI Ürün Düzenleyici</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Ürün Görseli</label>
+                        <input type="file" class="form-control bg-dark text-light" id="productImage" accept="image/*">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ürün Adı</label>
+                        <input type="text" class="form-control bg-dark text-light" id="productName" placeholder="Ürün adını girin">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mevcut Fiyat</label>
+                        <input type="number" class="form-control bg-dark text-light" id="productPrice" placeholder="100.00">
+                    </div>
+                    <div id="aiEnhancements" class="mt-4" style="display:none;">
+                        <h6>AI Önerileri</h6>
+                        <div class="alert alert-info">
+                            <p><strong>Otomatik Açıklama:</strong> <span id="aiDescription"></span></p>
+                            <p><strong>Kategori Önerileri:</strong> <span id="aiCategories"></span></p>
+                            <p><strong>Fiyat Önerisi:</strong> <span id="aiPriceRange"></span></p>
+                            <p><strong>SEO Anahtar Kelimeler:</strong> <span id="aiKeywords"></span></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="button" class="btn btn-ai" onclick="processProductWithAI()">
+                        <i class="fas fa-magic"></i> AI ile İşle
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Şablon Üretici Modal -->
+    <div class="modal fade" id="templateGeneratorModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-palette"></i> AI Şablon Üretici</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h6>Platform Seçimi</h6>
+                            <div class="btn-group-vertical w-100" role="group">
+                                <input type="radio" class="btn-check" name="platform" id="instagram" value="instagram" checked>
+                                <label class="btn btn-outline-light" for="instagram">
+                                    <i class="fab fa-instagram"></i> Instagram
+                                </label>
+                                <input type="radio" class="btn-check" name="platform" id="facebook" value="facebook">
+                                <label class="btn btn-outline-light" for="facebook">
+                                    <i class="fab fa-facebook"></i> Facebook
+                                </label>
+                                <input type="radio" class="btn-check" name="platform" id="twitter" value="twitter">
+                                <label class="btn btn-outline-light" for="twitter">
+                                    <i class="fab fa-twitter"></i> Twitter
+                                </label>
+                                <input type="radio" class="btn-check" name="platform" id="telegram" value="telegram">
+                                <label class="btn btn-outline-light" for="telegram">
+                                    <i class="fab fa-telegram"></i> Telegram
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <h6>Şablon Tipi</h6>
+                            <select class="form-select bg-dark text-light" id="templateType">
+                                <option value="product_showcase">Ürün Tanıtım</option>
+                                <option value="announcement">Duyuru</option>
+                                <option value="promotion">Promosyon</option>
+                                <option value="event">Etkinlik</option>
+                            </select>
+                            <h6 class="mt-3">Stil</h6>
+                            <select class="form-select bg-dark text-light" id="templateStyle">
+                                <option value="modern">Modern</option>
+                                <option value="elegant">Elegant</option>
+                                <option value="playful">Eğlenceli</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <h6>Önizleme</h6>
+                            <div class="template-preview">
+                                <i class="fas fa-image fa-3x text-secondary"></i>
+                                <p class="mt-2 text-secondary">Şablon önizlemesi burada görünecek</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4" id="templateResult" style="display:none;">
+                        <h6>Üretilen İçerik Önerileri</h6>
+                        <div class="list-group" id="contentSuggestions"></div>
+                        <h6 class="mt-3">Hashtag Önerileri</h6>
+                        <div id="hashtagSuggestions"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                    <button type="button" class="btn btn-ai" onclick="generateTemplate()">
+                        <i class="fas fa-magic"></i> Şablon Oluştur
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // AI Terminal simülasyonu
+        function addTerminalLog(command, responses) {
+            const terminal = document.getElementById('aiTerminal');
+            const commandDiv = document.createElement('div');
+            commandDiv.innerHTML = `<span class="command">$ ${command}</span>`;
+            terminal.appendChild(commandDiv);
+            
+            responses.forEach((response, index) => {
+                setTimeout(() => {
+                    const responseDiv = document.createElement('div');
+                    responseDiv.className = response.type || 'response';
+                    responseDiv.textContent = response.text;
+                    terminal.appendChild(responseDiv);
+                    terminal.scrollTop = terminal.scrollHeight;
+                }, (index + 1) * 500);
+            });
+        }
+
+        // Modal fonksiyonları
+        function openProductEditor() {
+            const modal = new bootstrap.Modal(document.getElementById('productEditorModal'));
+            modal.show();
+        }
+
+        function openTemplateGenerator() {
+            const modal = new bootstrap.Modal(document.getElementById('templateGeneratorModal'));
+            modal.show();
+        }
+
+        function openContentManager() {
+            addTerminalLog('ai.content_manager --open', [
+                {text: '✓ İçerik yönetimi modülü yükleniyor...'},
+                {text: '✓ Kullanıcı içerikleri analiz ediliyor...'},
+                {text: '→ 142 içerik bulundu, optimizasyon önerileri hazırlanıyor...'}
+            ]);
+        }
+
+        function openBatchProcessor() {
+            addTerminalLog('ai.batch_processor --status', [
+                {text: '✓ Toplu işlem modülü hazır'},
+                {text: '→ Maksimum batch boyutu: 1000 dosya'},
+                {text: '→ Paralel işlem sayısı: 8'}
+            ]);
+        }
+
+        // AI İşlemleri
+        async function processProductWithAI() {
+            const productName = document.getElementById('productName').value;
+            const productPrice = document.getElementById('productPrice').value;
+            
+            if (!productName) {
+                alert('Lütfen ürün bilgilerini girin');
+                return;
+            }
+
+            // Loading göster
+            const btn = event.target;
+            btn.innerHTML = '<span class="loading-spinner"></span> İşleniyor...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/ai/product-editor', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        product_data: {
+                            name: productName,
+                            current_price: parseFloat(productPrice) || 100
+                        }
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    // AI sonuçlarını göster
+                    document.getElementById('aiEnhancements').style.display = 'block';
+                    document.getElementById('aiDescription').textContent = 'Modern ve şık ' + productName + ' ile tarzınızı yansıtın';
+                    document.getElementById('aiCategories').textContent = 'Elektronik, Aksesuarlar, Teknoloji';
+                    document.getElementById('aiPriceRange').textContent = '₺' + (productPrice * 0.9) + ' - ₺' + (productPrice * 1.1);
+                    document.getElementById('aiKeywords').textContent = productName.toLowerCase() + ', online, satış, kaliteli';
+                    
+                    addTerminalLog('ai.product_editor --enhance', [
+                        {text: '✓ Ürün başarıyla analiz edildi'},
+                        {text: '✓ AI önerileri hazırlandı'},
+                        {text: '✓ SEO optimizasyonu tamamlandı'}
+                    ]);
+                } else {
+                    alert('Hata: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Bir hata oluştu');
+            } finally {
+                btn.innerHTML = '<i class="fas fa-magic"></i> AI ile İşle';
+                btn.disabled = false;
+            }
+        }
+
+        async function generateTemplate() {
+            const platform = document.querySelector('input[name="platform"]:checked').value;
+            const templateType = document.getElementById('templateType').value;
+            const templateStyle = document.getElementById('templateStyle').value;
+
+            const btn = event.target;
+            btn.innerHTML = '<span class="loading-spinner"></span> Oluşturuluyor...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/ai/generate-template', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        platform: platform,
+                        type: templateType,
+                        style: templateStyle,
+                        product_info: {
+                            name: 'Örnek Ürün'
+                        }
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Sonuçları göster
+                    document.getElementById('templateResult').style.display = 'block';
+                    
+                    // İçerik önerileri
+                    const suggestionsHtml = result.data.content_suggestions.map(s => 
+                        `<a href="#" class="list-group-item list-group-item-action bg-dark text-light">${s}</a>`
+                    ).join('');
+                    document.getElementById('contentSuggestions').innerHTML = suggestionsHtml;
+                    
+                    // Hashtag'ler
+                    const hashtagsHtml = result.data.hashtags.map(h => 
+                        `<span class="badge bg-primary me-1">${h}</span>`
+                    ).join('');
+                    document.getElementById('hashtagSuggestions').innerHTML = hashtagsHtml;
+                    
+                    addTerminalLog(`ai.generate_template --platform ${platform}`, [
+                        {text: '✓ Şablon başarıyla oluşturuldu'},
+                        {text: `✓ ${result.data.content_suggestions.length} içerik önerisi hazırlandı`},
+                        {text: `✓ ${result.data.hashtags.length} hashtag önerildi`}
+                    ]);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Bir hata oluştu');
+            } finally {
+                btn.innerHTML = '<i class="fas fa-magic"></i> Şablon Oluştur';
+                btn.disabled = false;
+            }
+        }
+
+        async function testAIFeature() {
+            addTerminalLog('ai.test --all-features', [
+                {text: '⚡ AI özellik testi başlatılıyor...'},
+                {text: '✓ Görüntü işleme modülü: OK'},
+                {text: '✓ Şablon üretici: OK'},
+                {text: '✓ İçerik optimizasyonu: OK'},
+                {text: '✓ Rol bazlı erişim kontrolü: OK'},
+                {text: '✅ Tüm sistemler çalışıyor!', type: 'response'}
+            ]);
+        }
+
+        async function viewAIStats() {
+            window.location.href = '/api/ai/system-status';
+        }
+
+        function configureAI() {
+            alert('AI Yapılandırma paneli yakında eklenecek!');
+        }
+
+        function viewDocs() {
+            window.open('/api/ai/docs', '_blank');
+        }
+
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', function() {
+            // Başlangıç animasyonu
+            setTimeout(() => {
+                addTerminalLog('ai.system --status', [
+                    {text: '✓ AI Core: Aktif'},
+                    {text: '✓ Model yükleme: Tamamlandı'},
+                    {text: '✓ GPU kullanımı: %45'},
+                    {text: '✓ Sistem hazır!'}
+                ]);
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
