@@ -56,6 +56,16 @@ app.before_request(AuthMiddleware.handle)
 # Route'ları kaydet
 web_router['register_routes'](app)
 
+# Gelişmiş AI route'larını kaydet
+try:
+    from core.Route.advanced_ai_routes import register_advanced_ai_routes
+    register_advanced_ai_routes(app)
+    logger.info("Gelişmiş AI route'ları başarıyla kaydedildi")
+except ImportError as e:
+    logger.warning(f"Gelişmiş AI route'ları yüklenemedi: {e}")
+except Exception as e:
+    logger.error(f"Gelişmiş AI route'ları kaydedilirken hata: {e}")
+
 # Hata yönetimini aktifleştir
 app.register_error_handler(Exception, error_handler.handle_error)
 
