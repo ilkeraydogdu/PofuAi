@@ -10,6 +10,7 @@ class IntegrationType(Enum):
     ECOMMERCE_SITE = "ecommerce_site"
     SOCIAL_MEDIA_STORE = "social_media_store"
     INTERNATIONAL = "international"
+    RETAIL = "retail"  # Perakende satış modülü
     
     # Muhasebe ve ERP Entegrasyonları
     ACCOUNTING = "accounting"
