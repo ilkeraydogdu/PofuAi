@@ -112,6 +112,10 @@ def register_routes(app: Flask):
     from core.Route.advanced_api_routes import register_advanced_api_routes
     register_advanced_api_routes(app)
     
+    # Register AI routes
+    from core.Route.ai_routes import register_ai_routes
+    register_ai_routes(app)
+    
     # Hata yönetimi
     app.register_error_handler(404, error_controller.error_404)
     app.register_error_handler(500, error_controller.error_500)
