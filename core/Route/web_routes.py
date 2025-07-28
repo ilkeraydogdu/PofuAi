@@ -108,6 +108,10 @@ def register_routes(app: Flask):
     app.register_blueprint(api_blueprint)
     app.register_blueprint(admin_blueprint)
     
+    # Register advanced API routes
+    from core.Route.advanced_api_routes import register_advanced_api_routes
+    register_advanced_api_routes(app)
+    
     # Hata yönetimi
     app.register_error_handler(404, error_controller.error_404)
     app.register_error_handler(500, error_controller.error_500)

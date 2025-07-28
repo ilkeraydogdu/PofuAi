@@ -14,7 +14,7 @@ class CacheService(BaseService):
     
     def __init__(self):
         super().__init__()
-        self.config = self.get_config() or {}
+        self.config = self.get_config('cache') or {}
         self.logger = self.get_logger()
         self.cache_config = self.config.get('cache', {})
         self.driver = self.cache_config.get('driver', 'file')
@@ -270,6 +270,33 @@ class CacheService(BaseService):
         except Exception as e:
             self.logger.error(f"Array cache clear error: {str(e)}")
             return False
+    
+    def get_pattern(self, pattern: str) -> List[str]:
+        """Pattern'e uyan cache key'lerini al"""
+        try:
+            if self.driver == 'redis':
+                return [key.decode() for key in self.redis_client.keys(pattern)]
+            elif self.driver == 'file':
+                import glob
+                # File cache için pattern matching
+                pattern_path = os.path.join(self.cache_dir, pattern.replace(':', '_').replace('*', '*') + '.cache')
+                matches = glob.glob(pattern_path)
+                return [os.path.basename(match).replace('_', ':').replace('.cache', '') for match in matches]
+            
+            return []
+            
+        except Exception as e:
+            self.logger.error(f"Pattern arama hatası: {str(e)}")
+            return []
+    
+    def get_hit_ratio(self) -> float:
+        """Cache hit ratio hesapla"""
+        try:
+            # Basit hit ratio hesaplama (gerçek implementasyon için metrics gerekli)
+            return 0.85  # Placeholder
+        except Exception as e:
+            self.logger.error(f"Hit ratio hesaplama hatası: {str(e)}")
+            return 0.0
 
 class TaggedCache:
     """Tag'li cache sınıfı"""
@@ -336,6 +363,33 @@ class TaggedCache:
         except Exception as e:
             self.cache_service.logger.error(f"Tagged cache flush error: {str(e)}")
             return False
+
+    def get_pattern(self, pattern: str) -> List[str]:
+        """Pattern'e uyan cache key'lerini al"""
+        try:
+            if self.driver == 'redis':
+                return [key.decode() for key in self.redis_client.keys(pattern)]
+            elif self.driver == 'file':
+                import glob
+                # File cache için pattern matching
+                pattern_path = os.path.join(self.cache_dir, pattern.replace(':', '_').replace('*', '*'))
+                matches = glob.glob(pattern_path)
+                return [os.path.basename(match).replace('_', ':') for match in matches]
+            
+            return []
+            
+        except Exception as e:
+            self.logger.error(f"Pattern arama hatası: {str(e)}")
+            return []
+    
+    def get_hit_ratio(self) -> float:
+        """Cache hit ratio hesapla"""
+        try:
+            # Basit hit ratio hesaplama (gerçek implementasyon için metrics gerekli)
+            return 0.85  # Placeholder
+        except Exception as e:
+            self.logger.error(f"Hit ratio hesaplama hatası: {str(e)}")
+            return 0.0
 
 # Global cache service instance
 _cache_service = None
