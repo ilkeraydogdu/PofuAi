@@ -9,12 +9,13 @@ from typing import Any, Optional, Dict, List
 from datetime import datetime, timedelta
 from core.Services.base_service import BaseService
 
-class CacheService:
+class CacheService(BaseService):
     """Önbellek yönetimi servisi"""
     
     def __init__(self):
-        self.config = BaseService.get_config()
-        self.logger = BaseService.get_logger()
+        super().__init__()
+        self.config = self.get_config() or {}
+        self.logger = self.get_logger()
         self.cache_config = self.config.get('cache', {})
         self.driver = self.cache_config.get('driver', 'file')
         self.prefix = self.cache_config.get('prefix', 'pofuai_')

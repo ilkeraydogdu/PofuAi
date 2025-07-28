@@ -352,14 +352,22 @@ class Config:
 # Config singleton instance
 _config = None
 
-def get_config() -> Config:
+def get_config(key: str = None, default: Any = None) -> Any:
     """
-    Config singleton instance'ını al
+    Config değerini al
     
+    Args:
+        key: Config anahtarı (dot notation destekler)
+        default: Varsayılan değer
+        
     Returns:
-        Config: Config instance
+        Any: Config değeri veya instance
     """
     global _config
     if _config is None:
         _config = Config()
-    return _config 
+    
+    if key is None:
+        return _config
+    
+    return _config.get(key, default) 

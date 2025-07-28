@@ -81,7 +81,7 @@ class BaseService(IService):
             validator: Validator instance'ı
             container: Service container instance'ı
         """
-        self._config_func = config_func or get_config
+        self._config_func = config_func or (lambda key=None, default=None: get_config(key, default))
         self._event_dispatcher = event_dispatcher or EventDispatcher()
         
         # Validator'ı doğrudan oluşturuyoruz
@@ -173,9 +173,8 @@ class BaseService(IService):
             Any: Yapılandırma değeri veya varsayılan değer
         """
         try:
-            # Yeni config modülü ile uyumlu hale getirme
-            config = self._config_func()
-            return config.get(key, default)
+            # Config fonksiyonunu kullan
+            return self._config_func(key, default)
         except Exception as e:
             self.log(f"Config getirme hatası: {e}", "error")
             return default
