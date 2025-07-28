@@ -66,6 +66,16 @@ except ImportError as e:
 except Exception as e:
     logger.error(f"Gelişmiş AI route'ları kaydedilirken hata: {e}")
 
+# Kurumsal AI route'larını kaydet
+try:
+    from core.Route.enterprise_ai_routes import register_enterprise_ai_routes
+    register_enterprise_ai_routes(app)
+    logger.info("Kurumsal AI route'ları başarıyla kaydedildi")
+except ImportError as e:
+    logger.warning(f"Kurumsal AI route'ları yüklenemedi: {e}")
+except Exception as e:
+    logger.error(f"Kurumsal AI route'ları kaydedilirken hata: {e}")
+
 # Hata yönetimini aktifleştir
 app.register_error_handler(Exception, error_handler.handle_error)
 
