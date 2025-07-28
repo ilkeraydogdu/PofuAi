@@ -785,7 +785,7 @@ class IntegrationManager:
             daily_sales = product_data.get('daily_sales', [])
             lead_time = product_data.get('lead_time_days', 7)
             
-            if daily_sales:
+            if daily_sales and len(daily_sales) > 0:
                 avg_daily_sales = sum(daily_sales) / len(daily_sales)
                 predicted_demand = avg_daily_sales * lead_time * 1.2  # %20 güvenlik marjı
                 
@@ -794,7 +794,10 @@ class IntegrationManager:
                 self.logger.info(f"AI stok tahmini: {current_stock} -> {recommended_stock}")
                 return recommended_stock
             else:
-                return current_stock
+                # Eğer satış verisi yoksa, mevcut stokun %120'sini öner
+                recommended_stock = max(int(current_stock * 1.2), 10)
+                self.logger.info(f"AI stok tahmini (veri yok): {current_stock} -> {recommended_stock}")
+                return recommended_stock
                 
         except Exception as e:
             self.logger.error(f"AI stok tahmin hatası: {e}")
