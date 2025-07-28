@@ -30,3 +30,7 @@ INFO [2025-07-28 17:44:56,202] [logger.init:101]: Logger başlatıldı - Seviye:
 INFO [2025-07-28 17:45:01,625] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-28.log
 INFO [2025-07-28 17:45:01,695] [test_system.test_services:146]: Test log message
 INFO [2025-07-28 17:46:35,619] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-28.log
+INFO [2025-07-28 18:01:29,350] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-28.log
+INFO [2025-07-28 18:01:29,463] [test_system.test_services:146]: Test log message
+INFO [2025-07-28 18:01:40,218] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-28.log
+INFO [2025-07-28 18:01:40,284] [test_system.test_services:146]: Test log message
