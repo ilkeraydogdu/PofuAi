@@ -645,16 +645,25 @@ class HepsilojistikFulfillmentIntegration(BaseIntegration):
 # ===== ENTEGRASYON YÖNETİCİSİ =====
 
 class IntegrationManager:
-    """Merkezi Entegrasyon Yöneticisi"""
+    """Enterprise Entegrasyon Yöneticisi"""
     
     def __init__(self):
         self.integrations: Dict[str, BaseIntegration] = {}
         self.logger = logging.getLogger("IntegrationManager")
         self.ai_enabled = True
+        self.metrics = {}
+        self.health_check_interval = 300  # 5 dakika
         
     def register_integration(self, name: str, integration: BaseIntegration):
         """Entegrasyon kaydet"""
         self.integrations[name] = integration
+        self.metrics[name] = {
+            'api_calls': 0,
+            'successful_calls': 0,
+            'failed_calls': 0,
+            'last_sync': None,
+            'error_count': 0
+        }
         self.logger.info(f"Entegrasyon kaydedildi: {name}")
         
     async def initialize_all(self):
@@ -665,10 +674,13 @@ class IntegrationManager:
                 result = await integration.connect()
                 results[name] = result
                 if result:
+                    self.metrics[name]['last_sync'] = datetime.utcnow()
                     self.logger.info(f"✅ {name} başarıyla başlatıldı")
                 else:
+                    self.metrics[name]['error_count'] += 1
                     self.logger.error(f"❌ {name} başlatılamadı")
             except Exception as e:
+                self.metrics[name]['error_count'] += 1
                 self.logger.error(f"❌ {name} başlatma hatası: {e}")
                 results[name] = False
         return results
@@ -676,27 +688,80 @@ class IntegrationManager:
     async def sync_all_products(self):
         """Tüm entegrasyonlardan ürünleri senkronize et"""
         all_products = []
+        sync_results = {}
+        
         for name, integration in self.integrations.items():
             try:
+                start_time = datetime.utcnow()
                 products = await integration.get_products()
+                sync_duration = (datetime.utcnow() - start_time).total_seconds()
+                
                 for product in products:
                     product['source'] = name
                 all_products.extend(products)
-                self.logger.info(f"{name} - {len(products)} ürün senkronize edildi")
+                
+                self.metrics[name]['api_calls'] += 1
+                self.metrics[name]['successful_calls'] += 1
+                self.metrics[name]['last_sync'] = datetime.utcnow()
+                
+                sync_results[name] = {
+                    'success': True,
+                    'products_count': len(products),
+                    'duration': sync_duration
+                }
+                
+                self.logger.info(f"{name} - {len(products)} ürün senkronize edildi ({sync_duration:.2f}s)")
             except Exception as e:
+                self.metrics[name]['api_calls'] += 1
+                self.metrics[name]['failed_calls'] += 1
+                self.metrics[name]['error_count'] += 1
+                
+                sync_results[name] = {
+                    'success': False,
+                    'error': str(e),
+                    'products_count': 0
+                }
+                
                 self.logger.error(f"{name} ürün senkronizasyon hatası: {e}")
-        return all_products
+                
+        return {
+            'total_products': len(all_products),
+            'sync_results': sync_results,
+            'timestamp': datetime.utcnow().isoformat()
+        }
         
     async def update_all_stocks(self, product_id: str, stock: int):
         """Tüm entegrasyonlarda stok güncelle"""
         results = {}
         for name, integration in self.integrations.items():
             try:
+                start_time = datetime.utcnow()
                 result = await integration.update_stock(product_id, stock)
-                results[name] = result
+                update_duration = (datetime.utcnow() - start_time).total_seconds()
+                
+                self.metrics[name]['api_calls'] += 1
+                if result:
+                    self.metrics[name]['successful_calls'] += 1
+                else:
+                    self.metrics[name]['failed_calls'] += 1
+                    
+                results[name] = {
+                    'success': result,
+                    'duration': update_duration
+                }
+                
+                self.logger.info(f"{name} stok güncellendi: {result} ({update_duration:.2f}s)")
             except Exception as e:
+                self.metrics[name]['api_calls'] += 1
+                self.metrics[name]['failed_calls'] += 1
+                self.metrics[name]['error_count'] += 1
+                
+                results[name] = {
+                    'success': False,
+                    'error': str(e)
+                }
+                
                 self.logger.error(f"{name} stok güncelleme hatası: {e}")
-                results[name] = False
         return results
         
     async def update_all_prices(self, product_id: str, price: float):
@@ -704,26 +769,78 @@ class IntegrationManager:
         results = {}
         for name, integration in self.integrations.items():
             try:
+                start_time = datetime.utcnow()
                 result = await integration.update_price(product_id, price)
-                results[name] = result
+                update_duration = (datetime.utcnow() - start_time).total_seconds()
+                
+                self.metrics[name]['api_calls'] += 1
+                if result:
+                    self.metrics[name]['successful_calls'] += 1
+                else:
+                    self.metrics[name]['failed_calls'] += 1
+                    
+                results[name] = {
+                    'success': result,
+                    'duration': update_duration
+                }
+                
+                self.logger.info(f"{name} fiyat güncellendi: {result} ({update_duration:.2f}s)")
             except Exception as e:
+                self.metrics[name]['api_calls'] += 1
+                self.metrics[name]['failed_calls'] += 1
+                self.metrics[name]['error_count'] += 1
+                
+                results[name] = {
+                    'success': False,
+                    'error': str(e)
+                }
+                
                 self.logger.error(f"{name} fiyat güncelleme hatası: {e}")
-                results[name] = False
         return results
         
     async def get_all_orders(self):
         """Tüm entegrasyonlardan siparişleri getir"""
         all_orders = []
+        order_results = {}
+        
         for name, integration in self.integrations.items():
             try:
+                start_time = datetime.utcnow()
                 orders = await integration.get_orders()
+                fetch_duration = (datetime.utcnow() - start_time).total_seconds()
+                
                 for order in orders:
                     order['source'] = name
                 all_orders.extend(orders)
-                self.logger.info(f"{name} - {len(orders)} sipariş getirildi")
+                
+                self.metrics[name]['api_calls'] += 1
+                self.metrics[name]['successful_calls'] += 1
+                
+                order_results[name] = {
+                    'success': True,
+                    'orders_count': len(orders),
+                    'duration': fetch_duration
+                }
+                
+                self.logger.info(f"{name} - {len(orders)} sipariş getirildi ({fetch_duration:.2f}s)")
             except Exception as e:
+                self.metrics[name]['api_calls'] += 1
+                self.metrics[name]['failed_calls'] += 1
+                self.metrics[name]['error_count'] += 1
+                
+                order_results[name] = {
+                    'success': False,
+                    'error': str(e),
+                    'orders_count': 0
+                }
+                
                 self.logger.error(f"{name} sipariş getirme hatası: {e}")
-        return all_orders
+                
+        return {
+            'total_orders': len(all_orders),
+            'order_results': order_results,
+            'timestamp': datetime.utcnow().isoformat()
+        }
         
     def get_integration_status(self) -> Dict:
         """Entegrasyon durumlarını getir"""
@@ -734,10 +851,19 @@ class IntegrationManager:
         }
         
         for name, integration in self.integrations.items():
+            metrics = self.metrics.get(name, {})
+            success_rate = 0
+            if metrics.get('api_calls', 0) > 0:
+                success_rate = (metrics.get('successful_calls', 0) / metrics.get('api_calls', 1)) * 100
+                
             status['integrations'][name] = {
                 'active': integration.is_active,
                 'type': integration.__class__.__name__,
-                'last_sync': datetime.now().isoformat()
+                'api_calls': metrics.get('api_calls', 0),
+                'success_rate': success_rate,
+                'error_count': metrics.get('error_count', 0),
+                'last_sync': metrics.get('last_sync'),
+                'health_score': max(0, 100 - metrics.get('error_count', 0) * 10)
             }
             
         return status
@@ -802,6 +928,51 @@ class IntegrationManager:
         except Exception as e:
             self.logger.error(f"AI stok tahmin hatası: {e}")
             return product_data.get('current_stock', 0)
+            
+    def get_system_health(self) -> Dict:
+        """Sistem sağlık durumu"""
+        total_integrations = len(self.integrations)
+        active_integrations = sum(1 for name, integration in self.integrations.items() if integration.is_active)
+        
+        total_api_calls = sum(metrics.get('api_calls', 0) for metrics in self.metrics.values())
+        total_successful_calls = sum(metrics.get('successful_calls', 0) for metrics in self.metrics.values())
+        total_error_count = sum(metrics.get('error_count', 0) for metrics in self.metrics.values())
+        
+        overall_success_rate = 0
+        if total_api_calls > 0:
+            overall_success_rate = (total_successful_calls / total_api_calls) * 100
+            
+        return {
+            'total_integrations': total_integrations,
+            'active_integrations': active_integrations,
+            'total_api_calls': total_api_calls,
+            'overall_success_rate': overall_success_rate,
+            'total_errors': total_error_count,
+            'health_percentage': max(0, 100 - total_error_count * 5),
+            'timestamp': datetime.utcnow().isoformat()
+        }
+        
+    async def perform_health_check(self):
+        """Sistem sağlık kontrolü"""
+        health_results = {}
+        for name, integration in self.integrations.items():
+            try:
+                # Bağlantı testi
+                is_connected = await integration.connect()
+                health_results[name] = {
+                    'status': 'healthy' if is_connected else 'unhealthy',
+                    'connected': is_connected,
+                    'timestamp': datetime.utcnow().isoformat()
+                }
+            except Exception as e:
+                health_results[name] = {
+                    'status': 'error',
+                    'error': str(e),
+                    'connected': False,
+                    'timestamp': datetime.utcnow().isoformat()
+                }
+                
+        return health_results
 
 # ===== ENTEGRASYON FABRİKASI =====
 
