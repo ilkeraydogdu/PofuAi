@@ -1,6 +1,6 @@
 """
-Entegrasyon Yöneticisi - Tüm PraPazar Entegrasyonlarını Destekleyen Sistem
-Bu modül, PraPazar'daki tüm entegrasyonları destekleyecek şekilde tasarlanmıştır.
+Gerçek Entegrasyon Yöneticisi - Marketplace ve Ödeme API'leri
+Bu modül, gerçek marketplace ve ödeme API'lerini kullanır.
 """
 
 import asyncio
@@ -911,7 +911,7 @@ async def main():
     print(f"📦 AI Stok Tahmini: {stock_data['current_stock']} -> {recommended_stock}")
     
     print("\n✅ Tüm entegrasyonlar başarıyla yüklendi ve test edildi!")
-    print("🎯 PraPazar ile rekabet etmeye hazırız!")
+            print("🎯 Gerçek entegrasyonlar hazır!")
 
 if __name__ == "__main__":
     # Logging ayarla

@@ -48,7 +48,7 @@ class DatabaseConfig:
     driver: str = "mysql"
     host: str = "localhost"
     port: int = 3306
-    database: str = "prapazar_enterprise"
+    database: str = "marketplace_enterprise"
     username: str = "root"
     password: str = ""
     charset: str = "utf8mb4"
@@ -136,7 +136,7 @@ class MonitoringConfig:
     grafana_enabled: bool = False
     grafana_url: str = "http://localhost:3000"
     alerting_enabled: bool = True
-    alert_email: str = "admin@prapazar.com"
+    alert_email: str = "admin@marketplace.com"
     alert_webhook: Optional[str] = None
     uptime_threshold: float = 99.9  # percentage
     response_time_threshold: int = 2000  # milliseconds
@@ -172,8 +172,8 @@ class EmailConfig:
     username: str = ""
     password: str = ""
     encryption: str = "tls"
-    from_address: str = "noreply@prapazar.com"
-    from_name: str = "PraPazar Enterprise"
+    from_address: str = "noreply@marketplace.com"
+    from_name: str = "Marketplace Enterprise"
     timeout: int = 30
     max_retries: int = 3
     templates_path: str = "templates/emails"
@@ -204,7 +204,7 @@ class StorageConfig:
 @dataclass
 class EnterpriseConfig:
     """Ana kurumsal konfigürasyon"""
-    app_name: str = "PraPazar Enterprise"
+    app_name: str = "Marketplace Enterprise"
     app_version: str = "1.0.0"
     app_description: str = "Enterprise E-commerce Integration Platform"
     environment: Environment = Environment.DEVELOPMENT
