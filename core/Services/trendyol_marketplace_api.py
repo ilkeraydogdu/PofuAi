@@ -1,370 +1,666 @@
 """
-Trendyol Marketplace API - Gerçek Implementasyon
-Bu modül Trendyol'un resmi Marketplace API'sini kullanır.
-API Dokümantasyonu: https://developers.trendyol.com/
+Trendyol Marketplace API Integration
+Full implementation with all features
 """
 
-import requests
-import json
+from typing import Dict, List, Any, Optional
+from datetime import datetime, timedelta
 import base64
-import hashlib
-import hmac
 import time
-from datetime import datetime
-from typing import Dict, List, Optional, Any
-import logging
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
+from decimal import Decimal
 
-class TrendyolMarketplaceAPI:
-    """Trendyol Marketplace API Client"""
+from .base_integration import BaseIntegration, RequestMethod, ValidationError, APIError
+
+
+class TrendyolMarketplaceAPI(BaseIntegration):
+    """
+    Trendyol Marketplace API implementation
     
-    def __init__(self, api_key: str, api_secret: str, supplier_id: str, sandbox: bool = True):
-        self.api_key = api_key
-        self.api_secret = api_secret
-        self.supplier_id = supplier_id
-        self.sandbox = sandbox
+    Documentation: https://developers.trendyol.com/
+    """
+    
+    def _initialize(self):
+        """Initialize Trendyol specific settings"""
+        self.api_key = self.credentials.get('api_key')
+        self.api_secret = self.credentials.get('api_secret')
+        self.supplier_id = self.credentials.get('supplier_id')
         
-        # API Base URLs
-        if sandbox:
-            self.base_url = "https://api.trendyol.com/sapigw"
+        if not all([self.api_key, self.api_secret, self.supplier_id]):
+            raise ValueError("Missing required credentials: api_key, api_secret, supplier_id")
+        
+        # Set base URLs
+        if self.sandbox:
+            self.base_url = "https://stageapi.trendyol.com/stageapigw"
         else:
-            self.base_url = "https://api.trendyol.com/sapigw"  # Production URL aynı
-            
-        # Setup session with retry strategy
-        self.session = requests.Session()
-        retry_strategy = Retry(
-            total=3,
-            backoff_factor=1,
-            status_forcelist=[429, 500, 502, 503, 504],
-        )
-        adapter = HTTPAdapter(max_retries=retry_strategy)
-        self.session.mount("http://", adapter)
-        self.session.mount("https://", adapter)
+            self.base_url = "https://api.trendyol.com/sapigw"
         
-        self.session.auth = (self.api_key, self.api_secret)
-        self.session.headers.update({
-            'Content-Type': 'application/json',
-            'User-Agent': 'TrendyolMarketplace-Python-Client/1.0'
-        })
+        # Trendyol specific rate limits
+        self.min_request_interval = 0.2  # 200ms between requests
+    
+    def _build_url(self, endpoint: str) -> str:
+        """Build full URL for endpoint"""
+        return f"{self.base_url}/{endpoint.lstrip('/')}"
+    
+    def _get_headers(self) -> Dict[str, str]:
+        """Get request headers with authentication"""
+        # Basic auth for Trendyol
+        auth_string = f"{self.api_key}:{self.api_secret}"
+        auth_bytes = auth_string.encode('ascii')
+        auth_b64 = base64.b64encode(auth_bytes).decode('ascii')
         
-        self.logger = logging.getLogger(__name__)
-
-    def _make_request(self, method: str, endpoint: str, data: Optional[Dict] = None, max_retries: int = 3) -> Dict:
-        """API isteği yapar - gelişmiş hata yönetimi ile"""
-        url = f"{self.base_url}{endpoint}"
-        
-        for attempt in range(max_retries):
-            try:
-                if method.upper() == 'GET':
-                    response = self.session.get(url, params=data, timeout=30)
-                elif method.upper() == 'POST':
-                    response = self.session.post(url, json=data, timeout=30)
-                elif method.upper() == 'PUT':
-                    response = self.session.put(url, json=data, timeout=30)
-                elif method.upper() == 'DELETE':
-                    response = self.session.delete(url, timeout=30)
-                else:
-                    raise ValueError(f"Unsupported HTTP method: {method}")
-                    
-                response.raise_for_status()
-                
-                # JSON parse kontrolü
-                try:
-                    return response.json()
-                except json.JSONDecodeError:
-                    self.logger.warning(f"Invalid JSON response from Trendyol API: {response.text[:200]}")
-                    return {"success": False, "error": "Invalid JSON response"}
-                    
-            except requests.exceptions.Timeout:
-                self.logger.warning(f"Trendyol API timeout (attempt {attempt + 1}/{max_retries})")
-                if attempt < max_retries - 1:
-                    time.sleep(2 ** attempt)  # Exponential backoff
-                    continue
-                return {"success": False, "error": "Request timeout"}
-                
-            except requests.exceptions.ConnectionError:
-                self.logger.warning(f"Trendyol API connection error (attempt {attempt + 1}/{max_retries})")
-                if attempt < max_retries - 1:
-                    time.sleep(2 ** attempt)
-                    continue
-                return {"success": False, "error": "Connection error"}
-                
-            except requests.exceptions.HTTPError as e:
-                if e.response.status_code == 429:  # Rate limit
-                    self.logger.warning(f"Trendyol API rate limit hit (attempt {attempt + 1}/{max_retries})")
-                    if attempt < max_retries - 1:
-                        time.sleep(5)  # Wait longer for rate limits
-                        continue
-                elif e.response.status_code >= 500:  # Server errors
-                    self.logger.warning(f"Trendyol API server error {e.response.status_code} (attempt {attempt + 1}/{max_retries})")
-                    if attempt < max_retries - 1:
-                        time.sleep(2 ** attempt)
-                        continue
-                
-                self.logger.error(f"Trendyol API HTTP error: {e}")
-                return {
-                    "success": False, 
-                    "error": f"HTTP {e.response.status_code}: {e.response.text[:200] if e.response else str(e)}"
-                }
-                
-            except requests.exceptions.RequestException as e:
-                self.logger.error(f"Trendyol API request failed: {e}")
-                if attempt < max_retries - 1:
-                    time.sleep(2 ** attempt)
-                    continue
-                return {"success": False, "error": str(e)}
-                
-        return {"success": False, "error": "Max retries exceeded"}
-
-    # ÜRÜN YÖNETİMİ
-    def create_product(self, product_data: Dict) -> Dict:
-        """Yeni ürün oluşturur"""
-        endpoint = f"/suppliers/{self.supplier_id}/products"
-        
-        # Ürün verilerini Trendyol formatına çevir
-        trendyol_product = {
-            "items": [{
-                "barcode": product_data.get("barcode"),
-                "title": product_data.get("title"),
-                "productMainId": product_data.get("product_main_id"),
-                "brandId": product_data.get("brand_id"),
-                "categoryId": product_data.get("category_id"),
-                "quantity": product_data.get("quantity", 0),
-                "stockCode": product_data.get("stock_code"),
-                "dimensionalWeight": product_data.get("dimensional_weight", 0),
-                "description": product_data.get("description"),
-                "currencyType": product_data.get("currency_type", "TRY"),
-                "listPrice": product_data.get("list_price"),
-                "salePrice": product_data.get("sale_price"),
-                "vatRate": product_data.get("vat_rate", 18),
-                "cargoCompanyId": product_data.get("cargo_company_id", 10),
-                "images": product_data.get("images", []),
-                "attributes": product_data.get("attributes", [])
-            }]
+        return {
+            'Authorization': f'Basic {auth_b64}',
+            'User-Agent': f'{self.supplier_id} - MarketplaceIntegration',
+            'Content-Type': 'application/json'
         }
-        
-        return self._make_request('POST', endpoint, trendyol_product)
-
-    def update_product(self, product_data: Dict) -> Dict:
-        """Ürün bilgilerini günceller"""
-        endpoint = f"/suppliers/{self.supplier_id}/products"
-        return self._make_request('POST', endpoint, product_data)
-
-    def get_products(self, page: int = 0, size: int = 50) -> Dict:
-        """Ürün listesini getirir"""
-        endpoint = f"/suppliers/{self.supplier_id}/products"
-        params = {"page": page, "size": size}
-        return self._make_request('GET', endpoint, params)
-
-    def get_product(self, barcode: str) -> Dict:
-        """Tek ürün bilgisini getirir"""
-        endpoint = f"/suppliers/{self.supplier_id}/products"
-        params = {"barcode": barcode}
-        return self._make_request('GET', endpoint, params)
-
-    def update_stock_price(self, items: List[Dict]) -> Dict:
-        """Stok ve fiyat günceller"""
-        endpoint = f"/suppliers/{self.supplier_id}/products/price-and-inventory"
-        
-        data = {"items": items}
-        return self._make_request('POST', endpoint, data)
-
-    # SİPARİŞ YÖNETİMİ
-    def get_orders(self, start_date: str = None, end_date: str = None, 
-                   page: int = 0, size: int = 50, status: str = None) -> Dict:
-        """Sipariş listesini getirir"""
-        endpoint = f"/suppliers/{self.supplier_id}/orders"
-        
-        params = {
-            "page": page,
-            "size": size
-        }
-        
-        if start_date:
-            params["startDate"] = start_date
-        if end_date:
-            params["endDate"] = end_date
-        if status:
-            params["status"] = status
-            
-        return self._make_request('GET', endpoint, params)
-
-    def get_order(self, order_number: str) -> Dict:
-        """Tek sipariş bilgisini getirir"""
-        endpoint = f"/suppliers/{self.supplier_id}/orders/{order_number}"
-        return self._make_request('GET', endpoint)
-
-    def update_order_status(self, order_number: str, status: str, 
-                           tracking_number: str = None, invoice_number: str = None) -> Dict:
-        """Sipariş durumunu günceller"""
-        endpoint = f"/suppliers/{self.supplier_id}/orders/{order_number}/status"
-        
-        data = {"status": status}
-        if tracking_number:
-            data["trackingNumber"] = tracking_number
-        if invoice_number:
-            data["invoiceNumber"] = invoice_number
-            
-        return self._make_request('PUT', endpoint, data)
-
-    def ship_order(self, order_number: str, tracking_number: str, 
-                   cargo_company_id: int, invoice_number: str = None) -> Dict:
-        """Siparişi kargoya verir"""
-        endpoint = f"/suppliers/{self.supplier_id}/orders/{order_number}/ship"
-        
-        data = {
-            "trackingNumber": tracking_number,
-            "cargoCompanyId": cargo_company_id
-        }
-        
-        if invoice_number:
-            data["invoiceNumber"] = invoice_number
-            
-        return self._make_request('POST', endpoint, data)
-
-    # KARGO YÖNETİMİ
-    def get_cargo_companies(self) -> Dict:
-        """Kargo firmalarını listeler"""
-        endpoint = "/cargo-companies"
-        return self._make_request('GET', endpoint)
-
-    def get_shipment_packages(self, order_number: str) -> Dict:
-        """Sipariş paket bilgilerini getirir"""
-        endpoint = f"/suppliers/{self.supplier_id}/orders/{order_number}/shipment-packages"
-        return self._make_request('GET', endpoint)
-
-    # KATEGORİ VE MARKA
-    def get_categories(self) -> Dict:
-        """Kategori listesini getirir"""
-        endpoint = "/product-categories"
-        return self._make_request('GET', endpoint)
-
-    def get_category_attributes(self, category_id: int) -> Dict:
-        """Kategori özelliklerini getirir"""
-        endpoint = f"/product-categories/{category_id}/attributes"
-        return self._make_request('GET', endpoint)
-
-    def get_brands(self) -> Dict:
-        """Marka listesini getirir"""
-        endpoint = "/brands"
-        return self._make_request('GET', endpoint)
-
-    def get_brand_by_name(self, name: str) -> Dict:
-        """İsme göre marka arar"""
-        endpoint = f"/brands/by-name"
-        params = {"name": name}
-        return self._make_request('GET', endpoint, params)
-
-    # BATCH İŞLEMLER
-    def check_batch_request_result(self, batch_request_id: str) -> Dict:
-        """Batch işlem sonucunu kontrol eder"""
-        endpoint = f"/suppliers/{self.supplier_id}/products/batch-requests/{batch_request_id}"
-        return self._make_request('GET', endpoint)
-
-    # WEBHOOK
-    def get_webhook_url(self) -> Dict:
-        """Webhook URL'ini getirir"""
-        endpoint = f"/suppliers/{self.supplier_id}/webhook-url"
-        return self._make_request('GET', endpoint)
-
-    def set_webhook_url(self, webhook_url: str) -> Dict:
-        """Webhook URL'ini ayarlar"""
-        endpoint = f"/suppliers/{self.supplier_id}/webhook-url"
-        data = {"url": webhook_url}
-        return self._make_request('POST', endpoint, data)
-
-    # RAPORLAMA
-    def get_settlement_report(self, start_date: str, end_date: str) -> Dict:
-        """Ödeme raporu getirir"""
-        endpoint = f"/suppliers/{self.supplier_id}/finance/settlement-reports"
-        params = {
-            "startDate": start_date,
-            "endDate": end_date
-        }
-        return self._make_request('GET', endpoint, params)
-
-    def get_returns(self, start_date: str = None, end_date: str = None, 
-                    page: int = 0, size: int = 50) -> Dict:
-        """İade listesini getirir"""
-        endpoint = f"/suppliers/{self.supplier_id}/returns"
-        
-        params = {"page": page, "size": size}
-        if start_date:
-            params["startDate"] = start_date
-        if end_date:
-            params["endDate"] = end_date
-            
-        return self._make_request('GET', endpoint, params)
-
-    # TEST FONKSİYONLARI
-    def test_connection(self) -> Dict:
-        """API bağlantısını test eder"""
+    
+    def _test_connection(self) -> bool:
+        """Test API connection"""
         try:
-            result = self.get_categories()
-            if "categoryId" in str(result):
-                return {
-                    "success": True,
-                    "message": "Trendyol API bağlantısı başarılı",
-                    "api_key": self.api_key[:8] + "...",
-                    "supplier_id": self.supplier_id,
-                    "sandbox": self.sandbox
-                }
-            else:
-                return {
-                    "success": False,
-                    "message": "API yanıtı beklenmedik format",
-                    "response": result
-                }
-        except Exception as e:
-            return {
-                "success": False,
-                "message": f"Trendyol API bağlantı hatası: {str(e)}"
-            }
+            # Get supplier info to test connection
+            self.get_supplier_info()
+            return True
+        except Exception:
+            return False
+    
+    # Supplier Management
+    def get_supplier_info(self) -> Dict[str, Any]:
+        """Get supplier information"""
+        return self.make_request(
+            RequestMethod.GET,
+            f"suppliers/{self.supplier_id}"
+        )
+    
+    def get_supplier_addresses(self) -> List[Dict[str, Any]]:
+        """Get supplier addresses"""
+        response = self.make_request(
+            RequestMethod.GET,
+            f"suppliers/{self.supplier_id}/addresses"
+        )
+        return response.get('supplierAddresses', [])
+    
+    # Product Management
+    def create_product(self, product_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Create a new product
+        
+        Args:
+            product_data: Product information including:
+                - barcode: Product barcode
+                - title: Product title
+                - productMainId: Main product ID
+                - brandId: Brand ID
+                - categoryId: Category ID
+                - quantity: Stock quantity
+                - stockCode: Stock code
+                - dimensionalWeight: Weight in grams
+                - description: Product description
+                - currencyType: Currency (TRY)
+                - listPrice: List price
+                - salePrice: Sale price
+                - vatRate: VAT rate (0, 1, 8, 18)
+                - cargoCompanyId: Cargo company ID
+                - images: List of image objects
+                - attributes: List of attribute objects
+        """
+        # Validate required fields
+        required_fields = ['barcode', 'title', 'productMainId', 'brandId', 
+                          'categoryId', 'quantity', 'stockCode', 'listPrice', 
+                          'salePrice', 'cargoCompanyId']
+        
+        for field in required_fields:
+            if field not in product_data:
+                raise ValidationError(f"Missing required field: {field}")
+        
+        # Create product batch request
+        batch_request = {
+            "items": [product_data]
+        }
+        
+        return self.make_request(
+            RequestMethod.POST,
+            f"suppliers/{self.supplier_id}/v2/products",
+            data=batch_request
+        )
+    
+    def update_product(self, product_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Update existing product"""
+        batch_request = {
+            "items": [product_data]
+        }
+        
+        return self.make_request(
+            RequestMethod.PUT,
+            f"suppliers/{self.supplier_id}/v2/products",
+            data=batch_request
+        )
+    
+    def get_products(self, 
+                    page: int = 0,
+                    size: int = 50,
+                    approved: Optional[bool] = None,
+                    barcode: Optional[str] = None,
+                    start_date: Optional[datetime] = None,
+                    end_date: Optional[datetime] = None) -> Dict[str, Any]:
+        """
+        Get products with filters
+        
+        Args:
+            page: Page number (0-based)
+            size: Page size (max 200)
+            approved: Filter by approval status
+            barcode: Filter by barcode
+            start_date: Filter by creation date start
+            end_date: Filter by creation date end
+        """
+        params = {
+            'page': page,
+            'size': min(size, 200)
+        }
+        
+        if approved is not None:
+            params['approved'] = str(approved).lower()
+        if barcode:
+            params['barcode'] = barcode
+        if start_date:
+            params['startDate'] = int(start_date.timestamp() * 1000)
+        if end_date:
+            params['endDate'] = int(end_date.timestamp() * 1000)
+        
+        return self.make_request(
+            RequestMethod.GET,
+            f"suppliers/{self.supplier_id}/products",
+            params=params
+        )
+    
+    def get_product_by_barcode(self, barcode: str) -> Dict[str, Any]:
+        """Get single product by barcode"""
+        products = self.get_products(barcode=barcode)
+        if products.get('content'):
+            return products['content'][0]
+        raise APIError(f"Product not found: {barcode}")
+    
+    def update_price_and_stock(self, updates: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """
+        Update price and stock for multiple products
+        
+        Args:
+            updates: List of updates, each containing:
+                - barcode: Product barcode
+                - quantity: New stock quantity (optional)
+                - salePrice: New sale price (optional)
+                - listPrice: New list price (optional)
+        """
+        batch_request = {
+            "items": updates
+        }
+        
+        return self.make_request(
+            RequestMethod.POST,
+            f"suppliers/{self.supplier_id}/products/price-and-inventory",
+            data=batch_request
+        )
+    
+    def delete_products(self, barcodes: List[str]) -> Dict[str, Any]:
+        """Delete products by barcode"""
+        batch_request = {
+            "items": [{"barcode": barcode} for barcode in barcodes]
+        }
+        
+        return self.make_request(
+            RequestMethod.DELETE,
+            f"suppliers/{self.supplier_id}/products",
+            data=batch_request
+        )
+    
+    # Category & Brand Management
+    def get_categories(self) -> List[Dict[str, Any]]:
+        """Get all categories"""
+        response = self.make_request(
+            RequestMethod.GET,
+            "product-categories"
+        )
+        return response.get('categories', [])
+    
+    def get_category_attributes(self, category_id: int) -> List[Dict[str, Any]]:
+        """Get attributes for a specific category"""
+        response = self.make_request(
+            RequestMethod.GET,
+            f"product-categories/{category_id}/attributes"
+        )
+        return response.get('categoryAttributes', [])
+    
+    def get_brands(self, name: Optional[str] = None, 
+                   page: int = 0, 
+                   size: int = 50) -> Dict[str, Any]:
+        """Get brands with optional name filter"""
+        params = {
+            'page': page,
+            'size': min(size, 200)
+        }
+        if name:
+            params['name'] = name
+        
+        return self.make_request(
+            RequestMethod.GET,
+            "brands",
+            params=params
+        )
+    
+    def get_brands_by_name(self, name: str) -> List[Dict[str, Any]]:
+        """Search brands by name"""
+        response = self.make_request(
+            RequestMethod.GET,
+            f"brands/by-name",
+            params={'name': name}
+        )
+        return response.get('brands', [])
+    
+    # Order Management
+    def get_orders(self,
+                   status: Optional[str] = None,
+                   start_date: Optional[datetime] = None,
+                   end_date: Optional[datetime] = None,
+                   page: int = 0,
+                   size: int = 50) -> Dict[str, Any]:
+        """
+        Get orders with filters
+        
+        Args:
+            status: Order status (Created, Picking, Invoiced, Shipped, Cancelled, etc.)
+            start_date: Start date filter
+            end_date: End date filter
+            page: Page number
+            size: Page size (max 200)
+        """
+        params = {
+            'page': page,
+            'size': min(size, 200)
+        }
+        
+        if status:
+            params['status'] = status
+        if start_date:
+            params['startDate'] = int(start_date.timestamp() * 1000)
+        if end_date:
+            params['endDate'] = int(end_date.timestamp() * 1000)
+        
+        return self.make_request(
+            RequestMethod.GET,
+            f"suppliers/{self.supplier_id}/orders",
+            params=params
+        )
+    
+    def get_order_by_number(self, order_number: str) -> Dict[str, Any]:
+        """Get single order by order number"""
+        orders = self.get_orders()
+        for order in orders.get('content', []):
+            if order.get('orderNumber') == order_number:
+                return order
+        raise APIError(f"Order not found: {order_number}")
+    
+    def update_order_status(self, order_number: str, status: str, 
+                           params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        Update order status
+        
+        Args:
+            order_number: Order number
+            status: New status (Picking, Invoiced, Shipped, etc.)
+            params: Additional parameters like invoiceNumber, trackingNumber
+        """
+        data = params or {}
+        
+        # Status-specific endpoints
+        if status == "Picking":
+            endpoint = f"suppliers/{self.supplier_id}/orders/{order_number}/in-progress"
+        elif status == "Invoiced":
+            endpoint = f"suppliers/{self.supplier_id}/orders/{order_number}/invoiced"
+        elif status == "Shipped":
+            endpoint = f"suppliers/{self.supplier_id}/orders/{order_number}/shipped"
+        elif status == "Cancelled":
+            endpoint = f"suppliers/{self.supplier_id}/orders/{order_number}/cancel"
+        else:
+            raise ValidationError(f"Invalid order status: {status}")
+        
+        return self.make_request(
+            RequestMethod.PUT,
+            endpoint,
+            data=data
+        )
+    
+    def split_order_packages(self, order_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Split order into multiple packages"""
+        return self.make_request(
+            RequestMethod.POST,
+            f"suppliers/{self.supplier_id}/orders/split-packages",
+            data=order_data
+        )
+    
+    # Shipment & Cargo Management
+    def get_shipment_providers(self) -> List[Dict[str, Any]]:
+        """Get available shipment providers"""
+        response = self.make_request(
+            RequestMethod.GET,
+            "shipment-providers"
+        )
+        return response.get('content', [])
+    
+    def create_cargo_label(self, cargo_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Create cargo label for shipment"""
+        return self.make_request(
+            RequestMethod.POST,
+            f"suppliers/{self.supplier_id}/cargo-labels",
+            data=cargo_data
+        )
+    
+    def get_cargo_label(self, cargo_tracking_number: str) -> bytes:
+        """Get cargo label PDF"""
+        response = self.session.get(
+            self._build_url(f"suppliers/{self.supplier_id}/cargo-labels/{cargo_tracking_number}"),
+            headers=self._get_headers()
+        )
+        response.raise_for_status()
+        return response.content
+    
+    # Returns & Claims
+    def get_returns(self,
+                   status: Optional[str] = None,
+                   start_date: Optional[datetime] = None,
+                   end_date: Optional[datetime] = None,
+                   page: int = 0,
+                   size: int = 50) -> Dict[str, Any]:
+        """Get return requests"""
+        params = {
+            'page': page,
+            'size': min(size, 200)
+        }
+        
+        if status:
+            params['status'] = status
+        if start_date:
+            params['startDate'] = int(start_date.timestamp() * 1000)
+        if end_date:
+            params['endDate'] = int(end_date.timestamp() * 1000)
+        
+        return self.make_request(
+            RequestMethod.GET,
+            f"suppliers/{self.supplier_id}/returns",
+            params=params
+        )
+    
+    def approve_return(self, return_id: str, params: Dict[str, Any]) -> Dict[str, Any]:
+        """Approve return request"""
+        return self.make_request(
+            RequestMethod.PUT,
+            f"suppliers/{self.supplier_id}/returns/{return_id}/approve",
+            data=params
+        )
+    
+    def reject_return(self, return_id: str, reject_reason: str) -> Dict[str, Any]:
+        """Reject return request"""
+        return self.make_request(
+            RequestMethod.PUT,
+            f"suppliers/{self.supplier_id}/returns/{return_id}/reject",
+            data={"rejectReason": reject_reason}
+        )
+    
+    def get_claims(self,
+                   status: Optional[str] = None,
+                   start_date: Optional[datetime] = None,
+                   end_date: Optional[datetime] = None,
+                   page: int = 0,
+                   size: int = 50) -> Dict[str, Any]:
+        """Get claim requests"""
+        params = {
+            'page': page,
+            'size': min(size, 200)
+        }
+        
+        if status:
+            params['status'] = status
+        if start_date:
+            params['startDate'] = int(start_date.timestamp() * 1000)
+        if end_date:
+            params['endDate'] = int(end_date.timestamp() * 1000)
+        
+        return self.make_request(
+            RequestMethod.GET,
+            f"suppliers/{self.supplier_id}/claims",
+            params=params
+        )
+    
+    def approve_claim(self, claim_id: str, params: Dict[str, Any]) -> Dict[str, Any]:
+        """Approve claim request"""
+        return self.make_request(
+            RequestMethod.PUT,
+            f"suppliers/{self.supplier_id}/claims/{claim_id}/approve",
+            data=params
+        )
+    
+    # Questions & Answers
+    def get_questions(self,
+                     status: Optional[str] = None,
+                     start_date: Optional[datetime] = None,
+                     end_date: Optional[datetime] = None,
+                     page: int = 0,
+                     size: int = 50) -> Dict[str, Any]:
+        """Get product questions"""
+        params = {
+            'page': page,
+            'size': min(size, 200)
+        }
+        
+        if status:
+            params['status'] = status
+        if start_date:
+            params['startDate'] = int(start_date.timestamp() * 1000)
+        if end_date:
+            params['endDate'] = int(end_date.timestamp() * 1000)
+        
+        return self.make_request(
+            RequestMethod.GET,
+            f"suppliers/{self.supplier_id}/questions",
+            params=params
+        )
+    
+    def answer_question(self, question_id: str, answer: str) -> Dict[str, Any]:
+        """Answer a product question"""
+        return self.make_request(
+            RequestMethod.POST,
+            f"suppliers/{self.supplier_id}/questions/{question_id}/answer",
+            data={"answer": answer}
+        )
+    
+    # Reporting & Analytics
+    def get_settlement_report(self, 
+                            start_date: datetime,
+                            end_date: datetime,
+                            page: int = 0,
+                            size: int = 50) -> Dict[str, Any]:
+        """Get settlement/payment report"""
+        params = {
+            'startDate': int(start_date.timestamp() * 1000),
+            'endDate': int(end_date.timestamp() * 1000),
+            'page': page,
+            'size': min(size, 200)
+        }
+        
+        return self.make_request(
+            RequestMethod.GET,
+            f"suppliers/{self.supplier_id}/settlements",
+            params=params
+        )
+    
+    def get_commission_report(self, 
+                            start_date: datetime,
+                            end_date: datetime) -> Dict[str, Any]:
+        """Get commission report"""
+        params = {
+            'startDate': start_date.strftime('%Y-%m-%d'),
+            'endDate': end_date.strftime('%Y-%m-%d')
+        }
+        
+        return self.make_request(
+            RequestMethod.GET,
+            f"suppliers/{self.supplier_id}/commission-report",
+            params=params
+        )
+    
+    # Webhook Management
+    def create_webhook(self, url: str, events: List[str]) -> Dict[str, Any]:
+        """Create webhook subscription"""
+        data = {
+            "url": url,
+            "events": events
+        }
+        
+        return self.make_request(
+            RequestMethod.POST,
+            f"suppliers/{self.supplier_id}/webhooks",
+            data=data
+        )
+    
+    def get_webhooks(self) -> List[Dict[str, Any]]:
+        """Get webhook subscriptions"""
+        response = self.make_request(
+            RequestMethod.GET,
+            f"suppliers/{self.supplier_id}/webhooks"
+        )
+        return response.get('webhooks', [])
+    
+    def delete_webhook(self, webhook_id: str) -> Dict[str, Any]:
+        """Delete webhook subscription"""
+        return self.make_request(
+            RequestMethod.DELETE,
+            f"suppliers/{self.supplier_id}/webhooks/{webhook_id}"
+        )
+    
+    # Batch Operations
+    def batch_update_products(self, products: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Batch update multiple products"""
+        return self.batch_operation(
+            items=products,
+            operation_function=lambda batch: self.update_product({"items": batch}),
+            batch_size=100,
+            delay_between_batches=1.0
+        )
+    
+    def batch_update_prices(self, updates: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Batch update prices and stock"""
+        return self.batch_operation(
+            items=updates,
+            operation_function=lambda batch: self.update_price_and_stock(batch),
+            batch_size=100,
+            delay_between_batches=1.0
+        )
+    
+    # Helper Methods
+    def get_all_products(self) -> List[Dict[str, Any]]:
+        """Get all products using pagination"""
+        return self.paginate_results(
+            fetch_function=lambda page, size: self.get_products(page=page, size=size).get('content', []),
+            page_size=200
+        )
+    
+    def get_all_orders(self, status: Optional[str] = None,
+                      start_date: Optional[datetime] = None,
+                      end_date: Optional[datetime] = None) -> List[Dict[str, Any]]:
+        """Get all orders using pagination"""
+        return self.paginate_results(
+            fetch_function=lambda page, size: self.get_orders(
+                status=status, 
+                start_date=start_date, 
+                end_date=end_date,
+                page=page, 
+                size=size
+            ).get('content', []),
+            page_size=200
+        )
+    
+    def calculate_commission(self, category_id: int, price: Decimal) -> Decimal:
+        """Calculate commission for a product"""
+        # This would typically call an API endpoint or use a commission table
+        # For now, using a default rate
+        commission_rate = Decimal('0.20')  # 20% default
+        return price * commission_rate
+    
+    def format_product_for_trendyol(self, product_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Format product data for Trendyol API"""
+        # Map common fields to Trendyol format
+        formatted = {
+            'barcode': product_data.get('barcode'),
+            'title': product_data.get('name'),
+            'productMainId': product_data.get('model_code'),
+            'brandId': product_data.get('brand_id'),
+            'categoryId': product_data.get('category_id'),
+            'quantity': product_data.get('stock', 0),
+            'stockCode': product_data.get('sku'),
+            'dimensionalWeight': int(product_data.get('weight', 0) * 1000),  # Convert kg to grams
+            'description': product_data.get('description', ''),
+            'currencyType': 'TRY',
+            'listPrice': float(product_data.get('list_price', 0)),
+            'salePrice': float(product_data.get('sale_price', 0)),
+            'vatRate': product_data.get('vat_rate', 18),
+            'cargoCompanyId': product_data.get('cargo_company_id', 10),  # Default cargo
+            'images': [],
+            'attributes': []
+        }
+        
+        # Add images
+        if 'images' in product_data:
+            for idx, image_url in enumerate(product_data['images'][:8]):  # Max 8 images
+                formatted['images'].append({
+                    'url': image_url
+                })
+        
+        # Add attributes
+        if 'attributes' in product_data:
+            for attr_name, attr_value in product_data['attributes'].items():
+                formatted['attributes'].append({
+                    'attributeId': attr_name,  # This should be mapped to actual attribute IDs
+                    'attributeValueId': attr_value  # This should be mapped to actual value IDs
+                })
+        
+        return formatted
 
-    def get_supplier_info(self) -> Dict:
-        """Satıcı bilgilerini getirir"""
-        endpoint = f"/suppliers/{self.supplier_id}"
-        return self._make_request('GET', endpoint)
 
-
-# Örnek kullanım ve test fonksiyonları
 def test_trendyol_api():
-    """Trendyol API'sini test eder"""
+    """Test Trendyol API functionality"""
+    print("Testing Trendyol Marketplace API...")
     
-    # Test credentials (gerçek projede environment variable'lardan alınmalı)
-    api_key = "YOUR_API_KEY"
-    api_secret = "YOUR_API_SECRET"
-    supplier_id = "YOUR_SUPPLIER_ID"
+    # Test credentials (these should come from environment variables)
+    credentials = {
+        'api_key': 'YOUR_API_KEY',
+        'api_secret': 'YOUR_API_SECRET',
+        'supplier_id': 'YOUR_SUPPLIER_ID'
+    }
     
-    # API client oluştur
-    trendyol = TrendyolMarketplaceAPI(
-        api_key=api_key,
-        api_secret=api_secret,
-        supplier_id=supplier_id,
-        sandbox=True
-    )
-    
-    print("🔄 Trendyol API Bağlantı Testi...")
-    connection_test = trendyol.test_connection()
-    print(f"Bağlantı: {'✅ Başarılı' if connection_test['success'] else '❌ Başarısız'}")
-    
-    if connection_test['success']:
-        print("\n📦 Ürün Listesi Testi...")
-        products = trendyol.get_products(page=0, size=10)
-        print(f"Ürün sayısı: {len(products.get('content', []))}")
+    try:
+        # Initialize API
+        api = TrendyolMarketplaceAPI(credentials, sandbox=True)
         
-        print("\n📋 Kategori Listesi Testi...")
-        categories = trendyol.get_categories()
-        print(f"Kategori sayısı: {len(categories.get('categoryTree', []))}")
-        
-        print("\n🏷️ Marka Listesi Testi...")
-        brands = trendyol.get_brands()
-        print(f"Marka sayısı: {len(brands.get('brands', []))}")
-        
-        print("\n📦 Sipariş Listesi Testi...")
-        orders = trendyol.get_orders(page=0, size=10)
-        print(f"Sipariş sayısı: {len(orders.get('content', []))}")
+        # Test connection
+        if api.validate_credentials():
+            print("✅ Connection successful!")
+            
+            # Get supplier info
+            supplier_info = api.get_supplier_info()
+            print(f"✅ Supplier: {supplier_info.get('supplierName')}")
+            
+            # Get categories
+            categories = api.get_categories()
+            print(f"✅ Found {len(categories)} categories")
+            
+            # Get brands
+            brands = api.get_brands(size=10)
+            print(f"✅ Found {brands.get('totalElements', 0)} brands")
+            
+        else:
+            print("❌ Authentication failed!")
+            
+    except Exception as e:
+        print(f"❌ Error: {e}")
 
 
 if __name__ == "__main__":
