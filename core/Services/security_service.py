@@ -75,8 +75,29 @@ class SecurityService(BaseService):
         self.rate_limits = self._load_rate_limit_rules()
         self.blocked_ips = self._load_blocked_ips()
         self.suspicious_patterns = self._load_suspicious_patterns()
-        self.allowed_file_types = ['jpg', 'jpeg', 'png', 'gif', 'pdf', 'doc', 'docx', 'txt']
+        self.allowed_file_types = ['jpg', 'jpeg', 'png', 'gif', 'pdf', 'doc', 'docx', 'txt', 'webp', 'svg']
         self.max_file_size = 10 * 1024 * 1024  # 10MB
+        
+        # Yeni güvenlik özellikleri
+        self.password_policy = {
+            'min_length': 8,
+            'require_uppercase': True,
+            'require_lowercase': True,
+            'require_numbers': True,
+            'require_special': True,
+            'max_repeated_chars': 3,
+            'password_history': 5,
+            'max_age_days': 90
+        }
+        
+        self.session_config = {
+            'max_lifetime': 3600,  # 1 saat
+            'idle_timeout': 1800,  # 30 dakika
+            'max_concurrent_sessions': 3,
+            'secure_cookie': True,
+            'httponly': True,
+            'samesite': 'Strict'
+        }
         
     def _get_encryption_key(self) -> bytes:
         """Şifreleme anahtarını al"""
@@ -708,6 +729,260 @@ class SecurityService(BaseService):
         """Geçici IP blokla"""
         cache_key = f"blocked_ip_{ip_address}"
         self.cache.set(cache_key, True, duration)
+    
+    def validate_password_strength(self, password: str, user_data: Dict[str, Any] = None) -> Tuple[bool, List[str]]:
+        """Şifre güvenliği kontrolü"""
+        errors = []
+        
+        # Uzunluk kontrolü
+        if len(password) < self.password_policy['min_length']:
+            errors.append(f"Şifre en az {self.password_policy['min_length']} karakter olmalıdır")
+        
+        # Büyük harf kontrolü
+        if self.password_policy['require_uppercase'] and not re.search(r'[A-Z]', password):
+            errors.append("Şifre en az bir büyük harf içermelidir")
+        
+        # Küçük harf kontrolü
+        if self.password_policy['require_lowercase'] and not re.search(r'[a-z]', password):
+            errors.append("Şifre en az bir küçük harf içermelidir")
+        
+        # Sayı kontrolü
+        if self.password_policy['require_numbers'] and not re.search(r'[0-9]', password):
+            errors.append("Şifre en az bir rakam içermelidir")
+        
+        # Özel karakter kontrolü
+        if self.password_policy['require_special'] and not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+            errors.append("Şifre en az bir özel karakter içermelidir")
+        
+        # Tekrarlayan karakter kontrolü
+        for i in range(len(password) - self.password_policy['max_repeated_chars'] + 1):
+            if password[i] * self.password_policy['max_repeated_chars'] in password:
+                errors.append(f"Aynı karakter {self.password_policy['max_repeated_chars']} defadan fazla tekrar edemez")
+                break
+        
+        # Yaygın şifre kontrolü
+        common_passwords = ['123456', 'password', 'qwerty', '123456789', '12345678']
+        if password.lower() in common_passwords:
+            errors.append("Bu şifre çok yaygın kullanılıyor, lütfen daha güçlü bir şifre seçin")
+        
+        # Kullanıcı bilgilerini içerme kontrolü
+        if user_data:
+            user_info = [
+                user_data.get('email', '').split('@')[0],
+                user_data.get('name', ''),
+                user_data.get('username', '')
+            ]
+            for info in user_info:
+                if info and info.lower() in password.lower():
+                    errors.append("Şifre kişisel bilgilerinizi içermemelidir")
+                    break
+        
+        return len(errors) == 0, errors
+    
+    def check_password_history(self, user_id: int, new_password_hash: str) -> bool:
+        """Şifre geçmişi kontrolü"""
+        try:
+            query = """
+            SELECT password_hash FROM password_history 
+            WHERE user_id = %s 
+            ORDER BY created_at DESC 
+            LIMIT %s
+            """
+            
+            history = self.connection.fetch_all(
+                query, 
+                (user_id, self.password_policy['password_history'])
+            )
+            
+            for record in history:
+                if bcrypt.checkpw(new_password_hash.encode(), record['password_hash'].encode()):
+                    return False  # Şifre daha önce kullanılmış
+            
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"Password history check error: {e}")
+            return True  # Hata durumunda izin ver
+    
+    def enforce_session_security(self, user_id: int, session_id: str) -> Dict[str, Any]:
+        """Oturum güvenliği kontrolü"""
+        try:
+            # Mevcut oturumları kontrol et
+            active_sessions_key = f"user_sessions_{user_id}"
+            active_sessions = self.cache.get(active_sessions_key) or []
+            
+            # Maksimum oturum sayısı kontrolü
+            if len(active_sessions) >= self.session_config['max_concurrent_sessions']:
+                # En eski oturumu sonlandır
+                oldest_session = active_sessions[0]
+                self.terminate_session(oldest_session['session_id'])
+                active_sessions = active_sessions[1:]
+            
+            # Yeni oturumu ekle
+            new_session = {
+                'session_id': session_id,
+                'created_at': datetime.now().isoformat(),
+                'last_activity': datetime.now().isoformat(),
+                'ip_address': self._get_client_ip(),
+                'user_agent': request.headers.get('User-Agent', '')
+            }
+            
+            active_sessions.append(new_session)
+            self.cache.set(active_sessions_key, active_sessions, self.session_config['max_lifetime'])
+            
+            return {
+                'success': True,
+                'session_id': session_id,
+                'expires_in': self.session_config['max_lifetime']
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Session security enforcement error: {e}")
+            return {'success': False, 'error': str(e)}
+    
+    def terminate_session(self, session_id: str):
+        """Oturumu sonlandır"""
+        try:
+            # Session cache'ini temizle
+            self.cache.delete(f"session_{session_id}")
+            
+            # Session blacklist'e ekle
+            blacklist_key = f"session_blacklist_{session_id}"
+            self.cache.set(blacklist_key, True, 86400)  # 24 saat
+            
+        except Exception as e:
+            self.logger.error(f"Session termination error: {e}")
+    
+    def detect_anomalous_behavior(self, user_id: int, action: str, metadata: Dict[str, Any] = None) -> Dict[str, Any]:
+        """Anormal davranış tespiti"""
+        try:
+            # Kullanıcı aktivite pattern'i
+            activity_key = f"user_activity_pattern_{user_id}"
+            activity_pattern = self.cache.get(activity_key) or {
+                'actions': [],
+                'locations': [],
+                'devices': []
+            }
+            
+            current_ip = self._get_client_ip()
+            current_device = request.headers.get('User-Agent', '')
+            
+            anomalies = []
+            
+            # Yeni lokasyon kontrolü
+            if current_ip not in activity_pattern['locations']:
+                if len(activity_pattern['locations']) > 0:
+                    anomalies.append({
+                        'type': 'new_location',
+                        'severity': 'medium',
+                        'details': f'New IP address: {current_ip}'
+                    })
+                activity_pattern['locations'].append(current_ip)
+            
+            # Yeni cihaz kontrolü
+            if current_device not in activity_pattern['devices']:
+                if len(activity_pattern['devices']) > 0:
+                    anomalies.append({
+                        'type': 'new_device',
+                        'severity': 'medium',
+                        'details': 'New device detected'
+                    })
+                activity_pattern['devices'].append(current_device)
+            
+            # Hızlı aktivite kontrolü
+            activity_pattern['actions'].append({
+                'action': action,
+                'timestamp': datetime.now().isoformat()
+            })
+            
+            # Son 5 dakikadaki aktivite sayısı
+            recent_actions = [
+                a for a in activity_pattern['actions'] 
+                if datetime.fromisoformat(a['timestamp']) > datetime.now() - timedelta(minutes=5)
+            ]
+            
+            if len(recent_actions) > 50:  # 5 dakikada 50'den fazla işlem
+                anomalies.append({
+                    'type': 'high_activity',
+                    'severity': 'high',
+                    'details': f'{len(recent_actions)} actions in 5 minutes'
+                })
+            
+            # Pattern'i güncelle
+            self.cache.set(activity_key, activity_pattern, 86400)  # 24 saat
+            
+            # Anomali varsa log'la
+            if anomalies:
+                self._log_security_event(
+                    ThreatType.SUSPICIOUS_ACTIVITY,
+                    SecurityLevel.MEDIUM,
+                    {'anomalies': anomalies, 'user_id': user_id}
+                )
+            
+            return {
+                'anomalies_detected': len(anomalies) > 0,
+                'anomalies': anomalies,
+                'risk_score': len(anomalies) * 25  # Her anomali 25 puan
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Anomaly detection error: {e}")
+            return {'anomalies_detected': False, 'error': str(e)}
+    
+    def generate_secure_token(self, purpose: str, data: Dict[str, Any] = None, expires_in: int = 3600) -> str:
+        """Güvenli token oluştur"""
+        try:
+            payload = {
+                'purpose': purpose,
+                'data': data or {},
+                'iat': datetime.utcnow(),
+                'exp': datetime.utcnow() + timedelta(seconds=expires_in),
+                'jti': secrets.token_urlsafe(16)  # Unique token ID
+            }
+            
+            token = jwt.encode(
+                payload,
+                self.get_config('jwt_secret_key', 'default-secret-key'),
+                algorithm='HS256'
+            )
+            
+            # Token'ı cache'e kaydet (revoke edilebilmesi için)
+            cache_key = f"token_{payload['jti']}"
+            self.cache.set(cache_key, payload, expires_in)
+            
+            return token
+            
+        except Exception as e:
+            self.logger.error(f"Token generation error: {e}")
+            return None
+    
+    def verify_secure_token(self, token: str, purpose: str) -> Tuple[bool, Dict[str, Any]]:
+        """Token doğrula"""
+        try:
+            payload = jwt.decode(
+                token,
+                self.get_config('jwt_secret_key', 'default-secret-key'),
+                algorithms=['HS256']
+            )
+            
+            # Purpose kontrolü
+            if payload.get('purpose') != purpose:
+                return False, {'error': 'Invalid token purpose'}
+            
+            # Token revoke kontrolü
+            cache_key = f"token_{payload.get('jti')}"
+            if not self.cache.get(cache_key):
+                return False, {'error': 'Token has been revoked'}
+            
+            return True, payload.get('data', {})
+            
+        except jwt.ExpiredSignatureError:
+            return False, {'error': 'Token has expired'}
+        except jwt.InvalidTokenError:
+            return False, {'error': 'Invalid token'}
+        except Exception as e:
+            self.logger.error(f"Token verification error: {e}")
+            return False, {'error': str(e)}
     
     def _load_rate_limit_rules(self) -> Dict[str, RateLimitRule]:
         """Rate limit kurallarını yükle"""

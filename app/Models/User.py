@@ -13,7 +13,10 @@ class User(BaseModel):
     __fillable__ = [
         'name', 'email', 'password', 'username', 'avatar',
         'phone', 'address', 'city', 'country', 'postal_code',
-        'role', 'status', 'email_verified_at', 'last_login_at'
+        'role', 'status', 'email_verified_at', 'last_login_at',
+        'two_factor_enabled', 'two_factor_secret', 'preferences',
+        'subscription_plan', 'subscription_expires_at', 'api_key',
+        'notification_settings', 'language', 'timezone'
     ]
     __hidden__ = ['password', 'remember_token']
     __timestamps__ = True
@@ -183,4 +186,108 @@ class User(BaseModel):
         if user.save():
             return user
         
-        return None 
+        return None
+    
+    @property
+    def has_two_factor(self) -> bool:
+        """İki faktörlü doğrulama aktif mi"""
+        return self.two_factor_enabled == True
+    
+    @property
+    def subscription_active(self) -> bool:
+        """Abonelik aktif mi"""
+        if not self.subscription_expires_at:
+            return False
+        return datetime.now() < datetime.fromisoformat(self.subscription_expires_at)
+    
+    @property
+    def notification_preferences(self) -> Dict[str, bool]:
+        """Bildirim tercihlerini döndür"""
+        if not self.notification_settings:
+            return {
+                'email': True,
+                'sms': False,
+                'push': True,
+                'marketing': False
+            }
+        try:
+            import json
+            return json.loads(self.notification_settings)
+        except:
+            return {}
+    
+    def update_preferences(self, preferences: Dict[str, Any]) -> bool:
+        """Kullanıcı tercihlerini güncelle"""
+        import json
+        self.preferences = json.dumps(preferences)
+        return self.save()
+    
+    def update_notification_settings(self, settings: Dict[str, bool]) -> bool:
+        """Bildirim ayarlarını güncelle"""
+        import json
+        self.notification_settings = json.dumps(settings)
+        return self.save()
+    
+    def generate_api_key(self) -> str:
+        """Yeni API anahtarı oluştur"""
+        import secrets
+        self.api_key = secrets.token_urlsafe(32)
+        self.save()
+        return self.api_key
+    
+    def enable_two_factor(self) -> str:
+        """İki faktörlü doğrulamayı etkinleştir"""
+        import pyotp
+        secret = pyotp.random_base32()
+        self.two_factor_secret = secret
+        self.two_factor_enabled = True
+        self.save()
+        return secret
+    
+    def disable_two_factor(self) -> bool:
+        """İki faktörlü doğrulamayı devre dışı bırak"""
+        self.two_factor_enabled = False
+        self.two_factor_secret = None
+        return self.save()
+    
+    def verify_two_factor_token(self, token: str) -> bool:
+        """İki faktörlü doğrulama tokenını kontrol et"""
+        if not self.has_two_factor or not self.two_factor_secret:
+            return False
+        
+        import pyotp
+        totp = pyotp.TOTP(self.two_factor_secret)
+        return totp.verify(token, valid_window=1)
+    
+    def update_subscription(self, plan: str, expires_at: datetime) -> bool:
+        """Abonelik bilgilerini güncelle"""
+        self.subscription_plan = plan
+        self.subscription_expires_at = expires_at.isoformat()
+        return self.save()
+    
+    def get_activity_log(self, limit: int = 50) -> List[Dict[str, Any]]:
+        """Kullanıcı aktivite loglarını getir"""
+        query = """
+        SELECT * FROM user_activity_logs 
+        WHERE user_id = %s 
+        ORDER BY created_at DESC 
+        LIMIT %s
+        """
+        return self.db.fetch_all(query, (self.id, limit))
+    
+    def log_activity(self, action: str, details: Dict[str, Any] = None) -> bool:
+        """Kullanıcı aktivitesini logla"""
+        import json
+        query = """
+        INSERT INTO user_activity_logs (user_id, action, details, ip_address, user_agent, created_at)
+        VALUES (%s, %s, %s, %s, %s, %s)
+        """
+        values = (
+            self.id,
+            action,
+            json.dumps(details or {}),
+            details.get('ip_address', ''),
+            details.get('user_agent', ''),
+            datetime.now()
+        )
+        return self.db.execute(query, values) is not None 

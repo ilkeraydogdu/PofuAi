@@ -98,6 +98,9 @@ class AdvancedAICore:
         self.advanced_metrics = {
             'role_based_requests': {},
             'template_generations': 0,
+            'ai_recommendations': 0,
+            'sentiment_analysis': 0,
+            'product_optimizations': 0,
             'product_edits': 0,
             'advanced_analysis': 0
         }
@@ -1239,6 +1242,303 @@ class AdvancedAICore:
             'role_permissions': self.role_permissions,
             'template_types': list(self.template_configs.keys())
         }
+    
+    async def analyze_product_sentiment(self, product_data: Dict[str, Any], user_role: str = 'user') -> Dict[str, Any]:
+        """Ürün yorumları ve açıklamalarının duygu analizi"""
+        try:
+            if not self._check_permission(user_role, 'sentiment_analysis'):
+                return {'error': 'Bu özellik için yetkiniz yok'}
+            
+            # Sentiment analysis pipeline'ı yükle
+            if 'sentiment' not in self.advanced_pipelines:
+                self.advanced_pipelines['sentiment'] = pipeline(
+                    "sentiment-analysis",
+                    model="savasy/bert-base-turkish-sentiment-cased",
+                    device=0 if self.device == 'cuda' else -1
+                )
+            
+            results = {
+                'product_id': product_data.get('id'),
+                'overall_sentiment': None,
+                'sentiment_scores': {},
+                'review_analysis': [],
+                'recommendations': []
+            }
+            
+            # Ürün açıklaması analizi
+            if product_data.get('description'):
+                desc_sentiment = self.advanced_pipelines['sentiment'](
+                    product_data['description'][:512]  # BERT token limiti
+                )[0]
+                results['sentiment_scores']['description'] = desc_sentiment
+            
+            # Yorumlar analizi
+            if product_data.get('reviews'):
+                review_sentiments = []
+                for review in product_data['reviews'][:10]:  # İlk 10 yorum
+                    sentiment = self.advanced_pipelines['sentiment'](
+                        review['text'][:512]
+                    )[0]
+                    review_sentiments.append({
+                        'review_id': review.get('id'),
+                        'sentiment': sentiment['label'],
+                        'score': sentiment['score'],
+                        'text_preview': review['text'][:100] + '...'
+                    })
+                
+                results['review_analysis'] = review_sentiments
+                
+                # Genel duygu hesapla
+                positive_count = sum(1 for r in review_sentiments if r['sentiment'] == 'positive')
+                negative_count = sum(1 for r in review_sentiments if r['sentiment'] == 'negative')
+                
+                if positive_count > negative_count:
+                    results['overall_sentiment'] = 'positive'
+                elif negative_count > positive_count:
+                    results['overall_sentiment'] = 'negative'
+                else:
+                    results['overall_sentiment'] = 'neutral'
+                
+                # Öneriler
+                if negative_count > positive_count * 0.3:
+                    results['recommendations'].append(
+                        "Müşteri memnuniyetini artırmak için ürün kalitesini gözden geçirin"
+                    )
+                    results['recommendations'].append(
+                        "Olumsuz yorumlara hızlı ve yapıcı yanıtlar verin"
+                    )
+            
+            self._update_advanced_metrics('sentiment_analysis', user_role)
+            return results
+            
+        except Exception as e:
+            self.logger.error(f"Sentiment analysis error: {e}")
+            return {'error': str(e)}
+    
+    async def generate_ai_product_recommendations(self, user_data: Dict[str, Any], user_role: str = 'user') -> Dict[str, Any]:
+        """Kullanıcı davranışına göre AI ürün önerileri"""
+        try:
+            if not self._check_permission(user_role, 'ai_recommendations'):
+                return {'error': 'Bu özellik için yetkiniz yok'}
+            
+            recommendations = {
+                'user_id': user_data.get('id'),
+                'personalized_products': [],
+                'trending_categories': [],
+                'price_range_suggestions': {},
+                'cross_sell_opportunities': [],
+                'generated_at': datetime.now().isoformat()
+            }
+            
+            # Kullanıcı geçmişi analizi
+            user_history = user_data.get('purchase_history', [])
+            browsing_history = user_data.get('browsing_history', [])
+            
+            # Kategori tercihleri
+            category_counts = {}
+            for item in user_history + browsing_history:
+                category = item.get('category')
+                if category:
+                    category_counts[category] = category_counts.get(category, 0) + 1
+            
+            # En çok tercih edilen kategoriler
+            sorted_categories = sorted(category_counts.items(), key=lambda x: x[1], reverse=True)
+            recommendations['trending_categories'] = [cat[0] for cat in sorted_categories[:5]]
+            
+            # Fiyat aralığı analizi
+            prices = [item.get('price', 0) for item in user_history if item.get('price')]
+            if prices:
+                avg_price = sum(prices) / len(prices)
+                min_price = min(prices)
+                max_price = max(prices)
+                
+                recommendations['price_range_suggestions'] = {
+                    'average_spending': round(avg_price, 2),
+                    'recommended_min': round(min_price * 0.8, 2),
+                    'recommended_max': round(max_price * 1.2, 2)
+                }
+            
+            # Kişiselleştirilmiş ürün önerileri (simülasyon)
+            for i in range(5):
+                recommendations['personalized_products'].append({
+                    'product_id': f"REC_PROD_{i+1}",
+                    'name': f"Önerilen Ürün {i+1}",
+                    'category': recommendations['trending_categories'][0] if recommendations['trending_categories'] else 'Genel',
+                    'match_score': round(0.7 + (i * 0.05), 2),
+                    'reason': 'Geçmiş alımlarınıza benzer'
+                })
+            
+            # Cross-sell fırsatları
+            if user_history:
+                last_purchase = user_history[-1]
+                recommendations['cross_sell_opportunities'] = [
+                    {
+                        'product_id': 'CROSS_1',
+                        'name': f"{last_purchase.get('name', 'Son ürün')} için aksesuar",
+                        'relevance': 0.85
+                    }
+                ]
+            
+            self._update_advanced_metrics('ai_recommendations', user_role)
+            return recommendations
+            
+        except Exception as e:
+            self.logger.error(f"AI recommendations error: {e}")
+            return {'error': str(e)}
+    
+    async def optimize_product_listing(self, product_data: Dict[str, Any], marketplace: str, user_role: str = 'editor') -> Dict[str, Any]:
+        """Pazaryeri için ürün listesini optimize et"""
+        try:
+            if not self._check_permission(user_role, 'product_optimization'):
+                return {'error': 'Bu özellik için yetkiniz yok'}
+            
+            optimization_result = {
+                'product_id': product_data.get('id'),
+                'marketplace': marketplace,
+                'optimized_title': '',
+                'optimized_description': '',
+                'keyword_suggestions': [],
+                'pricing_suggestions': {},
+                'image_recommendations': [],
+                'seo_score': 0
+            }
+            
+            # Başlık optimizasyonu
+            original_title = product_data.get('name', '')
+            keywords = self._extract_keywords(original_title + ' ' + product_data.get('description', ''))
+            
+            # Pazaryeri özel optimizasyonlar
+            marketplace_rules = {
+                'trendyol': {
+                    'title_max_length': 100,
+                    'important_keywords': ['ücretsiz kargo', 'hızlı teslimat', 'orjinal']
+                },
+                'hepsiburada': {
+                    'title_max_length': 120,
+                    'important_keywords': ['garantili', 'faturalı', 'hemen kargo']
+                },
+                'n11': {
+                    'title_max_length': 65,
+                    'important_keywords': ['kampanya', 'indirim', 'fırsat']
+                },
+                'sahibinden': {
+                    'title_max_length': 70,
+                    'important_keywords': ['sıfır', 'ikinci el', 'temiz']
+                }
+            }
+            
+            rules = marketplace_rules.get(marketplace.lower(), {})
+            max_length = rules.get('title_max_length', 100)
+            important_kw = rules.get('important_keywords', [])
+            
+            # Optimize edilmiş başlık
+            optimized_title = original_title
+            if len(optimized_title) > max_length:
+                optimized_title = optimized_title[:max_length-3] + '...'
+            
+            # Önemli anahtar kelimeleri ekle
+            for kw in important_kw:
+                if kw not in optimized_title.lower() and len(optimized_title + ' ' + kw) <= max_length:
+                    optimized_title += f' {kw}'
+            
+            optimization_result['optimized_title'] = optimized_title
+            
+            # Açıklama optimizasyonu
+            description_template = f"""
+{product_data.get('description', '')}
+
+🚚 Hızlı ve Güvenli Kargo
+✅ %100 Müşteri Memnuniyeti
+📦 Özenli Paketleme
+🔄 14 Gün İade Garantisi
+
+Ürün Özellikleri:
+{self._format_product_features(product_data.get('features', {}))}
+            """.strip()
+            
+            optimization_result['optimized_description'] = description_template
+            
+            # Anahtar kelime önerileri
+            optimization_result['keyword_suggestions'] = keywords[:10]
+            
+            # Fiyat önerileri
+            base_price = product_data.get('price', 0)
+            optimization_result['pricing_suggestions'] = {
+                'competitive_price': round(base_price * 0.95, 2),
+                'premium_price': round(base_price * 1.1, 2),
+                'discount_price': round(base_price * 0.85, 2),
+                'psychological_price': self._calculate_psychological_price(base_price)
+            }
+            
+            # Görsel önerileri
+            optimization_result['image_recommendations'] = [
+                "Ana ürün görseli - beyaz arka plan",
+                "Ürün detay görselleri (en az 3 adet)",
+                "Kullanım görseli",
+                "Boyut/ölçü referans görseli",
+                f"{marketplace} için özel banner/etiket ekleyin"
+            ]
+            
+            # SEO skoru hesapla
+            seo_score = 0
+            if len(keywords) >= 5: seo_score += 20
+            if len(optimized_title) > 30: seo_score += 20
+            if len(optimization_result['optimized_description']) > 200: seo_score += 20
+            if product_data.get('images', []): seo_score += 20
+            if product_data.get('features'): seo_score += 20
+            
+            optimization_result['seo_score'] = seo_score
+            
+            self._update_advanced_metrics('product_optimizations', user_role)
+            return optimization_result
+            
+        except Exception as e:
+            self.logger.error(f"Product optimization error: {e}")
+            return {'error': str(e)}
+    
+    def _extract_keywords(self, text: str) -> List[str]:
+        """Metinden anahtar kelimeleri çıkar"""
+        # Basit keyword extraction (gerçek uygulamada NLP kullanılabilir)
+        import re
+        words = re.findall(r'\b\w+\b', text.lower())
+        word_freq = {}
+        
+        stopwords = {'ve', 'ile', 'için', 'bir', 'bu', 'da', 'de', 'ki', 'ne', 'ya'}
+        
+        for word in words:
+            if len(word) > 3 and word not in stopwords:
+                word_freq[word] = word_freq.get(word, 0) + 1
+        
+        sorted_words = sorted(word_freq.items(), key=lambda x: x[1], reverse=True)
+        return [word[0] for word in sorted_words]
+    
+    def _format_product_features(self, features: Dict[str, Any]) -> str:
+        """Ürün özelliklerini formatla"""
+        if not features:
+            return "- Detaylı bilgi için bizimle iletişime geçin"
+        
+        formatted = []
+        for key, value in features.items():
+            formatted.append(f"- {key}: {value}")
+        
+        return '\n'.join(formatted)
+    
+    def _calculate_psychological_price(self, price: float) -> float:
+        """Psikolojik fiyatlandırma hesapla"""
+        if price < 100:
+            return round(price) - 0.01
+        elif price < 1000:
+            return round(price) - 1
+        else:
+            return round(price / 10) * 10 - 1
+    
+    def _check_permission(self, user_role: str, feature: str) -> bool:
+        """Kullanıcı rolü izin kontrolü"""
+        if user_role == 'admin':
+            return True
+        
+        permissions = self.role_permissions.get(user_role, [])
+        return feature in permissions or '*' in permissions
 
 
 # Global Advanced AI Core instance

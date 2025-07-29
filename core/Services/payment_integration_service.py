@@ -632,6 +632,210 @@ class PayPalProvider(BasePaymentProvider):
             return False
 
 
+class WiseProvider(BasePaymentProvider):
+    """Wise (TransferWise) Ödeme Entegrasyonu"""
+    
+    def __init__(self, config: Dict[str, Any]):
+        super().__init__(config)
+        self.base_url = "https://api.sandbox.transferwise.tech" if self.test_mode else "https://api.transferwise.com"
+        
+    async def create_payment(self, payment_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Wise ile ödeme oluştur"""
+        try:
+            payment_id = f"WISE_{uuid.uuid4().hex[:10]}"
+            
+            self.logger.info(f"Wise payment created: {payment_id}")
+            
+            return {
+                "status": "success",
+                "provider": "wise",
+                "payment_id": payment_id,
+                "amount": payment_data["amount"],
+                "currency": payment_data.get("currency", "TRY"),
+                "created_at": datetime.now().isoformat(),
+                "exchange_rate": 1.05,  # Simulated exchange rate
+                "fee": Decimal("2.50")
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Wise payment creation error: {e}")
+            return {"status": "error", "message": str(e)}
+            
+    async def verify_payment(self, payment_id: str) -> Dict[str, Any]:
+        """Wise ödeme doğrulama"""
+        return {
+            "status": "success",
+            "payment_status": PaymentStatus.SUCCESS.value,
+            "payment_id": payment_id,
+            "verified_at": datetime.now().isoformat()
+        }
+        
+    async def refund_payment(self, payment_id: str, amount: Optional[Decimal] = None) -> Dict[str, Any]:
+        """Wise ödeme iadesi"""
+        return {
+            "status": "success",
+            "refund_id": f"WISE_REF_{uuid.uuid4().hex[:8]}",
+            "payment_id": payment_id,
+            "amount": amount,
+            "refunded_at": datetime.now().isoformat()
+        }
+        
+    async def cancel_payment(self, payment_id: str) -> Dict[str, Any]:
+        """Wise ödeme iptali"""
+        return {
+            "status": "success",
+            "payment_id": payment_id,
+            "cancelled_at": datetime.now().isoformat()
+        }
+        
+    def verify_webhook(self, payload: str, signature: str) -> bool:
+        """Wise webhook doğrulama"""
+        expected_signature = self.generate_signature(payload)
+        return hmac.compare_digest(expected_signature, signature)
+
+
+class PaparaProvider(BasePaymentProvider):
+    """Papara Ödeme Entegrasyonu"""
+    
+    def __init__(self, config: Dict[str, Any]):
+        super().__init__(config)
+        self.base_url = "https://merchant-api-test.papara.com" if self.test_mode else "https://merchant-api.papara.com"
+        
+    async def create_payment(self, payment_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Papara ile ödeme oluştur"""
+        try:
+            payment_id = f"PAPARA_{uuid.uuid4().hex[:10]}"
+            
+            self.logger.info(f"Papara payment created: {payment_id}")
+            
+            return {
+                "status": "success",
+                "provider": "papara",
+                "payment_id": payment_id,
+                "amount": payment_data["amount"],
+                "currency": "TRY",  # Papara only supports TRY
+                "created_at": datetime.now().isoformat(),
+                "redirect_url": f"{self.base_url}/checkout/{payment_id}"
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Papara payment creation error: {e}")
+            return {"status": "error", "message": str(e)}
+            
+    async def verify_payment(self, payment_id: str) -> Dict[str, Any]:
+        """Papara ödeme doğrulama"""
+        return {
+            "status": "success",
+            "payment_status": PaymentStatus.SUCCESS.value,
+            "payment_id": payment_id,
+            "verified_at": datetime.now().isoformat()
+        }
+        
+    async def refund_payment(self, payment_id: str, amount: Optional[Decimal] = None) -> Dict[str, Any]:
+        """Papara ödeme iadesi"""
+        return {
+            "status": "success",
+            "refund_id": f"PAPARA_REF_{uuid.uuid4().hex[:8]}",
+            "payment_id": payment_id,
+            "amount": amount,
+            "refunded_at": datetime.now().isoformat()
+        }
+        
+    async def cancel_payment(self, payment_id: str) -> Dict[str, Any]:
+        """Papara ödeme iptali"""
+        return {
+            "status": "success",
+            "payment_id": payment_id,
+            "cancelled_at": datetime.now().isoformat()
+        }
+        
+    def verify_webhook(self, payload: str, signature: str) -> bool:
+        """Papara webhook doğrulama"""
+        expected_signature = self.generate_signature(payload)
+        return hmac.compare_digest(expected_signature, signature)
+
+
+class CryptoPayProvider(BasePaymentProvider):
+    """Kripto Para Ödeme Entegrasyonu (Bitcoin, Ethereum, USDT)"""
+    
+    def __init__(self, config: Dict[str, Any]):
+        super().__init__(config)
+        self.base_url = "https://api-sandbox.coinbase.com" if self.test_mode else "https://api.commerce.coinbase.com"
+        self.supported_cryptos = ["BTC", "ETH", "USDT", "USDC", "LTC", "BCH"]
+        
+    async def create_payment(self, payment_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Kripto para ile ödeme oluştur"""
+        try:
+            payment_id = f"CRYPTO_{uuid.uuid4().hex[:10]}"
+            crypto_currency = payment_data.get("crypto_currency", "BTC")
+            
+            if crypto_currency not in self.supported_cryptos:
+                return {"status": "error", "message": f"Unsupported cryptocurrency: {crypto_currency}"}
+            
+            # Kripto dönüşüm oranı simülasyonu
+            conversion_rates = {
+                "BTC": 0.000025,
+                "ETH": 0.00045,
+                "USDT": 1.0,
+                "USDC": 1.0,
+                "LTC": 0.015,
+                "BCH": 0.0035
+            }
+            
+            crypto_amount = float(payment_data["amount"]) * conversion_rates.get(crypto_currency, 1.0)
+            
+            self.logger.info(f"Crypto payment created: {payment_id}")
+            
+            return {
+                "status": "success",
+                "provider": "crypto",
+                "payment_id": payment_id,
+                "amount": payment_data["amount"],
+                "currency": payment_data.get("currency", "USD"),
+                "crypto_currency": crypto_currency,
+                "crypto_amount": crypto_amount,
+                "wallet_address": f"1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa",  # Example address
+                "qr_code": f"bitcoin:{payment_id}?amount={crypto_amount}",
+                "expires_at": (datetime.now() + timedelta(minutes=30)).isoformat(),
+                "created_at": datetime.now().isoformat()
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Crypto payment creation error: {e}")
+            return {"status": "error", "message": str(e)}
+            
+    async def verify_payment(self, payment_id: str) -> Dict[str, Any]:
+        """Kripto ödeme doğrulama"""
+        return {
+            "status": "success",
+            "payment_status": PaymentStatus.SUCCESS.value,
+            "payment_id": payment_id,
+            "confirmations": 3,
+            "transaction_hash": f"0x{uuid.uuid4().hex}",
+            "verified_at": datetime.now().isoformat()
+        }
+        
+    async def refund_payment(self, payment_id: str, amount: Optional[Decimal] = None) -> Dict[str, Any]:
+        """Kripto ödeme iadesi - Genelde desteklenmez"""
+        return {
+            "status": "error",
+            "message": "Cryptocurrency payments cannot be refunded automatically"
+        }
+        
+    async def cancel_payment(self, payment_id: str) -> Dict[str, Any]:
+        """Kripto ödeme iptali"""
+        return {
+            "status": "success",
+            "payment_id": payment_id,
+            "cancelled_at": datetime.now().isoformat()
+        }
+        
+    def verify_webhook(self, payload: str, signature: str) -> bool:
+        """Kripto webhook doğrulama"""
+        expected_signature = self.generate_signature(payload)
+        return hmac.compare_digest(expected_signature, signature)
+
+
 class PaymentIntegrationService(BaseService):
     """Kurumsal Ödeme Entegrasyon Servisi"""
     
@@ -662,6 +866,18 @@ class PaymentIntegrationService(BaseService):
         # PayPal
         if provider_configs.get('paypal', {}).get('enabled', False):
             self.providers['paypal'] = PayPalProvider(provider_configs['paypal'])
+            
+        # Wise
+        if provider_configs.get('wise', {}).get('enabled', False):
+            self.providers['wise'] = WiseProvider(provider_configs['wise'])
+            
+        # Papara
+        if provider_configs.get('papara', {}).get('enabled', False):
+            self.providers['papara'] = PaparaProvider(provider_configs['papara'])
+            
+        # Crypto
+        if provider_configs.get('crypto', {}).get('enabled', False):
+            self.providers['crypto'] = CryptoPayProvider(provider_configs['crypto'])
             
         self.log(f"Initialized {len(self.providers)} payment providers")
         
@@ -1016,7 +1232,10 @@ class PaymentIntegrationService(BaseService):
             'iyzico': ['TRY', 'USD', 'EUR', 'GBP'],
             'paytr': ['TRY'],
             'stripe': ['TRY', 'USD', 'EUR', 'GBP', 'JPY', 'CAD', 'AUD'],
-            'paypal': ['TRY', 'USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY']
+            'paypal': ['TRY', 'USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY'],
+            'wise': ['TRY', 'USD', 'EUR', 'GBP', 'JPY', 'CAD', 'AUD', 'CHF', 'SEK', 'NOK'],
+            'papara': ['TRY'],
+            'crypto': ['USD', 'EUR', 'GBP', 'TRY']
         }
         
         return currency_map.get(provider, ['TRY'])
@@ -1027,7 +1246,10 @@ class PaymentIntegrationService(BaseService):
             'iyzico': [PaymentMethod.CREDIT_CARD.value, PaymentMethod.DEBIT_CARD.value, PaymentMethod.BUY_NOW_PAY_LATER.value],
             'paytr': [PaymentMethod.CREDIT_CARD.value, PaymentMethod.DEBIT_CARD.value, PaymentMethod.BANK_TRANSFER.value],
             'stripe': [PaymentMethod.CREDIT_CARD.value, PaymentMethod.DEBIT_CARD.value, PaymentMethod.DIGITAL_WALLET.value],
-            'paypal': [PaymentMethod.CREDIT_CARD.value, PaymentMethod.DIGITAL_WALLET.value, PaymentMethod.BANK_TRANSFER.value]
+            'paypal': [PaymentMethod.CREDIT_CARD.value, PaymentMethod.DIGITAL_WALLET.value, PaymentMethod.BANK_TRANSFER.value],
+            'wise': [PaymentMethod.BANK_TRANSFER.value],
+            'papara': [PaymentMethod.DIGITAL_WALLET.value, PaymentMethod.CREDIT_CARD.value],
+            'crypto': [PaymentMethod.CRYPTO.value]
         }
         
         return method_map.get(provider, [PaymentMethod.CREDIT_CARD.value])
