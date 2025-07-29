@@ -1,0 +1,39 @@
+{
+  "app_name": "PraPazar Enterprise",
+  "debug": false,
+  "database": {
+    "host": "prod-db-host",
+    "port": 3306,
+    "database": "prapazar_prod",
+    "username": "prapazar_user",
+    "password": "secure-password-change-this",
+    "pool_size": 20,
+    "ssl_mode": "REQUIRED"
+  },
+  "redis": {
+    "host": "prod-redis-host",
+    "port": 6379,
+    "password": "redis-password-change-this",
+    "ssl": true
+  },
+  "security": {
+    "secret_key": "super-secure-secret-key-change-this-in-production",
+    "jwt_secret": "super-secure-jwt-secret-change-this-in-production",
+    "cors_origins": [
+      "https://yourdomain.com"
+    ],
+    "rate_limit_enabled": true
+  },
+  "logging": {
+    "level": "INFO",
+    "console_enabled": false,
+    "file_enabled": true,
+    "syslog_enabled": true
+  },
+  "monitoring": {
+    "enabled": true,
+    "prometheus_enabled": true,
+    "grafana_enabled": true,
+    "alerting_enabled": true
+  }
+}
