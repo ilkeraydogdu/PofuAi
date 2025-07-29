@@ -1,0 +1,44 @@
+{
+  "timestamp": "2025-07-29T01:05:36.211766",
+  "system_info": {
+    "python_version": "3.13.3",
+    "platform": "linux"
+  },
+  "results": {
+    "Dosya Yapısı": {
+      "success": true,
+      "time": 4.863739013671875e-05
+    },
+    "Veritabanı Şeması": {
+      "success": true,
+      "time": 0.00038313865661621094
+    },
+    "API Route'ları": {
+      "success": true,
+      "time": 6.008148193359375e-05
+    },
+    "Controller Metodları": {
+      "success": true,
+      "time": 0.00010919570922851562
+    },
+    "Dokümantasyon": {
+      "success": true,
+      "time": 0.0003948211669921875
+    },
+    "Entegrasyon Konfigürasyonu": {
+      "success": true,
+      "time": 0.0001361370086669922
+    },
+    "Ana Uygulama Entegrasyonu": {
+      "success": true,
+      "time": 2.4080276489257812e-05
+    }
+  },
+  "summary": {
+    "total_tests": 7,
+    "passed": 7,
+    "failed": 0,
+    "success_rate": 1.0,
+    "total_time": 0.001180410385131836
+  }
+}
