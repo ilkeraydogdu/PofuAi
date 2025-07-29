@@ -1,0 +1,34 @@
+{
+  "timestamp": "2025-07-29T01:14:26.462252",
+  "tests": {
+    "integration_manager": {
+      "status": "PASSED",
+      "message": "Integration Manager basic functionality works"
+    },
+    "integration_service": {
+      "status": "PASSED",
+      "message": "Integration Service basic functionality works"
+    },
+    "ai_service": {
+      "status": "PASSED",
+      "message": "AI Service basic functionality works"
+    },
+    "integration_controller": {
+      "status": "PASSED",
+      "message": "Integration Controller basic functionality works"
+    },
+    "integration_routes": {
+      "status": "PASSED",
+      "message": "Integration Routes basic functionality works"
+    },
+    "integrations_data": {
+      "status": "PASSED",
+      "message": "Integrations Data loaded successfully - 29 marketplace integrations"
+    }
+  },
+  "summary": {
+    "total": 6,
+    "passed": 6,
+    "failed": 0
+  }
+}
