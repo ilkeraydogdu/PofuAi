@@ -9,9 +9,12 @@ import json
 import base64
 import hashlib
 import hmac
+import time
 from datetime import datetime
 from typing import Dict, List, Optional, Any
 import logging
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 class TrendyolMarketplaceAPI:
     """Trendyol Marketplace API Client"""
@@ -26,9 +29,19 @@ class TrendyolMarketplaceAPI:
         if sandbox:
             self.base_url = "https://api.trendyol.com/sapigw"
         else:
-            self.base_url = "https://api.trendyol.com/sapigw"
+            self.base_url = "https://api.trendyol.com/sapigw"  # Production URL aynı
             
+        # Setup session with retry strategy
         self.session = requests.Session()
+        retry_strategy = Retry(
+            total=3,
+            backoff_factor=1,
+            status_forcelist=[429, 500, 502, 503, 504],
+        )
+        adapter = HTTPAdapter(max_retries=retry_strategy)
+        self.session.mount("http://", adapter)
+        self.session.mount("https://", adapter)
+        
         self.session.auth = (self.api_key, self.api_secret)
         self.session.headers.update({
             'Content-Type': 'application/json',
@@ -37,28 +50,72 @@ class TrendyolMarketplaceAPI:
         
         self.logger = logging.getLogger(__name__)
 
-    def _make_request(self, method: str, endpoint: str, data: Optional[Dict] = None) -> Dict:
-        """API isteği yapar"""
+    def _make_request(self, method: str, endpoint: str, data: Optional[Dict] = None, max_retries: int = 3) -> Dict:
+        """API isteği yapar - gelişmiş hata yönetimi ile"""
         url = f"{self.base_url}{endpoint}"
         
-        try:
-            if method.upper() == 'GET':
-                response = self.session.get(url, params=data)
-            elif method.upper() == 'POST':
-                response = self.session.post(url, json=data)
-            elif method.upper() == 'PUT':
-                response = self.session.put(url, json=data)
-            elif method.upper() == 'DELETE':
-                response = self.session.delete(url)
-            else:
-                raise ValueError(f"Unsupported HTTP method: {method}")
+        for attempt in range(max_retries):
+            try:
+                if method.upper() == 'GET':
+                    response = self.session.get(url, params=data, timeout=30)
+                elif method.upper() == 'POST':
+                    response = self.session.post(url, json=data, timeout=30)
+                elif method.upper() == 'PUT':
+                    response = self.session.put(url, json=data, timeout=30)
+                elif method.upper() == 'DELETE':
+                    response = self.session.delete(url, timeout=30)
+                else:
+                    raise ValueError(f"Unsupported HTTP method: {method}")
+                    
+                response.raise_for_status()
                 
-            response.raise_for_status()
-            return response.json()
-            
-        except requests.exceptions.RequestException as e:
-            self.logger.error(f"Trendyol API request failed: {e}")
-            return {"success": False, "error": str(e)}
+                # JSON parse kontrolü
+                try:
+                    return response.json()
+                except json.JSONDecodeError:
+                    self.logger.warning(f"Invalid JSON response from Trendyol API: {response.text[:200]}")
+                    return {"success": False, "error": "Invalid JSON response"}
+                    
+            except requests.exceptions.Timeout:
+                self.logger.warning(f"Trendyol API timeout (attempt {attempt + 1}/{max_retries})")
+                if attempt < max_retries - 1:
+                    time.sleep(2 ** attempt)  # Exponential backoff
+                    continue
+                return {"success": False, "error": "Request timeout"}
+                
+            except requests.exceptions.ConnectionError:
+                self.logger.warning(f"Trendyol API connection error (attempt {attempt + 1}/{max_retries})")
+                if attempt < max_retries - 1:
+                    time.sleep(2 ** attempt)
+                    continue
+                return {"success": False, "error": "Connection error"}
+                
+            except requests.exceptions.HTTPError as e:
+                if e.response.status_code == 429:  # Rate limit
+                    self.logger.warning(f"Trendyol API rate limit hit (attempt {attempt + 1}/{max_retries})")
+                    if attempt < max_retries - 1:
+                        time.sleep(5)  # Wait longer for rate limits
+                        continue
+                elif e.response.status_code >= 500:  # Server errors
+                    self.logger.warning(f"Trendyol API server error {e.response.status_code} (attempt {attempt + 1}/{max_retries})")
+                    if attempt < max_retries - 1:
+                        time.sleep(2 ** attempt)
+                        continue
+                
+                self.logger.error(f"Trendyol API HTTP error: {e}")
+                return {
+                    "success": False, 
+                    "error": f"HTTP {e.response.status_code}: {e.response.text[:200] if e.response else str(e)}"
+                }
+                
+            except requests.exceptions.RequestException as e:
+                self.logger.error(f"Trendyol API request failed: {e}")
+                if attempt < max_retries - 1:
+                    time.sleep(2 ** attempt)
+                    continue
+                return {"success": False, "error": str(e)}
+                
+        return {"success": False, "error": "Max retries exceeded"}
 
     # ÜRÜN YÖNETİMİ
     def create_product(self, product_data: Dict) -> Dict:

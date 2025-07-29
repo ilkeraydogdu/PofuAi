@@ -25,9 +25,9 @@ class N11MarketplaceAPI:
         
         # API Base URLs
         if sandbox:
-            self.base_url = "https://api.n11.com/ws"
+            self.base_url = "https://api.n11.com/ws"  # N11 sandbox URL
         else:
-            self.base_url = "https://api.n11.com/ws"
+            self.base_url = "https://api.n11.com/ws"  # N11 production URL (aynı endpoint)
             
         self.session = requests.Session()
         self.session.headers.update({
