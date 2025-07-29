@@ -9,6 +9,7 @@ import os
 import re
 import sys
 from flask import Flask, render_template, session, request, send_from_directory, redirect, g
+from flask_socketio import SocketIO, emit, join_room, leave_room
 from werkzeug.exceptions import HTTPException
 from werkzeug.middleware.proxy_fix import ProxyFix
 from core.Route.web_routes import router as web_router
@@ -50,6 +51,13 @@ app.config.update({
 # JSON formatını ayarla
 app.json.compact = False
 
+# SocketIO'yu başlat
+socketio = SocketIO(app, 
+                   cors_allowed_origins="*",
+                   async_mode='threading',
+                   logger=True,
+                   engineio_logger=True)
+
 # Middleware'leri ekle
 app.before_request(SessionMiddleware.handle)
 app.before_request(AuthMiddleware.handle)
@@ -65,6 +73,76 @@ app.register_error_handler(Exception, error_handler.handle_error)
 
 # Logging servisini başlat
 logger = LoggerService.get_logger()
+
+# Realtime AI Processor'ı başlat
+from core.AI.ai_realtime_processor import init_realtime_processor
+realtime_processor = init_realtime_processor(socketio)
+
+# WebSocket event handlers
+@socketio.on('connect')
+def handle_connect():
+    """WebSocket bağlantısı kurulduğunda"""
+    user_id = session.get('user_id')
+    if user_id:
+        # Kullanıcıyı kendi odasına ekle
+        join_room(f"user_{user_id}")
+        emit('connected', {'status': 'connected', 'user_id': user_id})
+        logger.info(f"WebSocket bağlantısı kuruldu: User {user_id}")
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    """WebSocket bağlantısı kesildiğinde"""
+    user_id = session.get('user_id')
+    if user_id:
+        leave_room(f"user_{user_id}")
+        logger.info(f"WebSocket bağlantısı kesildi: User {user_id}")
+
+@socketio.on('join_room')
+def handle_join_room(data):
+    """Odaya katılma"""
+    room = data.get('room')
+    if room:
+        join_room(room)
+        emit('room_joined', {'room': room})
+
+@socketio.on('leave_room')
+def handle_leave_room(data):
+    """Odadan ayrılma"""
+    room = data.get('room')
+    if room:
+        leave_room(room)
+        emit('room_left', {'room': room})
+
+@socketio.on('ai_task')
+def handle_ai_task(data):
+    """AI görevi gönderme"""
+    user_id = session.get('user_id')
+    if user_id:
+        # Görevi realtime processor'a gönder
+        task_type = data.get('task_type')
+        task_data = data.get('task_data', {})
+        priority = data.get('priority', 5)
+        
+        # Asenkron görev gönderimi için thread kullan
+        import threading
+        def submit_task():
+            import asyncio
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            
+            task_id = loop.run_until_complete(
+                realtime_processor.submit_task(
+                    task_type=task_type,
+                    user_id=user_id,
+                    data=task_data,
+                    priority=priority
+                )
+            )
+            
+            emit('task_submitted', {'task_id': task_id}, room=f"user_{user_id}")
+        
+        thread = threading.Thread(target=submit_task)
+        thread.start()
 
 # Hata sayfaları için basit component
 class ErrorPageComponent:
@@ -135,5 +213,5 @@ if __name__ == '__main__':
     if not os.path.exists(session_dir):
         os.makedirs(session_dir)
         
-    # Geliştirme sunucusunu başlat
-    app.run(debug=True)
+    # WebSocket desteği ile sunucuyu başlat
+    socketio.run(app, debug=True, port=5000)

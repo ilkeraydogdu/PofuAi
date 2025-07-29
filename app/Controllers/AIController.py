@@ -796,6 +796,341 @@ class AIController:
                 'error': str(e),
                 'code': 'THUMBNAIL_GENERATION_ERROR'
             }
+    
+    async def start_realtime_processing(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Gerçek zamanlı AI işleme başlat
+        
+        Args:
+            request_data: İstek verileri
+            
+        Returns:
+            İşlem sonucu
+        """
+        try:
+            from core.AI.ai_realtime_processor import realtime_processor
+            
+            if not realtime_processor:
+                return {
+                    'success': False,
+                    'error': 'Realtime processor başlatılmamış',
+                    'code': 'PROCESSOR_NOT_INITIALIZED'
+                }
+            
+            user_id = request_data.get('user_id', session.get('user_id', 1))
+            task_type = request_data.get('task_type')
+            task_data = request_data.get('task_data', {})
+            priority = request_data.get('priority', 5)
+            
+            # Görev gönder
+            task_id = await realtime_processor.submit_task(
+                task_type=task_type,
+                user_id=user_id,
+                data=task_data,
+                priority=priority
+            )
+            
+            return {
+                'success': True,
+                'task_id': task_id,
+                'status': 'submitted',
+                'message': 'Görev işleme alındı'
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Realtime processing başlatma hatası: {e}")
+            return {
+                'success': False,
+                'error': str(e),
+                'code': 'REALTIME_PROCESSING_ERROR'
+            }
+    
+    async def get_task_status(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Görev durumunu sorgula
+        
+        Args:
+            request_data: İstek verileri
+            
+        Returns:
+            Görev durumu
+        """
+        try:
+            from core.AI.ai_realtime_processor import realtime_processor
+            
+            task_id = request_data.get('task_id')
+            if not task_id:
+                return {
+                    'success': False,
+                    'error': 'task_id parametresi gerekli',
+                    'code': 'MISSING_PARAMETER'
+                }
+            
+            status = await realtime_processor.get_task_status(task_id)
+            
+            if status:
+                return {
+                    'success': True,
+                    'data': status
+                }
+            else:
+                return {
+                    'success': False,
+                    'error': 'Görev bulunamadı',
+                    'code': 'TASK_NOT_FOUND'
+                }
+                
+        except Exception as e:
+            self.logger.error(f"Görev durumu sorgulama hatası: {e}")
+            return {
+                'success': False,
+                'error': str(e),
+                'code': 'STATUS_QUERY_ERROR'
+            }
+    
+    async def train_user_model(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Kullanıcı modelini eğit
+        
+        Args:
+            request_data: İstek verileri
+            
+        Returns:
+            Eğitim sonucu
+        """
+        try:
+            from core.AI.ai_learning_engine import ai_learning_engine
+            
+            user_id = request_data.get('user_id', session.get('user_id', 1))
+            user_role = self._get_user_role()
+            
+            # İzin kontrolü
+            if user_role not in ['admin', 'premium']:
+                return {
+                    'success': False,
+                    'error': 'Model eğitimi için yetkiniz yok',
+                    'code': 'PERMISSION_DENIED'
+                }
+            
+            # Model eğitimi
+            result = await ai_learning_engine.learn_user_behavior(user_id)
+            
+            return result
+            
+        except Exception as e:
+            self.logger.error(f"Model eğitimi hatası: {e}")
+            return {
+                'success': False,
+                'error': str(e),
+                'code': 'TRAINING_ERROR'
+            }
+    
+    async def get_personalized_recommendations(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Kişiselleştirilmiş öneriler al
+        
+        Args:
+            request_data: İstek verileri
+            
+        Returns:
+            Öneriler
+        """
+        try:
+            from core.AI.ai_learning_engine import ai_learning_engine
+            
+            user_id = request_data.get('user_id', session.get('user_id', 1))
+            context = request_data.get('context', {})
+            
+            # Mevcut bağlamı ekle
+            context.update({
+                'timestamp': datetime.now().isoformat(),
+                'session_id': session.get('session_id'),
+                'device_type': request.user_agent.platform
+            })
+            
+            # Öneriler al
+            result = await ai_learning_engine.get_personalized_recommendations(user_id, context)
+            
+            return result
+            
+        except Exception as e:
+            self.logger.error(f"Kişiselleştirilmiş öneri hatası: {e}")
+            return {
+                'success': False,
+                'error': str(e),
+                'code': 'RECOMMENDATION_ERROR'
+            }
+    
+    async def submit_feedback(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Kullanıcı geri bildirimi gönder
+        
+        Args:
+            request_data: İstek verileri
+            
+        Returns:
+            İşlem sonucu
+        """
+        try:
+            from core.AI.ai_learning_engine import ai_learning_engine
+            
+            user_id = request_data.get('user_id', session.get('user_id', 1))
+            feedback_data = request_data.get('feedback', {})
+            
+            if not feedback_data:
+                return {
+                    'success': False,
+                    'error': 'feedback parametresi gerekli',
+                    'code': 'MISSING_PARAMETER'
+                }
+            
+            # Geri bildirimi işle
+            result = await ai_learning_engine.process_user_feedback(user_id, feedback_data)
+            
+            return result
+            
+        except Exception as e:
+            self.logger.error(f"Geri bildirim gönderme hatası: {e}")
+            return {
+                'success': False,
+                'error': str(e),
+                'code': 'FEEDBACK_ERROR'
+            }
+    
+    async def analyze_user_patterns(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Kullanıcı desenlerini analiz et
+        
+        Args:
+            request_data: İstek verileri
+            
+        Returns:
+            Desen analizi
+        """
+        try:
+            from core.AI.ai_learning_engine import ai_learning_engine
+            
+            user_id = request_data.get('user_id', session.get('user_id', 1))
+            
+            # Desen analizi
+            result = await ai_learning_engine.analyze_user_patterns(user_id)
+            
+            return result
+            
+        except Exception as e:
+            self.logger.error(f"Desen analizi hatası: {e}")
+            return {
+                'success': False,
+                'error': str(e),
+                'code': 'PATTERN_ANALYSIS_ERROR'
+            }
+    
+    async def advanced_image_analysis(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Gelişmiş görsel analizi
+        
+        Args:
+            request_data: İstek verileri
+            
+        Returns:
+            Analiz sonuçları
+        """
+        try:
+            from core.AI.ai_enhanced_core import enhanced_ai_core
+            
+            image_path = request_data.get('image_path')
+            analysis_types = request_data.get('analysis_types', ['caption', 'quality', 'aesthetic'])
+            
+            if not image_path:
+                return {
+                    'success': False,
+                    'error': 'image_path parametresi gerekli',
+                    'code': 'MISSING_PARAMETER'
+                }
+            
+            # Gelişmiş analiz
+            result = await enhanced_ai_core.advanced_image_analysis(image_path, analysis_types)
+            
+            return {
+                'success': True,
+                'data': result
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Gelişmiş görsel analizi hatası: {e}")
+            return {
+                'success': False,
+                'error': str(e),
+                'code': 'ADVANCED_ANALYSIS_ERROR'
+            }
+    
+    async def enhance_image(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Görsel iyileştirme
+        
+        Args:
+            request_data: İstek verileri
+            
+        Returns:
+            İyileştirme sonucu
+        """
+        try:
+            from core.AI.ai_enhanced_core import enhanced_ai_core
+            
+            image_path = request_data.get('image_path')
+            enhancement_type = request_data.get('enhancement_type', 'auto')
+            
+            if not image_path:
+                return {
+                    'success': False,
+                    'error': 'image_path parametresi gerekli',
+                    'code': 'MISSING_PARAMETER'
+                }
+            
+            # Görsel iyileştirme
+            result = await enhanced_ai_core.smart_image_enhancement(image_path, enhancement_type)
+            
+            return result
+            
+        except Exception as e:
+            self.logger.error(f"Görsel iyileştirme hatası: {e}")
+            return {
+                'success': False,
+                'error': str(e),
+                'code': 'ENHANCEMENT_ERROR'
+            }
+    
+    def get_realtime_metrics(self) -> Dict[str, Any]:
+        """
+        Gerçek zamanlı AI metrikleri
+        
+        Returns:
+            Metrikler
+        """
+        try:
+            from core.AI.ai_realtime_processor import realtime_processor
+            
+            if realtime_processor:
+                metrics = realtime_processor.get_metrics()
+            else:
+                metrics = {'message': 'Realtime processor aktif değil'}
+            
+            return {
+                'success': True,
+                'data': {
+                    'realtime_metrics': metrics,
+                    'ai_core_metrics': ai_core.get_metrics(),
+                    'timestamp': datetime.now().isoformat()
+                }
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Metrik alma hatası: {e}")
+            return {
+                'success': False,
+                'error': str(e),
+                'code': 'METRICS_ERROR'
+            }
 
 
 # Global AI Controller instance

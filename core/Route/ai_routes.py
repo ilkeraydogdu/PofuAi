@@ -397,3 +397,155 @@ def api_documentation():
 
 # Import datetime for health check
 from datetime import datetime
+
+# Realtime Processing
+@ai_bp.route('/realtime/submit', methods=['POST'])
+@async_route
+async def submit_realtime_task():
+    """Gerçek zamanlı AI görevi gönder"""
+    try:
+        data = request.get_json()
+        result = await ai_controller.start_realtime_processing(data)
+        return jsonify(result), 200 if result['success'] else 400
+    except Exception as e:
+        logger.error(f"Realtime submit route error: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'code': 'ROUTE_ERROR'
+        }), 500
+
+
+@ai_bp.route('/realtime/status/<task_id>', methods=['GET'])
+@async_route
+async def get_realtime_task_status(task_id):
+    """Görev durumunu sorgula"""
+    try:
+        result = await ai_controller.get_task_status({'task_id': task_id})
+        return jsonify(result), 200 if result['success'] else 400
+    except Exception as e:
+        logger.error(f"Task status route error: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'code': 'ROUTE_ERROR'
+        }), 500
+
+
+@ai_bp.route('/realtime/metrics', methods=['GET'])
+def get_realtime_metrics():
+    """Gerçek zamanlı metrikler"""
+    try:
+        result = ai_controller.get_realtime_metrics()
+        return jsonify(result), 200 if result['success'] else 400
+    except Exception as e:
+        logger.error(f"Realtime metrics route error: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'code': 'ROUTE_ERROR'
+        }), 500
+
+
+# Learning Engine
+@ai_bp.route('/learning/train', methods=['POST'])
+@async_route
+async def train_user_model():
+    """Kullanıcı modelini eğit"""
+    try:
+        data = request.get_json()
+        result = await ai_controller.train_user_model(data)
+        return jsonify(result), 200 if result['success'] else 400
+    except Exception as e:
+        logger.error(f"Train model route error: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'code': 'ROUTE_ERROR'
+        }), 500
+
+
+@ai_bp.route('/learning/recommendations', methods=['POST'])
+@async_route
+async def get_personalized_recommendations():
+    """Kişiselleştirilmiş öneriler"""
+    try:
+        data = request.get_json()
+        result = await ai_controller.get_personalized_recommendations(data)
+        return jsonify(result), 200 if result['success'] else 400
+    except Exception as e:
+        logger.error(f"Recommendations route error: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'code': 'ROUTE_ERROR'
+        }), 500
+
+
+@ai_bp.route('/learning/feedback', methods=['POST'])
+@async_route
+async def submit_user_feedback():
+    """Kullanıcı geri bildirimi"""
+    try:
+        data = request.get_json()
+        result = await ai_controller.submit_feedback(data)
+        return jsonify(result), 200 if result['success'] else 400
+    except Exception as e:
+        logger.error(f"Feedback route error: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'code': 'ROUTE_ERROR'
+        }), 500
+
+
+@ai_bp.route('/learning/patterns', methods=['POST'])
+@async_route
+async def analyze_patterns():
+    """Kullanıcı desen analizi"""
+    try:
+        data = request.get_json()
+        result = await ai_controller.analyze_user_patterns(data)
+        return jsonify(result), 200 if result['success'] else 400
+    except Exception as e:
+        logger.error(f"Pattern analysis route error: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'code': 'ROUTE_ERROR'
+        }), 500
+
+
+# Enhanced Analysis
+@ai_bp.route('/analysis/advanced', methods=['POST'])
+@async_route
+async def advanced_analysis():
+    """Gelişmiş görsel analizi"""
+    try:
+        data = request.get_json()
+        result = await ai_controller.advanced_image_analysis(data)
+        return jsonify(result), 200 if result['success'] else 400
+    except Exception as e:
+        logger.error(f"Advanced analysis route error: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'code': 'ROUTE_ERROR'
+        }), 500
+
+
+@ai_bp.route('/enhance-image', methods=['POST'])
+@async_route
+async def enhance_image():
+    """Görsel iyileştirme"""
+    try:
+        data = request.get_json()
+        result = await ai_controller.enhance_image(data)
+        return jsonify(result), 200 if result['success'] else 400
+    except Exception as e:
+        logger.error(f"Enhance image route error: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'code': 'ROUTE_ERROR'
+        }), 500
