@@ -57,18 +57,16 @@ INTEGRATIONS_DATA = {
         {
             "name": "ciceksepeti",
             "display_name": "Çiçeksepeti",
-            "description": "Çiçek ve hediye platformu",
+            "description": "Çiçek, hediye ve yaşam ürünleri platformu",
             "features": [
-                "Ürün listeleme",
-                "Stok kontrolü",
-                "Sipariş yönetimi",
+                "Ürün yönetimi",
                 "Teslimat takibi",
                 "Özel gün kampanyaları",
-                "Dijital ürün gönderimi"
+                "Kurumsal satış"
             ],
             "ai_features": [
-                "Sezonsal talep tahmini",
-                "Hediye önerileri"
+                "Özel gün hatırlatıcı",
+                "Kişiselleştirilmiş öneriler"
             ],
             "supported_countries": ["TR"],
             "supported_currencies": ["TRY"],
@@ -78,39 +76,34 @@ INTEGRATIONS_DATA = {
         {
             "name": "amazon_tr",
             "display_name": "Amazon Türkiye",
-            "description": "Global e-ticaret devi Amazon'un Türkiye platformu",
+            "description": "Amazon'un Türkiye pazaryeri",
             "features": [
                 "FBA entegrasyonu",
-                "Global satış",
-                "Ürün listeleme",
-                "Envanter yönetimi",
-                "Sipariş işleme",
-                "Performans metrikleri",
-                "Rekabet analizi"
+                "Prime desteği",
+                "Global satış imkanı",
+                "Detaylı raporlama"
             ],
             "ai_features": [
-                "A9 algoritma optimizasyonu",
                 "Satış tahmini",
+                "Rekabet analizi",
                 "Fiyat optimizasyonu"
             ],
-            "supported_countries": ["TR", "US", "UK", "DE", "FR", "IT", "ES"],
-            "supported_currencies": ["TRY", "USD", "EUR", "GBP"],
-            "is_premium": True,
+            "supported_countries": ["TR"],
+            "supported_currencies": ["TRY"],
+            "is_premium": False,
             "is_coming_soon": False
         },
         {
             "name": "pttavm",
-            "display_name": "PttAvm",
+            "display_name": "PTT AVM",
             "description": "PTT'nin resmi e-ticaret platformu",
             "features": [
-                "Ürün yönetimi",
-                "Stok takibi",
-                "Sipariş işleme",
-                "PTT kargo entegrasyonu",
-                "Fatura yönetimi"
+                "Güvenli ödeme",
+                "PTT kargo avantajı",
+                "Devlet güvencesi"
             ],
             "ai_features": [
-                "Lojistik optimizasyonu"
+                "Otomatik kategorizasyon"
             ],
             "supported_countries": ["TR"],
             "supported_currencies": ["TRY"],
@@ -120,19 +113,16 @@ INTEGRATIONS_DATA = {
         {
             "name": "n11",
             "display_name": "N11",
-            "description": "Doğuş ve SK Group ortaklığı e-ticaret platformu",
+            "description": "Doğuş Planet ve SK Group ortak girişimi",
             "features": [
                 "Mağaza yönetimi",
-                "Ürün listeleme",
-                "Stok güncelleme",
-                "Sipariş takibi",
-                "N11 Pro desteği",
-                "Kampanya yönetimi",
-                "İade işlemleri"
+                "Kampanya araçları",
+                "N11 Pro üyelik",
+                "API entegrasyonu"
             ],
             "ai_features": [
-                "Satış analizi",
-                "Müşteri segmentasyonu"
+                "Ürün önerisi",
+                "Fiyat karşılaştırma"
             ],
             "supported_countries": ["TR"],
             "supported_currencies": ["TRY"],
@@ -287,28 +277,6 @@ INTEGRATIONS_DATA = {
             ],
             "supported_countries": ["US", "UK", "CA", "AU", "DE", "FR", "IT", "ES", "NL", "BE"],
             "supported_currencies": ["USD", "GBP", "CAD", "AUD", "EUR"],
-            "is_premium": False,
-            "is_coming_soon": False
-        },
-        {
-            "name": "gittigidiyor",
-            "display_name": "GittiGidiyor",
-            "description": "GittiGidiyor Türkiye pazaryeri",
-            "features": [
-                "Ürün yönetimi",
-                "Sipariş takibi",
-                "Stok senkronizasyonu",
-                "Fiyat güncelleme",
-                "Kategori yönetimi",
-                "Mağaza ayarları"
-            ],
-            "ai_features": [
-                "Akıllı fiyatlandırma",
-                "Rekabet analizi",
-                "Satış tahmin"
-            ],
-            "supported_countries": ["TR"],
-            "supported_currencies": ["TRY"],
             "is_premium": False,
             "is_coming_soon": False
         },
