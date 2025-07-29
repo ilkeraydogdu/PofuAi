@@ -4,3 +4,5 @@ INFO [2025-07-29 01:12:58,112] [logger.init:101]: Logger başlatıldı - Seviye:
 INFO [2025-07-29 01:13:47,099] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-29.log
 INFO [2025-07-29 01:13:58,676] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-29.log
 INFO [2025-07-29 01:14:15,736] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-29.log
+INFO [2025-07-29 05:53:54,904] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-07-29.log
+INFO [2025-07-29 05:53:55,018] [test_system.test_services:146]: Test log message
