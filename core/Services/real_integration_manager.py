@@ -16,6 +16,11 @@ from .n11_marketplace_api import N11MarketplaceAPI
 from .hepsiburada_marketplace_api import HepsiburadaMarketplaceAPI
 from .iyzico_payment_api import IyzicoPaymentAPI
 
+# Configuration management
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+from config.marketplace_config import get_marketplace_config, get_marketplace_credentials, validate_marketplace_config
+
 class RealIntegrationManager:
     """Gerçek API'leri kullanan entegrasyon yöneticisi"""
     
@@ -40,44 +45,68 @@ class RealIntegrationManager:
         self._initialize_apis()
 
     def _initialize_apis(self):
-        """API client'larını başlatır"""
+        """API client'larını başlatır - güvenli config management ile"""
         try:
             # Trendyol API
-            if self.config.get('trendyol', {}).get('enabled', False):
-                self.trendyol = TrendyolMarketplaceAPI(
-                    api_key=self.config['trendyol']['api_key'],
-                    api_secret=self.config['trendyol']['api_secret'],
-                    supplier_id=self.config['trendyol']['supplier_id'],
-                    sandbox=self.config['trendyol'].get('sandbox', True)
-                )
+            try:
+                trendyol_config = get_marketplace_config('trendyol')
+                if trendyol_config.get('enabled', False):
+                    credentials = get_marketplace_credentials('trendyol')
+                    self.trendyol = TrendyolMarketplaceAPI(
+                        api_key=credentials.api_key,
+                        api_secret=credentials.api_secret,
+                        supplier_id=credentials.additional_params.get('supplier_id'),
+                        sandbox=trendyol_config.get('sandbox', True)
+                    )
+                    self.logger.info("Trendyol API initialized successfully")
+            except Exception as e:
+                self.logger.error(f"Trendyol API initialization failed: {e}")
                 
             # N11 API
-            if self.config.get('n11', {}).get('enabled', False):
-                self.n11 = N11MarketplaceAPI(
-                    api_key=self.config['n11']['api_key'],
-                    api_secret=self.config['n11']['api_secret'],
-                    sandbox=self.config['n11'].get('sandbox', True)
-                )
+            try:
+                n11_config = get_marketplace_config('n11')
+                if n11_config.get('enabled', False):
+                    credentials = get_marketplace_credentials('n11')
+                    self.n11 = N11MarketplaceAPI(
+                        api_key=credentials.api_key,
+                        api_secret=credentials.api_secret,
+                        sandbox=n11_config.get('sandbox', True)
+                    )
+                    self.logger.info("N11 API initialized successfully")
+            except Exception as e:
+                self.logger.error(f"N11 API initialization failed: {e}")
                 
             # Hepsiburada API
-            if self.config.get('hepsiburada', {}).get('enabled', False):
-                self.hepsiburada = HepsiburadaMarketplaceAPI(
-                    username=self.config['hepsiburada']['username'],
-                    password=self.config['hepsiburada']['password'],
-                    merchant_id=self.config['hepsiburada']['merchant_id'],
-                    sandbox=self.config['hepsiburada'].get('sandbox', True)
-                )
+            try:
+                hb_config = get_marketplace_config('hepsiburada')
+                if hb_config.get('enabled', False):
+                    credentials = get_marketplace_credentials('hepsiburada')
+                    self.hepsiburada = HepsiburadaMarketplaceAPI(
+                        username=credentials.api_key,
+                        password=credentials.api_secret,
+                        merchant_id=credentials.additional_params.get('merchant_id'),
+                        sandbox=hb_config.get('sandbox', True)
+                    )
+                    self.logger.info("Hepsiburada API initialized successfully")
+            except Exception as e:
+                self.logger.error(f"Hepsiburada API initialization failed: {e}")
                 
             # İyzico API
-            if self.config.get('iyzico', {}).get('enabled', False):
-                self.iyzico = IyzicoPaymentAPI(
-                    api_key=self.config['iyzico']['api_key'],
-                    secret_key=self.config['iyzico']['secret_key'],
-                    sandbox=self.config['iyzico'].get('sandbox', True)
-                )
+            try:
+                iyzico_config = get_marketplace_config('iyzico')
+                if iyzico_config.get('enabled', False):
+                    credentials = get_marketplace_credentials('iyzico')
+                    self.iyzico = IyzicoPaymentAPI(
+                        api_key=credentials.api_key,
+                        secret_key=credentials.api_secret,
+                        sandbox=iyzico_config.get('sandbox', True)
+                    )
+                    self.logger.info("İyzico API initialized successfully")
+            except Exception as e:
+                self.logger.error(f"İyzico API initialization failed: {e}")
                 
         except Exception as e:
-            self.logger.error(f"API initialization failed: {e}")
+            self.logger.error(f"General API initialization failed: {e}")
 
     def test_all_connections(self) -> Dict:
         """Tüm API bağlantılarını test eder"""

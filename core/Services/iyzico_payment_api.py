@@ -6,9 +6,31 @@ API Dokümantasyonu: https://dev.iyzipay.com/
 
 try:
     import iyzipay
+    from iyzipay import Payment, CheckoutFormInitialize, Refund, Cancel
     IYZIPAY_AVAILABLE = True
 except ImportError:
     IYZIPAY_AVAILABLE = False
+    # Mock classes for when iyzipay is not available
+    class Payment:
+        @staticmethod
+        def create(request, options):
+            return {"status": "failure", "errorMessage": "iyzipay SDK not installed"}
+    
+    class CheckoutFormInitialize:
+        @staticmethod
+        def create(request, options):
+            return {"status": "failure", "errorMessage": "iyzipay SDK not installed"}
+    
+    class Refund:
+        @staticmethod
+        def create(request, options):
+            return {"status": "failure", "errorMessage": "iyzipay SDK not installed"}
+    
+    class Cancel:
+        @staticmethod
+        def create(request, options):
+            return {"status": "failure", "errorMessage": "iyzipay SDK not installed"}
+
 from typing import Dict, List, Optional, Any
 import logging
 import json
@@ -29,6 +51,14 @@ class IyzicoPaymentAPI:
         }
         
         self.logger = logging.getLogger(__name__)
+        
+        # SDK availability kontrolü
+        if not IYZIPAY_AVAILABLE:
+            self.logger.warning("İyzico SDK is not available. Install with: pip install iyzipay")
+        
+        # Test credentials kontrolü
+        if api_key in ['YOUR_API_KEY', 'YOUR_IYZICO_API_KEY', '']:
+            self.logger.warning("Test or empty API key detected for İyzico")
 
     def _create_buyer(self, buyer_data: Dict) -> Dict:
         """Alıcı bilgilerini oluşturur"""
@@ -73,8 +103,22 @@ class IyzicoPaymentAPI:
         return basket_items
 
     # ÖDEME İŞLEMLERİ
+    def _check_sdk_availability(self) -> Dict:
+        """SDK availability kontrolü"""
+        if not IYZIPAY_AVAILABLE:
+            return {
+                "success": False,
+                "error": "İyzico SDK not installed. Run: pip install iyzipay"
+            }
+        return {"success": True}
+
     def create_payment(self, payment_data: Dict) -> Dict:
         """Ödeme oluşturur (Non-3DS)"""
+        # SDK kontrolü
+        sdk_check = self._check_sdk_availability()
+        if not sdk_check["success"]:
+            return sdk_check
+            
         try:
             request = {
                 'locale': payment_data.get('locale', 'tr'),
