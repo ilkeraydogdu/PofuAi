@@ -38,16 +38,22 @@ import json
 class IyzicoPaymentAPI:
     """İyzico Payment API Client"""
     
-    def __init__(self, api_key: str, secret_key: str, sandbox: bool = True):
-        self.api_key = api_key
-        self.secret_key = secret_key
-        self.sandbox = sandbox
+    def __init__(self, api_key: str = None, secret_key: str = None, sandbox: bool = None):
+        # Import here to avoid circular imports
+        from config.marketplace_config import get_marketplace_config
+        
+        # Use provided parameters or load from config
+        config = get_marketplace_config('iyzico')
+        
+        self.api_key = api_key or (config.api_key if config else 'demo_api_key')
+        self.secret_key = secret_key or (config.api_secret if config else 'demo_secret_key')
+        self.sandbox = sandbox if sandbox is not None else (config.sandbox if config else True)
         
         # API Options
         self.options = {
             'api_key': self.api_key,
             'secret_key': self.secret_key,
-            'base_url': 'sandbox-api.iyzipay.com' if sandbox else 'api.iyzipay.com'
+            'base_url': 'sandbox-api.iyzipay.com' if self.sandbox else 'api.iyzipay.com'
         }
         
         self.logger = logging.getLogger(__name__)

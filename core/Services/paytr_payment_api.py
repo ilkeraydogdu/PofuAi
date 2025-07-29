@@ -22,7 +22,21 @@ from .base_service import BaseService
 class PayTRPaymentAPI(BaseService):
     """PayTR Payment API Implementation"""
     
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: Dict[str, Any] = None):
+        # Import here to avoid circular imports
+        from config.marketplace_config import get_marketplace_config
+        
+        if config is None:
+            # Use provided parameters or load from config
+            marketplace_config = get_marketplace_config('paytr')
+            config = {
+                'merchant_id': marketplace_config.api_key if marketplace_config else 'demo_merchant_id',
+                'merchant_key': marketplace_config.api_secret if marketplace_config else 'demo_merchant_key',
+                'merchant_salt': 'demo_salt',
+                'base_url': 'https://www.paytr.com',
+                'test_mode': marketplace_config.sandbox if marketplace_config else True
+            }
+        
         super().__init__(config)
         self.merchant_id = config.get('merchant_id')
         self.merchant_key = config.get('merchant_key')
