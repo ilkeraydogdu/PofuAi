@@ -10,13 +10,8 @@ from datetime import datetime
 from typing import Dict, List, Optional, Any
 from abc import ABC, abstractmethod
 
-# Import base integration from integration_manager
-import sys
-import os
-sys.path.insert(0, os.path.dirname(__file__))
-
-# Base integration sınıfını import et
-exec(open(os.path.join(os.path.dirname(__file__), 'integration_manager.py')).read())
+# BaseIntegration sınıfını doğrudan modülden içe aktar
+from .integration_manager import BaseIntegration
 
 # ===== ORTA ÖNCELİK ENTEGRASYONLARI =====
 

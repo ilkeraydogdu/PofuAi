@@ -482,21 +482,26 @@ class EnterpriseAIStructureTester:
         
         try:
             with open(results_file, 'w', encoding='utf-8') as f:
-                json.dump({
-                    'timestamp': datetime.now().isoformat(),
-                    'system_info': {
-                        'python_version': sys.version.split()[0],
-                        'platform': sys.platform
+                json.dump(
+                    {
+                        'timestamp': datetime.now().isoformat(),
+                        'system_info': {
+                            'python_version': sys.version.split()[0],
+                            'platform': sys.platform
+                        },
+                        'results': results,
+                        'summary': {
+                            'total_tests': total,
+                            'passed': passed,
+                            'failed': total - passed,
+                            'success_rate': passed / total,
+                            'total_time': total_time
+                        }
                     },
-                    'results': results,
-                    'summary': {
-                        'total_tests': total,
-                        'passed': passed,
-                        'failed': total - passed,
-                        'success_rate': passed / total,
-                        'total_time': total_time
-                    }
-                }, indent=2, ensure_ascii=False)
+                    f,
+                    indent=2,
+                    ensure_ascii=False
+                )
             
             print(f"\n💾 Test sonuçları kaydedildi: {results_file}")
         except Exception as e:
