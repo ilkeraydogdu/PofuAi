@@ -19,17 +19,23 @@ from urllib3.util.retry import Retry
 class TrendyolMarketplaceAPI:
     """Trendyol Marketplace API Client"""
     
-    def __init__(self, api_key: str, api_secret: str, supplier_id: str, sandbox: bool = True):
-        self.api_key = api_key
-        self.api_secret = api_secret
-        self.supplier_id = supplier_id
-        self.sandbox = sandbox
+    def __init__(self, api_key: str = None, api_secret: str = None, supplier_id: str = None, sandbox: bool = None):
+        # Import here to avoid circular imports
+        from config.marketplace_config import get_marketplace_config
+        
+        # Use provided parameters or load from config
+        config = get_marketplace_config('trendyol')
+        
+        self.api_key = api_key or (config.api_key if config else 'demo_api_key')
+        self.api_secret = api_secret or (config.api_secret if config else 'demo_api_secret')
+        self.supplier_id = supplier_id or (config.supplier_id if config else 'demo_supplier_id')
+        self.sandbox = sandbox if sandbox is not None else (config.sandbox if config else True)
         
         # API Base URLs
-        if sandbox:
-            self.base_url = "https://api.trendyol.com/sapigw"
+        if self.sandbox:
+            self.base_url = "https://api.trendyol.com/sapigw"  # Sandbox URL
         else:
-            self.base_url = "https://api.trendyol.com/sapigw"  # Production URL aynı
+            self.base_url = "https://api.trendyol.com/sapigw"  # Production URL (same endpoint)
             
         # Setup session with retry strategy
         self.session = requests.Session()
@@ -332,18 +338,22 @@ class TrendyolMarketplaceAPI:
 def test_trendyol_api():
     """Trendyol API'sini test eder"""
     
-    # Test credentials (gerçek projede environment variable'lardan alınmalı)
-    api_key = "YOUR_API_KEY"
-    api_secret = "YOUR_API_SECRET"
-    supplier_id = "YOUR_SUPPLIER_ID"
+    # API client oluştur (environment variables'dan otomatik yükler)
+    trendyol = TrendyolMarketplaceAPI()
     
-    # API client oluştur
-    trendyol = TrendyolMarketplaceAPI(
-        api_key=api_key,
-        api_secret=api_secret,
-        supplier_id=supplier_id,
-        sandbox=True
-    )
+    # Check if using demo credentials
+    from config.marketplace_config import is_marketplace_production_ready
+    is_production = is_marketplace_production_ready('trendyol')
+    
+    print(f"🔧 Trendyol API Konfigürasyonu:")
+    print(f"   - API Key: {trendyol.api_key[:10]}..." if trendyol.api_key else "Ayarlanmadı")
+    print(f"   - Supplier ID: {trendyol.supplier_id}")
+    print(f"   - Sandbox Mode: {trendyol.sandbox}")
+    print(f"   - Production Ready: {'✅' if is_production else '⚠️  Demo credentials kullanılıyor'}")
+    
+    if not is_production:
+        print("\n⚠️  Uyarı: Demo credentials kullanılıyor. Production için environment variables ayarlayın.")
+        print("   Gerekli değişkenler için .env.template dosyasını kontrol edin.")
     
     print("🔄 Trendyol API Bağlantı Testi...")
     connection_test = trendyol.test_connection()

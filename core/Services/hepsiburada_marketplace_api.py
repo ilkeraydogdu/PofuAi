@@ -16,14 +16,20 @@ import logging
 class HepsiburadaMarketplaceAPI:
     """Hepsiburada Marketplace API Client"""
     
-    def __init__(self, username: str, password: str, merchant_id: str, sandbox: bool = True):
-        self.username = username
-        self.password = password
-        self.merchant_id = merchant_id
-        self.sandbox = sandbox
+    def __init__(self, username: str = None, password: str = None, merchant_id: str = None, sandbox: bool = None):
+        # Import here to avoid circular imports
+        from config.marketplace_config import get_marketplace_config
+        
+        # Use provided parameters or load from config
+        config = get_marketplace_config('hepsiburada')
+        
+        self.username = username or (config.api_key if config else 'demo_username')
+        self.password = password or (config.api_secret if config else 'demo_password')
+        self.merchant_id = merchant_id or (config.supplier_id if config else 'demo_merchant_id')
+        self.sandbox = sandbox if sandbox is not None else (config.sandbox if config else True)
         
         # API Base URLs
-        if sandbox:
+        if self.sandbox:
             self.base_url = "https://oms-external-sandbox.hepsiburada.com"
         else:
             self.base_url = "https://oms-external.hepsiburada.com"

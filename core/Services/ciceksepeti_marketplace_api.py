@@ -17,14 +17,20 @@ from urllib.parse import urlencode
 class CiceksepetiMarketplaceAPI:
     """Çiçeksepeti Marketplace API Client"""
     
-    def __init__(self, api_key: str, secret_key: str, merchant_id: str, sandbox: bool = True):
-        self.api_key = api_key
-        self.secret_key = secret_key
-        self.merchant_id = merchant_id
-        self.sandbox = sandbox
+    def __init__(self, api_key: str = None, secret_key: str = None, merchant_id: str = None, sandbox: bool = None):
+        # Import here to avoid circular imports
+        from config.marketplace_config import get_marketplace_config
+        
+        # Use provided parameters or load from config
+        config = get_marketplace_config('ciceksepeti')
+        
+        self.api_key = api_key or (config.api_key if config else 'demo_api_key')
+        self.secret_key = secret_key or (config.api_secret if config else 'demo_secret_key')
+        self.merchant_id = merchant_id or (config.supplier_id if config else 'demo_merchant_id')
+        self.sandbox = sandbox if sandbox is not None else (config.sandbox if config else True)
         
         # API Base URLs
-        if sandbox:
+        if self.sandbox:
             self.base_url = "https://api-test.ciceksepeti.com/v1"
         else:
             self.base_url = "https://api.ciceksepeti.com/v1"

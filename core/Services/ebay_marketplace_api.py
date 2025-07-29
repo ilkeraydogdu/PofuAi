@@ -16,7 +16,7 @@ from urllib.parse import urlencode, quote
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 
-class eBayMarketplaceAPI:
+class EbayMarketplaceAPI:
     """eBay Marketplace API Client"""
     
     def __init__(self, client_id: str, client_secret: str, refresh_token: str = None,
