@@ -1,452 +1,690 @@
 """
-Hepsiburada Marketplace API - Gerçek Implementasyon
-Bu modül Hepsiburada'nın resmi Marketplace API'sini kullanır.
-API Dokümantasyonu: https://developers.hepsiburada.com/
+Hepsiburada Marketplace API Integration
+Full implementation with all features
 """
 
-import requests
-import json
+from typing import Dict, List, Any, Optional, Tuple
+from datetime import datetime, timedelta
 import hashlib
-import hmac
-import base64
-from datetime import datetime
-from typing import Dict, List, Optional, Any
-import logging
+import time
+from decimal import Decimal
+import xml.etree.ElementTree as ET
+from xml.dom import minidom
 
-class HepsiburadaMarketplaceAPI:
-    """Hepsiburada Marketplace API Client"""
+from .base_integration import BaseIntegration, RequestMethod, ValidationError, APIError
+
+
+class HepsiburadaMarketplaceAPI(BaseIntegration):
+    """
+    Hepsiburada Marketplace API implementation
     
-    def __init__(self, username: str, password: str, merchant_id: str, sandbox: bool = True):
-        self.username = username
-        self.password = password
-        self.merchant_id = merchant_id
-        self.sandbox = sandbox
+    Documentation: https://developers.hepsiburada.com/
+    """
+    
+    def _initialize(self):
+        """Initialize Hepsiburada specific settings"""
+        self.username = self.credentials.get('username')
+        self.password = self.credentials.get('password')
+        self.merchant_id = self.credentials.get('merchant_id')
         
-        # API Base URLs
-        if sandbox:
-            self.base_url = "https://oms-external-sandbox.hepsiburada.com"
+        if not all([self.username, self.password, self.merchant_id]):
+            raise ValueError("Missing required credentials: username, password, merchant_id")
+        
+        # Set base URLs
+        if self.sandbox:
+            self.base_url = "https://sandbox-mpop.hepsiburada.com"
         else:
-            self.base_url = "https://oms-external.hepsiburada.com"
-            
-        self.session = requests.Session()
-        self.session.headers.update({
+            self.base_url = "https://mpop.hepsiburada.com"
+        
+        # Hepsiburada specific settings
+        self.min_request_interval = 0.5  # 500ms between requests
+        
+        # Get authentication token
+        self._authenticate()
+    
+    def _build_url(self, endpoint: str) -> str:
+        """Build full URL for endpoint"""
+        return f"{self.base_url}/{endpoint.lstrip('/')}"
+    
+    def _get_headers(self) -> Dict[str, str]:
+        """Get request headers with authentication"""
+        headers = {
+            'Authorization': f'Bearer {self.auth_token}',
             'Content-Type': 'application/json',
-            'User-Agent': 'HepsiburadaMarketplace-Python-Client/1.0'
-        })
+            'Accept': 'application/json'
+        }
+        return headers
+    
+    def _authenticate(self):
+        """Authenticate and get access token"""
+        auth_data = {
+            'username': self.username,
+            'password': self.password,
+            'authenticationType': 'MERCHANT'
+        }
         
-        self.access_token = None
-        self.token_expires_at = None
+        response = self.session.post(
+            self._build_url('authenticate'),
+            json=auth_data,
+            headers={'Content-Type': 'application/json'}
+        )
         
-        self.logger = logging.getLogger(__name__)
-
-    def _authenticate(self) -> bool:
-        """API kimlik doğrulaması yapar"""
+        if response.status_code == 200:
+            data = response.json()
+            self.auth_token = data.get('token')
+            self.token_expires = datetime.now() + timedelta(hours=23)  # Token valid for 24 hours
+        else:
+            raise AuthenticationError(f"Authentication failed: {response.text}")
+    
+    def _check_token_expiry(self):
+        """Check if token is expired and renew if necessary"""
+        if datetime.now() >= self.token_expires:
+            self._authenticate()
+    
+    def _test_connection(self) -> bool:
+        """Test API connection"""
         try:
-            auth_url = f"{self.base_url}/user/login"
-            auth_data = {
-                "username": self.username,
-                "password": self.password
-            }
-            
-            response = self.session.post(auth_url, json=auth_data)
-            response.raise_for_status()
-            
-            result = response.json()
-            if result.get("success"):
-                self.access_token = result.get("data", {}).get("access_token")
-                # Token'ı header'a ekle
-                self.session.headers.update({
-                    'Authorization': f'Bearer {self.access_token}'
-                })
-                return True
-            else:
-                self.logger.error(f"Authentication failed: {result.get('message')}")
-                return False
-                
-        except Exception as e:
-            self.logger.error(f"Authentication error: {e}")
+            # Get merchant info to test connection
+            self.get_merchant_info()
+            return True
+        except Exception:
             return False
-
-    def _make_request(self, method: str, endpoint: str, data: Optional[Dict] = None) -> Dict:
-        """API isteği yapar"""
-        # Token yoksa veya süresi dolmuşsa yeniden authenticate et
-        if not self.access_token:
-            if not self._authenticate():
-                return {"success": False, "error": "Authentication failed"}
+    
+    def make_request(self, method: RequestMethod, endpoint: str, 
+                    data: Optional[Dict] = None, params: Optional[Dict] = None,
+                    headers: Optional[Dict] = None, timeout: int = 30) -> Dict[str, Any]:
+        """Override to check token expiry"""
+        self._check_token_expiry()
+        return super().make_request(method, endpoint, data, params, headers, timeout)
+    
+    # Merchant Management
+    def get_merchant_info(self) -> Dict[str, Any]:
+        """Get merchant information"""
+        return self.make_request(
+            RequestMethod.GET,
+            f"merchants/{self.merchant_id}"
+        )
+    
+    def get_merchant_categories(self) -> List[Dict[str, Any]]:
+        """Get merchant's approved categories"""
+        response = self.make_request(
+            RequestMethod.GET,
+            f"merchants/{self.merchant_id}/categories"
+        )
+        return response.get('categories', [])
+    
+    # Product Management
+    def create_product(self, product_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Create a new product listing
         
-        url = f"{self.base_url}{endpoint}"
+        Args:
+            product_data: Product information including:
+                - merchantSku: Unique SKU
+                - varyantGroupID: Variant group ID
+                - barcode: Product barcode
+                - urunAdi: Product name
+                - urunAciklamasi: Product description
+                - marka: Brand
+                - garantiSuresi: Warranty period
+                - kg: Weight
+                - tax: Tax rate
+                - price: Price
+                - stock: Stock quantity
+                - productImageUrl: Main image URL
+                - categoryId: Category ID
+                - attributes: Product attributes
+        """
+        # Validate required fields
+        required_fields = ['merchantSku', 'barcode', 'urunAdi', 'marka', 
+                          'price', 'stock', 'categoryId']
         
-        try:
-            if method.upper() == 'GET':
-                response = self.session.get(url, params=data)
-            elif method.upper() == 'POST':
-                response = self.session.post(url, json=data)
-            elif method.upper() == 'PUT':
-                response = self.session.put(url, json=data)
-            elif method.upper() == 'DELETE':
-                response = self.session.delete(url)
-            else:
-                raise ValueError(f"Unsupported HTTP method: {method}")
-                
-            response.raise_for_status()
-            return response.json()
-            
-        except requests.exceptions.RequestException as e:
-            self.logger.error(f"Hepsiburada API request failed: {e}")
-            # 401 hatası alırsa yeniden authenticate et
-            if hasattr(e, 'response') and e.response.status_code == 401:
-                self.access_token = None
-                return self._make_request(method, endpoint, data)
-            return {"success": False, "error": str(e)}
-
-    # ÜRÜN YÖNETİMİ
-    def create_product(self, product_data: Dict) -> Dict:
-        """Yeni ürün oluşturur"""
-        endpoint = f"/products/api/products/{self.merchant_id}"
+        for field in required_fields:
+            if field not in product_data:
+                raise ValidationError(f"Missing required field: {field}")
         
-        # Hepsiburada ürün formatına çevir
-        hb_product = {
-            "merchantId": self.merchant_id,
-            "sku": product_data.get("sku"),
-            "VaryantGroupID": product_data.get("variant_group_id"),
-            "Barcode": product_data.get("barcode"),
-            "Title": product_data.get("title"),
-            "ProductDescription": product_data.get("description"),
-            "BrandName": product_data.get("brand_name"),
-            "CategoryName": product_data.get("category_name"),
-            "Price": product_data.get("price"),
-            "AvailableStock": product_data.get("stock", 0),
-            "DispatchTime": product_data.get("dispatch_time", 1),
-            "CargoCompany1": product_data.get("cargo_company", "Yurtiçi Kargo"),
-            "ShippingAddressLabel": product_data.get("shipping_address_label", "varsayılan"),
-            "ClaimAddressLabel": product_data.get("claim_address_label", "varsayılan"),
-            "Images": product_data.get("images", []),
-            "Attributes": product_data.get("attributes", [])
-        }
+        # Create product XML
+        xml_data = self._build_product_xml([product_data])
         
-        return self._make_request('POST', endpoint, hb_product)
-
-    def update_product(self, sku: str, product_data: Dict) -> Dict:
-        """Ürün bilgilerini günceller"""
-        endpoint = f"/products/api/products/{self.merchant_id}/{sku}"
-        return self._make_request('PUT', endpoint, product_data)
-
-    def get_products(self, page: int = 0, size: int = 50, sku: str = None) -> Dict:
-        """Ürün listesini getirir"""
-        endpoint = f"/products/api/products/{self.merchant_id}"
+        return self.make_request(
+            RequestMethod.POST,
+            'product/import',
+            data={'products': xml_data},
+            headers={'Content-Type': 'application/xml'}
+        )
+    
+    def update_product(self, product_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Update existing product"""
+        xml_data = self._build_product_xml([product_data])
         
+        return self.make_request(
+            RequestMethod.PUT,
+            'product/update',
+            data={'products': xml_data},
+            headers={'Content-Type': 'application/xml'}
+        )
+    
+    def get_products(self, 
+                    offset: int = 0,
+                    limit: int = 100,
+                    merchant_sku: Optional[str] = None,
+                    barcode: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Get products with filters
+        
+        Args:
+            offset: Pagination offset
+            limit: Number of results (max 100)
+            merchant_sku: Filter by SKU
+            barcode: Filter by barcode
+        """
         params = {
-            "offset": page * size,
-            "limit": size
+            'offset': offset,
+            'limit': min(limit, 100)
         }
         
-        if sku:
-            params["sku"] = sku
-            
-        return self._make_request('GET', endpoint, params)
-
-    def get_product(self, sku: str) -> Dict:
-        """Tek ürün bilgisini getirir"""
-        endpoint = f"/products/api/products/{self.merchant_id}/{sku}"
-        return self._make_request('GET', endpoint)
-
-    def update_stock_price(self, updates: List[Dict]) -> Dict:
-        """Stok ve fiyat günceller"""
-        endpoint = f"/products/api/inventory/{self.merchant_id}"
+        if merchant_sku:
+            params['merchantSku'] = merchant_sku
+        if barcode:
+            params['barcode'] = barcode
         
-        inventory_updates = []
-        for update in updates:
-            inventory_updates.append({
-                "sku": update.get("sku"),
-                "price": update.get("price"),
-                "availableStock": update.get("stock")
-            })
+        return self.make_request(
+            RequestMethod.GET,
+            'listings/merchantid/{self.merchant_id}',
+            params=params
+        )
+    
+    def update_stock_and_price(self, updates: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """
+        Update stock and price for multiple products
         
-        data = {"items": inventory_updates}
-        return self._make_request('PUT', endpoint, data)
-
-    def delete_product(self, sku: str) -> Dict:
-        """Ürün siler"""
-        endpoint = f"/products/api/products/{self.merchant_id}/{sku}"
-        return self._make_request('DELETE', endpoint)
-
-    # SİPARİŞ YÖNETİMİ
-    def get_orders(self, start_date: str = None, end_date: str = None, 
-                   status: str = None, page: int = 0, size: int = 50) -> Dict:
-        """Sipariş listesini getirir"""
-        endpoint = f"/orders/api/orders/{self.merchant_id}"
+        Args:
+            updates: List of updates containing:
+                - merchantSku or hbSku: Product identifier
+                - stock: New stock quantity
+                - price: New price
+        """
+        xml_data = self._build_stock_price_xml(updates)
         
+        return self.make_request(
+            RequestMethod.POST,
+            'stock-price/update',
+            data={'updates': xml_data},
+            headers={'Content-Type': 'application/xml'}
+        )
+    
+    def activate_products(self, skus: List[str]) -> Dict[str, Any]:
+        """Activate products by SKU"""
+        data = {
+            'merchantId': self.merchant_id,
+            'skus': skus
+        }
+        
+        return self.make_request(
+            RequestMethod.POST,
+            'listings/activate',
+            data=data
+        )
+    
+    def deactivate_products(self, skus: List[str]) -> Dict[str, Any]:
+        """Deactivate products by SKU"""
+        data = {
+            'merchantId': self.merchant_id,
+            'skus': skus
+        }
+        
+        return self.make_request(
+            RequestMethod.POST,
+            'listings/deactivate',
+            data=data
+        )
+    
+    # Category Management
+    def get_categories(self) -> List[Dict[str, Any]]:
+        """Get all categories"""
+        response = self.make_request(
+            RequestMethod.GET,
+            'categories'
+        )
+        return response.get('categories', [])
+    
+    def get_category_attributes(self, category_id: str) -> List[Dict[str, Any]]:
+        """Get attributes for a specific category"""
+        response = self.make_request(
+            RequestMethod.GET,
+            f'categories/{category_id}/attributes'
+        )
+        return response.get('attributes', [])
+    
+    def get_category_commission(self, category_id: str) -> Dict[str, Any]:
+        """Get commission rates for a category"""
+        return self.make_request(
+            RequestMethod.GET,
+            f'categories/{category_id}/commission'
+        )
+    
+    # Order Management
+    def get_orders(self,
+                   status: Optional[str] = None,
+                   start_date: Optional[datetime] = None,
+                   end_date: Optional[datetime] = None,
+                   offset: int = 0,
+                   limit: int = 100) -> Dict[str, Any]:
+        """
+        Get orders with filters
+        
+        Args:
+            status: Order status (Open, Delivered, Cancelled, etc.)
+            start_date: Start date filter
+            end_date: End date filter
+            offset: Pagination offset
+            limit: Number of results
+        """
         params = {
-            "offset": page * size,
-            "limit": size
+            'merchantId': self.merchant_id,
+            'offset': offset,
+            'limit': min(limit, 100)
         }
         
-        if start_date:
-            params["startDate"] = start_date
-        if end_date:
-            params["endDate"] = end_date
         if status:
-            params["status"] = status
-            
-        return self._make_request('GET', endpoint, params)
-
-    def get_order(self, order_number: str) -> Dict:
-        """Tek sipariş bilgisini getirir"""
-        endpoint = f"/orders/api/orders/{self.merchant_id}/{order_number}"
-        return self._make_request('GET', endpoint)
-
-    def accept_order(self, order_number: str) -> Dict:
-        """Siparişi onayla"""
-        endpoint = f"/orders/api/orders/{self.merchant_id}/{order_number}/accept"
-        return self._make_request('POST', endpoint)
-
-    def reject_order(self, order_number: str, reject_reason: str) -> Dict:
-        """Siparişi reddet"""
-        endpoint = f"/orders/api/orders/{self.merchant_id}/{order_number}/reject"
-        data = {"rejectReason": reject_reason}
-        return self._make_request('POST', endpoint, data)
-
-    def ship_order(self, order_number: str, tracking_number: str, 
-                   cargo_company: str) -> Dict:
-        """Siparişi kargoya ver"""
-        endpoint = f"/orders/api/orders/{self.merchant_id}/{order_number}/ship"
-        
-        data = {
-            "trackingNumber": tracking_number,
-            "cargoCompany": cargo_company
-        }
-        
-        return self._make_request('POST', endpoint, data)
-
-    def deliver_order(self, order_number: str) -> Dict:
-        """Siparişi teslim edildi olarak işaretle"""
-        endpoint = f"/orders/api/orders/{self.merchant_id}/{order_number}/deliver"
-        return self._make_request('POST', endpoint)
-
-    # KARGO YÖNETİMİ
-    def get_cargo_companies(self) -> Dict:
-        """Kargo firmalarını listeler"""
-        endpoint = "/orders/api/cargo-companies"
-        return self._make_request('GET', endpoint)
-
-    def get_shipping_addresses(self) -> Dict:
-        """Kargo adreslerini listeler"""
-        endpoint = f"/products/api/addresses/{self.merchant_id}/shipping"
-        return self._make_request('GET', endpoint)
-
-    def get_claim_addresses(self) -> Dict:
-        """İade adreslerini listeler"""
-        endpoint = f"/products/api/addresses/{self.merchant_id}/claim"
-        return self._make_request('GET', endpoint)
-
-    # KATEGORİ VE MARKA
-    def get_categories(self) -> Dict:
-        """Kategori listesini getirir"""
-        endpoint = "/products/api/categories"
-        return self._make_request('GET', endpoint)
-
-    def get_category_attributes(self, category_id: str) -> Dict:
-        """Kategori özelliklerini getirir"""
-        endpoint = f"/products/api/categories/{category_id}/attributes"
-        return self._make_request('GET', endpoint)
-
-    def get_brands(self) -> Dict:
-        """Marka listesini getirir"""
-        endpoint = "/products/api/brands"
-        return self._make_request('GET', endpoint)
-
-    def search_brand(self, brand_name: str) -> Dict:
-        """Marka arar"""
-        endpoint = "/products/api/brands/search"
-        params = {"name": brand_name}
-        return self._make_request('GET', endpoint, params)
-
-    # RAPORLAMA
-    def get_sales_report(self, start_date: str, end_date: str) -> Dict:
-        """Satış raporu getirir"""
-        endpoint = f"/reports/api/sales/{self.merchant_id}"
-        params = {
-            "startDate": start_date,
-            "endDate": end_date
-        }
-        return self._make_request('GET', endpoint, params)
-
-    def get_inventory_report(self) -> Dict:
-        """Stok raporu getirir"""
-        endpoint = f"/reports/api/inventory/{self.merchant_id}"
-        return self._make_request('GET', endpoint)
-
-    def get_return_report(self, start_date: str, end_date: str) -> Dict:
-        """İade raporu getirir"""
-        endpoint = f"/reports/api/returns/{self.merchant_id}"
-        params = {
-            "startDate": start_date,
-            "endDate": end_date
-        }
-        return self._make_request('GET', endpoint, params)
-
-    # İADE YÖNETİMİ
-    def get_returns(self, start_date: str = None, end_date: str = None,
-                    page: int = 0, size: int = 50) -> Dict:
-        """İade listesini getirir"""
-        endpoint = f"/returns/api/returns/{self.merchant_id}"
-        
-        params = {
-            "offset": page * size,
-            "limit": size
-        }
-        
+            params['status'] = status
         if start_date:
-            params["startDate"] = start_date
+            params['beginDate'] = start_date.strftime('%Y-%m-%d')
         if end_date:
-            params["endDate"] = end_date
-            
-        return self._make_request('GET', endpoint, params)
-
-    def accept_return(self, return_id: str) -> Dict:
-        """İadeyi kabul et"""
-        endpoint = f"/returns/api/returns/{self.merchant_id}/{return_id}/accept"
-        return self._make_request('POST', endpoint)
-
-    def reject_return(self, return_id: str, reject_reason: str) -> Dict:
-        """İadeyi reddet"""
-        endpoint = f"/returns/api/returns/{self.merchant_id}/{return_id}/reject"
-        data = {"rejectReason": reject_reason}
-        return self._make_request('POST', endpoint, data)
-
-    # ENTEGRASYON YÖNETİMİ
-    def get_integration_status(self) -> Dict:
-        """Entegrasyon durumunu getirir"""
-        endpoint = f"/integration/api/status/{self.merchant_id}"
-        return self._make_request('GET', endpoint)
-
-    def update_integration_settings(self, settings: Dict) -> Dict:
-        """Entegrasyon ayarlarını günceller"""
-        endpoint = f"/integration/api/settings/{self.merchant_id}"
-        return self._make_request('PUT', endpoint, settings)
-
-    # WEBHOOK YÖNETİMİ
-    def register_webhook(self, webhook_url: str, events: List[str]) -> Dict:
-        """Webhook kaydeder"""
-        endpoint = f"/webhooks/api/webhooks/{self.merchant_id}"
+            params['endDate'] = end_date.strftime('%Y-%m-%d')
+        
+        return self.make_request(
+            RequestMethod.GET,
+            'orders',
+            params=params
+        )
+    
+    def get_order_details(self, order_number: str) -> Dict[str, Any]:
+        """Get detailed order information"""
+        return self.make_request(
+            RequestMethod.GET,
+            f'orders/{order_number}'
+        )
+    
+    def package_items(self, package_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Create package for order items
+        
+        Args:
+            package_data: Package information including:
+                - orderNumber: Order number
+                - items: List of items to package
+                - parcelQuantity: Number of parcels
+        """
+        return self.make_request(
+            RequestMethod.POST,
+            'packages/create',
+            data=package_data
+        )
+    
+    def update_tracking_number(self, package_number: str, 
+                             tracking_number: str,
+                             shipping_company: str) -> Dict[str, Any]:
+        """Update package tracking information"""
         data = {
-            "url": webhook_url,
-            "events": events
+            'trackingNumber': tracking_number,
+            'shippingCompany': shipping_company
         }
-        return self._make_request('POST', endpoint, data)
-
-    def get_webhooks(self) -> Dict:
-        """Webhook listesini getirir"""
-        endpoint = f"/webhooks/api/webhooks/{self.merchant_id}"
-        return self._make_request('GET', endpoint)
-
-    def delete_webhook(self, webhook_id: str) -> Dict:
-        """Webhook siler"""
-        endpoint = f"/webhooks/api/webhooks/{self.merchant_id}/{webhook_id}"
-        return self._make_request('DELETE', endpoint)
-
-    # TEST FONKSİYONLARI
-    def test_connection(self) -> Dict:
-        """API bağlantısını test eder"""
-        try:
-            # Kategorileri getirerek test et
-            result = self.get_categories()
-            if result.get("success", True) and "data" in result:
-                return {
-                    "success": True,
-                    "message": "Hepsiburada API bağlantısı başarılı",
-                    "username": self.username,
-                    "merchant_id": self.merchant_id,
-                    "sandbox": self.sandbox,
-                    "token_status": "active" if self.access_token else "inactive"
-                }
-            else:
-                return {
-                    "success": False,
-                    "message": "API yanıtı beklenmedik format",
-                    "response": result
-                }
-        except Exception as e:
-            return {
-                "success": False,
-                "message": f"Hepsiburada API bağlantı hatası: {str(e)}"
-            }
-
-    def get_merchant_info(self) -> Dict:
-        """Satıcı bilgilerini getirir"""
-        endpoint = f"/merchants/api/merchants/{self.merchant_id}"
-        return self._make_request('GET', endpoint)
-
-    # BULK İŞLEMLER
-    def bulk_update_products(self, products: List[Dict]) -> Dict:
-        """Toplu ürün güncelleme"""
-        endpoint = f"/products/api/products/{self.merchant_id}/bulk"
-        data = {"products": products}
-        return self._make_request('PUT', endpoint, data)
-
-    def bulk_update_inventory(self, inventory_updates: List[Dict]) -> Dict:
-        """Toplu stok güncelleme"""
-        endpoint = f"/products/api/inventory/{self.merchant_id}/bulk"
-        data = {"items": inventory_updates}
-        return self._make_request('PUT', endpoint, data)
-
-    # PERFORMANS RAPORLARI
-    def get_performance_metrics(self, start_date: str, end_date: str) -> Dict:
-        """Performans metriklerini getirir"""
-        endpoint = f"/analytics/api/performance/{self.merchant_id}"
+        
+        return self.make_request(
+            RequestMethod.PUT,
+            f'packages/{package_number}/tracking',
+            data=data
+        )
+    
+    def mark_as_shipped(self, package_number: str) -> Dict[str, Any]:
+        """Mark package as shipped"""
+        return self.make_request(
+            RequestMethod.PUT,
+            f'packages/{package_number}/shipped'
+        )
+    
+    def cancel_order(self, order_number: str, items: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """
+        Cancel order items
+        
+        Args:
+            order_number: Order number
+            items: List of items to cancel with reasons
+        """
+        data = {
+            'orderNumber': order_number,
+            'items': items
+        }
+        
+        return self.make_request(
+            RequestMethod.POST,
+            'orders/cancel',
+            data=data
+        )
+    
+    # Returns Management
+    def get_returns(self,
+                   status: Optional[str] = None,
+                   start_date: Optional[datetime] = None,
+                   end_date: Optional[datetime] = None,
+                   offset: int = 0,
+                   limit: int = 100) -> Dict[str, Any]:
+        """Get return requests"""
         params = {
-            "startDate": start_date,
-            "endDate": end_date
+            'merchantId': self.merchant_id,
+            'offset': offset,
+            'limit': min(limit, 100)
         }
-        return self._make_request('GET', endpoint, params)
+        
+        if status:
+            params['status'] = status
+        if start_date:
+            params['beginDate'] = start_date.strftime('%Y-%m-%d')
+        if end_date:
+            params['endDate'] = end_date.strftime('%Y-%m-%d')
+        
+        return self.make_request(
+            RequestMethod.GET,
+            'returns',
+            params=params
+        )
+    
+    def approve_return(self, return_id: str) -> Dict[str, Any]:
+        """Approve return request"""
+        return self.make_request(
+            RequestMethod.PUT,
+            f'returns/{return_id}/approve'
+        )
+    
+    def reject_return(self, return_id: str, reason: str) -> Dict[str, Any]:
+        """Reject return request"""
+        data = {'reason': reason}
+        
+        return self.make_request(
+            RequestMethod.PUT,
+            f'returns/{return_id}/reject',
+            data=data
+        )
+    
+    # Claims Management
+    def get_claims(self,
+                   status: Optional[str] = None,
+                   start_date: Optional[datetime] = None,
+                   end_date: Optional[datetime] = None,
+                   offset: int = 0,
+                   limit: int = 100) -> Dict[str, Any]:
+        """Get claim requests"""
+        params = {
+            'merchantId': self.merchant_id,
+            'offset': offset,
+            'limit': min(limit, 100)
+        }
+        
+        if status:
+            params['status'] = status
+        if start_date:
+            params['beginDate'] = start_date.strftime('%Y-%m-%d')
+        if end_date:
+            params['endDate'] = end_date.strftime('%Y-%m-%d')
+        
+        return self.make_request(
+            RequestMethod.GET,
+            'claims',
+            params=params
+        )
+    
+    def respond_to_claim(self, claim_id: str, response: str) -> Dict[str, Any]:
+        """Respond to a claim"""
+        data = {'response': response}
+        
+        return self.make_request(
+            RequestMethod.POST,
+            f'claims/{claim_id}/respond',
+            data=data
+        )
+    
+    # Finance & Reporting
+    def get_financial_transactions(self,
+                                 transaction_type: Optional[str] = None,
+                                 start_date: Optional[datetime] = None,
+                                 end_date: Optional[datetime] = None,
+                                 offset: int = 0,
+                                 limit: int = 100) -> Dict[str, Any]:
+        """Get financial transactions"""
+        params = {
+            'merchantId': self.merchant_id,
+            'offset': offset,
+            'limit': min(limit, 100)
+        }
+        
+        if transaction_type:
+            params['transactionType'] = transaction_type
+        if start_date:
+            params['beginDate'] = start_date.strftime('%Y-%m-%d')
+        if end_date:
+            params['endDate'] = end_date.strftime('%Y-%m-%d')
+        
+        return self.make_request(
+            RequestMethod.GET,
+            'finance/transactions',
+            params=params
+        )
+    
+    def get_invoice_details(self, invoice_number: str) -> Dict[str, Any]:
+        """Get invoice details"""
+        return self.make_request(
+            RequestMethod.GET,
+            f'finance/invoices/{invoice_number}'
+        )
+    
+    # Cargo Management
+    def get_cargo_companies(self) -> List[Dict[str, Any]]:
+        """Get available cargo companies"""
+        response = self.make_request(
+            RequestMethod.GET,
+            'cargo-companies'
+        )
+        return response.get('companies', [])
+    
+    def create_cargo_label(self, package_number: str) -> bytes:
+        """Get cargo label for package"""
+        response = self.session.get(
+            self._build_url(f'packages/{package_number}/label'),
+            headers=self._get_headers()
+        )
+        response.raise_for_status()
+        return response.content
+    
+    # Batch Operations
+    def batch_update_products(self, products: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Batch update multiple products"""
+        return self.batch_operation(
+            items=products,
+            operation_function=lambda batch: self.update_product({'products': batch}),
+            batch_size=50,
+            delay_between_batches=1.0
+        )
+    
+    def batch_update_stock_price(self, updates: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Batch update stock and prices"""
+        return self.batch_operation(
+            items=updates,
+            operation_function=lambda batch: self.update_stock_and_price(batch),
+            batch_size=100,
+            delay_between_batches=0.5
+        )
+    
+    # Helper Methods
+    def _build_product_xml(self, products: List[Dict[str, Any]]) -> str:
+        """Build product XML for API"""
+        root = ET.Element('products')
+        
+        for product in products:
+            prod_elem = ET.SubElement(root, 'product')
+            
+            # Add product fields
+            for field, value in product.items():
+                if field == 'attributes':
+                    attrs_elem = ET.SubElement(prod_elem, 'attributes')
+                    for attr in value:
+                        attr_elem = ET.SubElement(attrs_elem, 'attribute')
+                        attr_elem.set('name', attr['name'])
+                        attr_elem.text = str(attr['value'])
+                elif field == 'images':
+                    images_elem = ET.SubElement(prod_elem, 'images')
+                    for idx, image_url in enumerate(value):
+                        img_elem = ET.SubElement(images_elem, 'image')
+                        img_elem.set('order', str(idx))
+                        img_elem.text = image_url
+                else:
+                    elem = ET.SubElement(prod_elem, field)
+                    elem.text = str(value)
+        
+        return self._prettify_xml(root)
+    
+    def _build_stock_price_xml(self, updates: List[Dict[str, Any]]) -> str:
+        """Build stock/price update XML"""
+        root = ET.Element('stockPriceUpdates')
+        
+        for update in updates:
+            update_elem = ET.SubElement(root, 'update')
+            for field, value in update.items():
+                elem = ET.SubElement(update_elem, field)
+                elem.text = str(value)
+        
+        return self._prettify_xml(root)
+    
+    def _prettify_xml(self, elem) -> str:
+        """Return a pretty-printed XML string"""
+        rough_string = ET.tostring(elem, encoding='unicode')
+        reparsed = minidom.parseString(rough_string)
+        return reparsed.toprettyxml(indent="  ")
+    
+    def get_all_products(self) -> List[Dict[str, Any]]:
+        """Get all products using pagination"""
+        all_products = []
+        offset = 0
+        limit = 100
+        
+        while True:
+            response = self.get_products(offset=offset, limit=limit)
+            products = response.get('listings', [])
+            
+            if not products:
+                break
+            
+            all_products.extend(products)
+            
+            if len(products) < limit:
+                break
+            
+            offset += limit
+        
+        return all_products
+    
+    def get_all_orders(self, status: Optional[str] = None,
+                      start_date: Optional[datetime] = None,
+                      end_date: Optional[datetime] = None) -> List[Dict[str, Any]]:
+        """Get all orders using pagination"""
+        all_orders = []
+        offset = 0
+        limit = 100
+        
+        while True:
+            response = self.get_orders(
+                status=status,
+                start_date=start_date,
+                end_date=end_date,
+                offset=offset,
+                limit=limit
+            )
+            orders = response.get('orders', [])
+            
+            if not orders:
+                break
+            
+            all_orders.extend(orders)
+            
+            if len(orders) < limit:
+                break
+            
+            offset += limit
+        
+        return all_orders
+    
+    def calculate_commission(self, category_id: str, price: Decimal) -> Decimal:
+        """Calculate commission for a product"""
+        commission_info = self.get_category_commission(category_id)
+        commission_rate = Decimal(str(commission_info.get('rate', 0.18)))  # Default 18%
+        return price * commission_rate
+    
+    def format_product_for_hepsiburada(self, product_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Format product data for Hepsiburada API"""
+        formatted = {
+            'merchantSku': product_data.get('sku'),
+            'barcode': product_data.get('barcode'),
+            'urunAdi': product_data.get('name'),
+            'urunAciklamasi': product_data.get('description', ''),
+            'marka': product_data.get('brand'),
+            'garantiSuresi': product_data.get('warranty_period', 24),  # Default 24 months
+            'kg': product_data.get('weight', 1),
+            'tax': product_data.get('vat_rate', 18),
+            'price': float(product_data.get('price', 0)),
+            'stock': product_data.get('stock', 0),
+            'categoryId': product_data.get('category_id'),
+            'productImageUrl': product_data.get('main_image', ''),
+            'images': product_data.get('images', []),
+            'attributes': []
+        }
+        
+        # Add attributes
+        if 'attributes' in product_data:
+            for attr_name, attr_value in product_data['attributes'].items():
+                formatted['attributes'].append({
+                    'name': attr_name,
+                    'value': attr_value
+                })
+        
+        return formatted
 
-    def get_listing_quality_score(self) -> Dict:
-        """Listeleme kalite skorunu getirir"""
-        endpoint = f"/analytics/api/listing-quality/{self.merchant_id}"
-        return self._make_request('GET', endpoint)
 
-
-# Örnek kullanım ve test fonksiyonları
 def test_hepsiburada_api():
-    """Hepsiburada API'sini test eder"""
+    """Test Hepsiburada API functionality"""
+    print("Testing Hepsiburada Marketplace API...")
     
-    # Test credentials (gerçek projede environment variable'lardan alınmalı)
-    username = "YOUR_USERNAME"
-    password = "YOUR_PASSWORD"
-    merchant_id = "YOUR_MERCHANT_ID"
+    # Test credentials (these should come from environment variables)
+    credentials = {
+        'username': 'YOUR_USERNAME',
+        'password': 'YOUR_PASSWORD',
+        'merchant_id': 'YOUR_MERCHANT_ID'
+    }
     
-    # API client oluştur
-    hepsiburada = HepsiburadaMarketplaceAPI(
-        username=username,
-        password=password,
-        merchant_id=merchant_id,
-        sandbox=True
-    )
-    
-    print("🔄 Hepsiburada API Bağlantı Testi...")
-    connection_test = hepsiburada.test_connection()
-    print(f"Bağlantı: {'✅ Başarılı' if connection_test['success'] else '❌ Başarısız'}")
-    
-    if connection_test['success']:
-        print("\n📦 Ürün Listesi Testi...")
-        products = hepsiburada.get_products(page=0, size=10)
-        print(f"Ürün listesi alındı: {'✅' if products.get('success', True) else '❌'}")
+    try:
+        # Initialize API
+        api = HepsiburadaMarketplaceAPI(credentials, sandbox=True)
         
-        print("\n📋 Kategori Listesi Testi...")
-        categories = hepsiburada.get_categories()
-        print(f"Kategori listesi alındı: {'✅' if categories.get('success', True) else '❌'}")
-        
-        print("\n🏷️ Marka Listesi Testi...")
-        brands = hepsiburada.get_brands()
-        print(f"Marka listesi alındı: {'✅' if brands.get('success', True) else '❌'}")
-        
-        print("\n📦 Sipariş Listesi Testi...")
-        orders = hepsiburada.get_orders(page=0, size=10)
-        print(f"Sipariş listesi alındı: {'✅' if orders.get('success', True) else '❌'}")
-        
-        print("\n🏢 Kargo Firmaları Testi...")
-        cargo_companies = hepsiburada.get_cargo_companies()
-        print(f"Kargo firmaları alındı: {'✅' if cargo_companies.get('success', True) else '❌'}")
+        # Test connection
+        if api.validate_credentials():
+            print("✅ Connection successful!")
+            
+            # Get merchant info
+            merchant_info = api.get_merchant_info()
+            print(f"✅ Merchant: {merchant_info.get('merchantName')}")
+            
+            # Get categories
+            categories = api.get_categories()
+            print(f"✅ Found {len(categories)} categories")
+            
+            # Get cargo companies
+            cargo_companies = api.get_cargo_companies()
+            print(f"✅ Found {len(cargo_companies)} cargo companies")
+            
+        else:
+            print("❌ Authentication failed!")
+            
+    except Exception as e:
+        print(f"❌ Error: {e}")
 
 
 if __name__ == "__main__":

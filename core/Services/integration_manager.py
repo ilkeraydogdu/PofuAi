@@ -1,924 +1,537 @@
 """
-Gerçek Entegrasyon Yöneticisi - Marketplace ve Ödeme API'leri
-Bu modül, gerçek marketplace ve ödeme API'lerini kullanır.
+Integration Manager - Central hub for all integrations
+Manages initialization and access to all marketplace, payment, and service integrations
 """
 
-import asyncio
-import json
+from typing import Dict, Any, Optional, Type, List
+from enum import Enum
 import logging
+import os
 from datetime import datetime
-from typing import Dict, List, Optional, Any
-from abc import ABC, abstractmethod
 
-class BaseIntegration(ABC):
-    """Tüm entegrasyonlar için temel sınıf"""
-    
-    def __init__(self, config: Dict[str, Any]):
-        self.config = config
-        self.logger = logging.getLogger(f"{self.__class__.__name__}")
-        self.is_active = config.get('active', True)
-        self.api_key = config.get('api_key')
-        self.secret_key = config.get('secret_key')
-        
-    @abstractmethod
-    async def connect(self) -> bool:
-        """Entegrasyona bağlan"""
-        pass
-        
-    @abstractmethod
-    async def get_products(self) -> List[Dict]:
-        """Ürünleri getir"""
-        pass
-        
-    @abstractmethod
-    async def update_stock(self, product_id: str, stock: int) -> bool:
-        """Stok güncelle"""
-        pass
-        
-    @abstractmethod
-    async def update_price(self, product_id: str, price: float) -> bool:
-        """Fiyat güncelle"""
-        pass
-        
-    @abstractmethod
-    async def get_orders(self) -> List[Dict]:
-        """Siparişleri getir"""
-        pass
+# Import all integration classes
+from .base_integration import BaseIntegration, IntegrationError
 
-# ===== KRİTİK SEVİYE ENTEGRASYONLARI =====
+# Marketplace APIs
+from .trendyol_marketplace_api import TrendyolMarketplaceAPI
+from .hepsiburada_marketplace_api import HepsiburadaMarketplaceAPI
+from .n11_marketplace_api import N11MarketplaceAPI
+from .amazon_tr_marketplace_api import AmazonTRMarketplaceAPI
+from .ciceksepeti_marketplace_api import CiceksepetiMarketplaceAPI
+from .pttavm_marketplace_api import PTTAVMMarketplaceAPI
 
-class PttAvmIntegration(BaseIntegration):
-    """PTT AVM Entegrasyonu - Kritik Seviye"""
-    
-    def __init__(self, config: Dict[str, Any]):
-        super().__init__(config)
-        self.base_url = "https://api.pttavm.com/v1"
-        
-    async def connect(self) -> bool:
-        """PTT AVM API'ye bağlan"""
-        try:
-            # PTT AVM API bağlantısı
-            headers = {
-                'Authorization': f'Bearer {self.api_key}',
-                'Content-Type': 'application/json'
-            }
-            # Bağlantı testi
-            self.logger.info("PTT AVM entegrasyonu bağlandı")
-            return True
-        except Exception as e:
-            self.logger.error(f"PTT AVM bağlantı hatası: {e}")
-            return False
-            
-    async def get_products(self) -> List[Dict]:
-        """PTT AVM ürünleri getir"""
-        try:
-            # PTT AVM ürün listesi API çağrısı
-            products = []
-            # API implementasyonu burada olacak
-            return products
-        except Exception as e:
-            self.logger.error(f"PTT AVM ürün getirme hatası: {e}")
-            return []
-            
-    async def update_stock(self, product_id: str, stock: int) -> bool:
-        """PTT AVM stok güncelle"""
-        try:
-            # PTT AVM stok güncelleme API çağrısı
-            self.logger.info(f"PTT AVM stok güncellendi: {product_id} -> {stock}")
-            return True
-        except Exception as e:
-            self.logger.error(f"PTT AVM stok güncelleme hatası: {e}")
-            return False
-            
-    async def update_price(self, product_id: str, price: float) -> bool:
-        """PTT AVM fiyat güncelle"""
-        try:
-            # PTT AVM fiyat güncelleme API çağrısı
-            self.logger.info(f"PTT AVM fiyat güncellendi: {product_id} -> {price}")
-            return True
-        except Exception as e:
-            self.logger.error(f"PTT AVM fiyat güncelleme hatası: {e}")
-            return False
-            
-    async def get_orders(self) -> List[Dict]:
-        """PTT AVM siparişleri getir"""
-        try:
-            # PTT AVM sipariş listesi API çağrısı
-            orders = []
-            # API implementasyonu burada olacak
-            return orders
-        except Exception as e:
-            self.logger.error(f"PTT AVM sipariş getirme hatası: {e}")
-            return []
+# Payment APIs
+from .iyzico_payment_api import IyzicoPaymentAPI
+from .paytr_payment_api import PayTRPaymentAPI
+from .stripe_payment_api import StripePaymentAPI
+from .paypal_payment_api import PayPalPaymentAPI
 
-class N11ProIntegration(BaseIntegration):
-    """N11 Pro Entegrasyonu - Kritik Seviye"""
-    
-    def __init__(self, config: Dict[str, Any]):
-        super().__init__(config)
-        self.base_url = "https://api.n11pro.com/v2"
-        
-    async def connect(self) -> bool:
-        """N11 Pro API'ye bağlan"""
-        try:
-            # N11 Pro API bağlantısı
-            self.logger.info("N11 Pro entegrasyonu bağlandı")
-            return True
-        except Exception as e:
-            self.logger.error(f"N11 Pro bağlantı hatası: {e}")
-            return False
-            
-    async def get_products(self) -> List[Dict]:
-        """N11 Pro ürünleri getir"""
-        try:
-            products = []
-            # N11 Pro API implementasyonu
-            return products
-        except Exception as e:
-            self.logger.error(f"N11 Pro ürün getirme hatası: {e}")
-            return []
-            
-    async def update_stock(self, product_id: str, stock: int) -> bool:
-        """N11 Pro stok güncelle"""
-        try:
-            self.logger.info(f"N11 Pro stok güncellendi: {product_id} -> {stock}")
-            return True
-        except Exception as e:
-            self.logger.error(f"N11 Pro stok güncelleme hatası: {e}")
-            return False
-            
-    async def update_price(self, product_id: str, price: float) -> bool:
-        """N11 Pro fiyat güncelle"""
-        try:
-            self.logger.info(f"N11 Pro fiyat güncellendi: {product_id} -> {price}")
-            return True
-        except Exception as e:
-            self.logger.error(f"N11 Pro fiyat güncelleme hatası: {e}")
-            return False
-            
-    async def get_orders(self) -> List[Dict]:
-        """N11 Pro siparişleri getir"""
-        try:
-            orders = []
-            # N11 Pro API implementasyonu
-            return orders
-        except Exception as e:
-            self.logger.error(f"N11 Pro sipariş getirme hatası: {e}")
-            return []
+# E-Invoice APIs
+from .uyumsoft_einvoice_api import UyumsoftEInvoiceAPI
+from .logo_einvoice_api import LogoEInvoiceAPI
+from .mikro_einvoice_api import MikroEInvoiceAPI
+from .foriba_einvoice_api import ForibaEInvoiceAPI
+from .edmbilisim_einvoice_api import EDMBilisimEInvoiceAPI
+from .izibiz_einvoice_api import IzibizEInvoiceAPI
+from .fitbulut_einvoice_api import FitbulutEInvoiceAPI
+from .kolaysoft_einvoice_api import KolaysoftEInvoiceAPI
+from .nesbilgi_einvoice_api import NesbilgiEInvoiceAPI
+from .edonusum_einvoice_api import EDonusumEInvoiceAPI
+from .ingbank_einvoice_api import INGBankEInvoiceAPI
+from .qnbfinansbank_einvoice_api import QNBFinansbankEInvoiceAPI
+from .protel_einvoice_api import ProtelEInvoiceAPI
+from .sovos_einvoice_api import SovosEInvoiceAPI
+from .digital_planet_einvoice_api import DigitalPlanetEInvoiceAPI
 
-class TrendyolEFaturaIntegration(BaseIntegration):
-    """Trendyol E-Fatura Entegrasyonu - Kritik Seviye"""
-    
-    def __init__(self, config: Dict[str, Any]):
-        super().__init__(config)
-        self.base_url = "https://api.trendyol.com/efatura/v1"
-        
-    async def connect(self) -> bool:
-        """Trendyol E-Fatura API'ye bağlan"""
-        try:
-            self.logger.info("Trendyol E-Fatura entegrasyonu bağlandı")
-            return True
-        except Exception as e:
-            self.logger.error(f"Trendyol E-Fatura bağlantı hatası: {e}")
-            return False
-            
-    async def create_invoice(self, order_data: Dict) -> Dict:
-        """E-Fatura oluştur"""
-        try:
-            # Trendyol E-Fatura oluşturma API çağrısı
-            invoice = {
-                'invoice_id': f"TRY-{datetime.now().strftime('%Y%m%d%H%M%S')}",
-                'status': 'created',
-                'order_id': order_data.get('order_id')
-            }
-            self.logger.info(f"Trendyol E-Fatura oluşturuldu: {invoice['invoice_id']}")
-            return invoice
-        except Exception as e:
-            self.logger.error(f"Trendyol E-Fatura oluşturma hatası: {e}")
-            return {}
-            
-    async def get_products(self) -> List[Dict]:
-        """Bu entegrasyon için geçerli değil"""
-        return []
-        
-    async def update_stock(self, product_id: str, stock: int) -> bool:
-        """Bu entegrasyon için geçerli değil"""
-        return True
-        
-    async def update_price(self, product_id: str, price: float) -> bool:
-        """Bu entegrasyon için geçerli değil"""
-        return True
-        
-    async def get_orders(self) -> List[Dict]:
-        """Bu entegrasyon için geçerli değil"""
-        return []
+# Accounting/ERP APIs
+from .logo_tiger_api import LogoTigerAPI
+from .netsis_api import NetsisAPI
+from .mikro_api import MikroAPI
+from .eta_api import ETAAPI
+from .zirve_api import ZirveAPI
+from .orka_api import OrkaAPI
+from .akınsoft_api import AkinsoftAPI
+from .link_api import LinkAPI
+from .uyumsoft_api import UyumsoftAPI
+from .sentez_api import SentezAPI
+from .dia_api import DiaAPI
+from .vega_api import VegaAPI
+from .workcube_api import WorkcubeAPI
 
-class QNBEFaturaIntegration(BaseIntegration):
-    """QNB E-Fatura Entegrasyonu - Kritik Seviye"""
-    
-    def __init__(self, config: Dict[str, Any]):
-        super().__init__(config)
-        self.base_url = "https://api.qnbefinans.com.tr/efatura/v1"
-        
-    async def connect(self) -> bool:
-        """QNB E-Fatura API'ye bağlan"""
-        try:
-            self.logger.info("QNB E-Fatura entegrasyonu bağlandı")
-            return True
-        except Exception as e:
-            self.logger.error(f"QNB E-Fatura bağlantı hatası: {e}")
-            return False
-            
-    async def create_invoice(self, order_data: Dict) -> Dict:
-        """QNB E-Fatura oluştur"""
-        try:
-            invoice = {
-                'invoice_id': f"QNB-{datetime.now().strftime('%Y%m%d%H%M%S')}",
-                'status': 'created',
-                'order_id': order_data.get('order_id')
-            }
-            self.logger.info(f"QNB E-Fatura oluşturuldu: {invoice['invoice_id']}")
-            return invoice
-        except Exception as e:
-            self.logger.error(f"QNB E-Fatura oluşturma hatası: {e}")
-            return {}
-            
-    async def get_products(self) -> List[Dict]:
-        return []
-        
-    async def update_stock(self, product_id: str, stock: int) -> bool:
-        return True
-        
-    async def update_price(self, product_id: str, price: float) -> bool:
-        return True
-        
-    async def get_orders(self) -> List[Dict]:
-        return []
+# Pre-Accounting APIs
+from .parasut_api import ParasutAPI
+from .kolaybi_api import KolaybiAPI
+from .muhasebetr_api import MuhasebeTRAPI
+from .altinrota_api import AltinrotaAPI
 
-class NilveraEFaturaIntegration(BaseIntegration):
-    """Nilvera E-Fatura Entegrasyonu - Kritik Seviye"""
-    
-    def __init__(self, config: Dict[str, Any]):
-        super().__init__(config)
-        self.base_url = "https://api.nilvera.com/efatura/v1"
-        
-    async def connect(self) -> bool:
-        """Nilvera E-Fatura API'ye bağlan"""
-        try:
-            self.logger.info("Nilvera E-Fatura entegrasyonu bağlandı")
-            return True
-        except Exception as e:
-            self.logger.error(f"Nilvera E-Fatura bağlantı hatası: {e}")
-            return False
-            
-    async def create_invoice(self, order_data: Dict) -> Dict:
-        """Nilvera E-Fatura oluştur"""
-        try:
-            invoice = {
-                'invoice_id': f"NIL-{datetime.now().strftime('%Y%m%d%H%M%S')}",
-                'status': 'created',
-                'order_id': order_data.get('order_id')
-            }
-            self.logger.info(f"Nilvera E-Fatura oluşturuldu: {invoice['invoice_id']}")
-            return invoice
-        except Exception as e:
-            self.logger.error(f"Nilvera E-Fatura oluşturma hatası: {e}")
-            return {}
-            
-    async def get_products(self) -> List[Dict]:
-        return []
-        
-    async def update_stock(self, product_id: str, stock: int) -> bool:
-        return True
-        
-    async def update_price(self, product_id: str, price: float) -> bool:
-        return True
-        
-    async def get_orders(self) -> List[Dict]:
-        return []
+# Cargo APIs
+from .yurtici_kargo_api import YurticiKargoAPI
+from .aras_kargo_api import ArasKargoAPI
+from .mng_kargo_api import MNGKargoAPI
+from .ptt_kargo_api import PTTKargoAPI
+from .ups_kargo_api import UPSKargoAPI
+from .sendeo_api import SendeoAPI
+from .suratcargo_api import SuratCargoAPI
+from .horoz_lojistik_api import HorozLojistikAPI
+from .borusan_lojistik_api import BorusanLojistikAPI
+from .ekol_lojistik_api import EkolLojistikAPI
+from .netlog_lojistik_api import NetlogLojistikAPI
+from .kargonet_api import KargonetAPI
+from .kolay_gelsin_api import KolayGelsinAPI
+from .trendyol_express_api import TrendyolExpressAPI
+from .hepsijet_api import HepsiJetAPI
+from .getir_api import GetirAPI
+from .banabi_api import BanabiAPI
 
-class PTTKargoIntegration(BaseIntegration):
-    """PTT Kargo Entegrasyonu - Kritik Seviye"""
-    
-    def __init__(self, config: Dict[str, Any]):
-        super().__init__(config)
-        self.base_url = "https://api.ptt.gov.tr/kargo/v1"
-        
-    async def connect(self) -> bool:
-        """PTT Kargo API'ye bağlan"""
-        try:
-            self.logger.info("PTT Kargo entegrasyonu bağlandı")
-            return True
-        except Exception as e:
-            self.logger.error(f"PTT Kargo bağlantı hatası: {e}")
-            return False
-            
-    async def create_shipment(self, order_data: Dict) -> Dict:
-        """Kargo gönderi oluştur"""
-        try:
-            shipment = {
-                'tracking_number': f"PTT{datetime.now().strftime('%Y%m%d%H%M%S')}",
-                'status': 'created',
-                'order_id': order_data.get('order_id')
-            }
-            self.logger.info(f"PTT Kargo gönderi oluşturuldu: {shipment['tracking_number']}")
-            return shipment
-        except Exception as e:
-            self.logger.error(f"PTT Kargo gönderi oluşturma hatası: {e}")
-            return {}
-            
-    async def track_shipment(self, tracking_number: str) -> Dict:
-        """Kargo takip et"""
-        try:
-            tracking_info = {
-                'tracking_number': tracking_number,
-                'status': 'in_transit',
-                'location': 'Ankara Merkez'
-            }
-            return tracking_info
-        except Exception as e:
-            self.logger.error(f"PTT Kargo takip hatası: {e}")
-            return {}
-            
-    async def get_products(self) -> List[Dict]:
-        return []
-        
-    async def update_stock(self, product_id: str, stock: int) -> bool:
-        return True
-        
-    async def update_price(self, product_id: str, price: float) -> bool:
-        return True
-        
-    async def get_orders(self) -> List[Dict]:
-        return []
+# Fulfillment APIs
+from .octopus_api import OctopusAPI
+from .shiphero_api import ShipheroAPI
+from .fulfillmentbox_api import FulfillmentBoxAPI
+from .deposco_api import DeposcoAPI
+from .shipbob_api import ShipBobAPI
 
-class OplogFulfillmentIntegration(BaseIntegration):
-    """Oplog Fulfillment Entegrasyonu - Kritik Seviye"""
-    
-    def __init__(self, config: Dict[str, Any]):
-        super().__init__(config)
-        self.base_url = "https://api.oplog.com.tr/fulfillment/v1"
-        
-    async def connect(self) -> bool:
-        """Oplog Fulfillment API'ye bağlan"""
-        try:
-            self.logger.info("Oplog Fulfillment entegrasyonu bağlandı")
-            return True
-        except Exception as e:
-            self.logger.error(f"Oplog Fulfillment bağlantı hatası: {e}")
-            return False
-            
-    async def create_fulfillment_order(self, order_data: Dict) -> Dict:
-        """Fulfillment siparişi oluştur"""
-        try:
-            fulfillment_order = {
-                'fulfillment_id': f"OPL-{datetime.now().strftime('%Y%m%d%H%M%S')}",
-                'status': 'received',
-                'order_id': order_data.get('order_id')
-            }
-            self.logger.info(f"Oplog Fulfillment siparişi oluşturuldu: {fulfillment_order['fulfillment_id']}")
-            return fulfillment_order
-        except Exception as e:
-            self.logger.error(f"Oplog Fulfillment sipariş oluşturma hatası: {e}")
-            return {}
-            
-    async def get_inventory(self) -> Dict:
-        """Depo stok durumu getir"""
-        try:
-            inventory = {
-                'warehouse_id': 'OPL-MAIN',
-                'total_products': 1000,
-                'available_space': '80%'
-            }
-            return inventory
-        except Exception as e:
-            self.logger.error(f"Oplog Fulfillment envanter getirme hatası: {e}")
-            return {}
-            
-    async def get_products(self) -> List[Dict]:
-        return []
-        
-    async def update_stock(self, product_id: str, stock: int) -> bool:
-        return True
-        
-    async def update_price(self, product_id: str, price: float) -> bool:
-        return True
-        
-    async def get_orders(self) -> List[Dict]:
-        return []
+# Additional Marketplace APIs
+from .epttavm_api import EPttAvmAPI
+from .morhipo_api import MorhipoAPI
+from .boyner_api import BoynerAPI
+from .evidea_api import EvideaAPI
+from .koton_api import KotonAPI
+from .lcwaikiki_api import LCWaikikiAPI
+from .defacto_api import DefactoAPI
+from .mavi_api import MaviAPI
+from .teknosa_api import TeknosaAPI
+from .vatan_api import VatanAPI
+from .mediamarkt_api import MediaMarktAPI
+from .carrefoursa_api import CarrefourSAAPI
+from .migros_sanal_market_api import MigrosSanalMarketAPI
+from .a101_api import A101API
+from .sok_market_api import SokMarketAPI
+from .gratis_api import GratisAPI
+from .watsons_api import WatsonsAPI
+from .rossmann_api import RossmannAPI
+from .koçtaş_api import KoctasAPI
+from .bauhaus_api import BauhausAPI
+from .ikea_api import IkeaAPI
+from .adidas_api import AdidasAPI
+from .nike_api import NikeAPI
+from .decathlon_api import DecathlonAPI
+from .intersport_api import IntersportAPI
 
-# ===== YÜKSEK ÖNCELİKLİ ENTEGRASYONLAR =====
+# E-Commerce Platform APIs
+from .ideasoft_api import IdeasoftAPI
+from .tsoft_api import TSoftAPI
+from .shopify_api import ShopifyAPI
+from .woocommerce_api import WooCommerceAPI
+from .magento_api import MagentoAPI
+from .opencart_api import OpenCartAPI
+from .prestashop_api import PrestaShopAPI
 
-class TurkcellPasajIntegration(BaseIntegration):
-    """Turkcell Pasaj Entegrasyonu - Yüksek Öncelik"""
-    
-    def __init__(self, config: Dict[str, Any]):
-        super().__init__(config)
-        self.base_url = "https://api.turkcellpasaj.com/v1"
-        
-    async def connect(self) -> bool:
-        try:
-            self.logger.info("Turkcell Pasaj entegrasyonu bağlandı")
-            return True
-        except Exception as e:
-            self.logger.error(f"Turkcell Pasaj bağlantı hatası: {e}")
-            return False
-            
-    async def get_products(self) -> List[Dict]:
-        try:
-            products = []
-            return products
-        except Exception as e:
-            self.logger.error(f"Turkcell Pasaj ürün getirme hatası: {e}")
-            return []
-            
-    async def update_stock(self, product_id: str, stock: int) -> bool:
-        try:
-            self.logger.info(f"Turkcell Pasaj stok güncellendi: {product_id} -> {stock}")
-            return True
-        except Exception as e:
-            self.logger.error(f"Turkcell Pasaj stok güncelleme hatası: {e}")
-            return False
-            
-    async def update_price(self, product_id: str, price: float) -> bool:
-        try:
-            self.logger.info(f"Turkcell Pasaj fiyat güncellendi: {product_id} -> {price}")
-            return True
-        except Exception as e:
-            self.logger.error(f"Turkcell Pasaj fiyat güncelleme hatası: {e}")
-            return False
-            
-    async def get_orders(self) -> List[Dict]:
-        try:
-            orders = []
-            return orders
-        except Exception as e:
-            self.logger.error(f"Turkcell Pasaj sipariş getirme hatası: {e}")
-            return []
+# International Marketplace APIs
+from .etsy_api import EtsyAPI
+from .ebay_api import EbayAPI
+from .aliexpress_api import AliExpressAPI
+from .wish_api import WishAPI
+from .walmart_api import WalmartAPI
 
-class GetirCarsiIntegration(BaseIntegration):
-    """GetirÇarşı Entegrasyonu - Yüksek Öncelik"""
-    
-    def __init__(self, config: Dict[str, Any]):
-        super().__init__(config)
-        self.base_url = "https://api.getir.com/carsi/v1"
-        
-    async def connect(self) -> bool:
-        try:
-            self.logger.info("GetirÇarşı entegrasyonu bağlandı")
-            return True
-        except Exception as e:
-            self.logger.error(f"GetirÇarşı bağlantı hatası: {e}")
-            return False
-            
-    async def get_products(self) -> List[Dict]:
-        try:
-            products = []
-            return products
-        except Exception as e:
-            self.logger.error(f"GetirÇarşı ürün getirme hatası: {e}")
-            return []
-            
-    async def update_stock(self, product_id: str, stock: int) -> bool:
-        try:
-            self.logger.info(f"GetirÇarşı stok güncellendi: {product_id} -> {stock}")
-            return True
-        except Exception as e:
-            self.logger.error(f"GetirÇarşı stok güncelleme hatası: {e}")
-            return False
-            
-    async def update_price(self, product_id: str, price: float) -> bool:
-        try:
-            self.logger.info(f"GetirÇarşı fiyat güncellendi: {product_id} -> {price}")
-            return True
-        except Exception as e:
-            self.logger.error(f"GetirÇarşı fiyat güncelleme hatası: {e}")
-            return False
-            
-    async def get_orders(self) -> List[Dict]:
-        try:
-            orders = []
-            return orders
-        except Exception as e:
-            self.logger.error(f"GetirÇarşı sipariş getirme hatası: {e}")
-            return []
+# Social Media Store APIs
+from .facebook_shops_api import FacebookShopsAPI
+from .instagram_shopping_api import InstagramShoppingAPI
+from .tiktok_shop_api import TikTokShopAPI
+from .pinterest_shopping_api import PinterestShoppingAPI
 
-class VodafoneHerSeyYanimdaIntegration(BaseIntegration):
-    """Vodafone Her Şey Yanımda Entegrasyonu - Yüksek Öncelik"""
-    
-    def __init__(self, config: Dict[str, Any]):
-        super().__init__(config)
-        self.base_url = "https://api.vodafone.com.tr/hsy/v1"
-        
-    async def connect(self) -> bool:
-        try:
-            self.logger.info("Vodafone Her Şey Yanımda entegrasyonu bağlandı")
-            return True
-        except Exception as e:
-            self.logger.error(f"Vodafone Her Şey Yanımda bağlantı hatası: {e}")
-            return False
-            
-    async def get_products(self) -> List[Dict]:
-        try:
-            products = []
-            return products
-        except Exception as e:
-            self.logger.error(f"Vodafone Her Şey Yanımda ürün getirme hatası: {e}")
-            return []
-            
-    async def update_stock(self, product_id: str, stock: int) -> bool:
-        try:
-            self.logger.info(f"Vodafone Her Şey Yanımda stok güncellendi: {product_id} -> {stock}")
-            return True
-        except Exception as e:
-            self.logger.error(f"Vodafone Her Şey Yanımda stok güncelleme hatası: {e}")
-            return False
-            
-    async def update_price(self, product_id: str, price: float) -> bool:
-        try:
-            self.logger.info(f"Vodafone Her Şey Yanımda fiyat güncellendi: {product_id} -> {price}")
-            return True
-        except Exception as e:
-            self.logger.error(f"Vodafone Her Şey Yanımda fiyat güncelleme hatası: {e}")
-            return False
-            
-    async def get_orders(self) -> List[Dict]:
-        try:
-            orders = []
-            return orders
-        except Exception as e:
-            self.logger.error(f"Vodafone Her Şey Yanımda sipariş getirme hatası: {e}")
-            return []
+# SMS APIs
+from .netgsm_api import NetGSMAPI
+from .iletimerkezi_api import IletiMerkeziAPI
+from .masgsm_api import MasGSMAPI
+from .jetsms_api import JetSMSAPI
+from .vatansms_api import VatanSMSAPI
 
-class ForibaEFaturaIntegration(BaseIntegration):
-    """Foriba E-Fatura Entegrasyonu - Yüksek Öncelik"""
-    
-    def __init__(self, config: Dict[str, Any]):
-        super().__init__(config)
-        self.base_url = "https://api.foriba.com/efatura/v1"
-        
-    async def connect(self) -> bool:
-        try:
-            self.logger.info("Foriba E-Fatura entegrasyonu bağlandı")
-            return True
-        except Exception as e:
-            self.logger.error(f"Foriba E-Fatura bağlantı hatası: {e}")
-            return False
-            
-    async def create_invoice(self, order_data: Dict) -> Dict:
-        try:
-            invoice = {
-                'invoice_id': f"FOR-{datetime.now().strftime('%Y%m%d%H%M%S')}",
-                'status': 'created',
-                'order_id': order_data.get('order_id')
-            }
-            self.logger.info(f"Foriba E-Fatura oluşturuldu: {invoice['invoice_id']}")
-            return invoice
-        except Exception as e:
-            self.logger.error(f"Foriba E-Fatura oluşturma hatası: {e}")
-            return {}
-            
-    async def get_products(self) -> List[Dict]:
-        return []
-        
-    async def update_stock(self, product_id: str, stock: int) -> bool:
-        return True
-        
-    async def update_price(self, product_id: str, price: float) -> bool:
-        return True
-        
-    async def get_orders(self) -> List[Dict]:
-        return []
+# Email APIs
+from .sendgrid_api import SendGridAPI
+from .mailchimp_api import MailChimpAPI
+from .mailgun_api import MailgunAPI
+from .sendinblue_api import SendinBlueAPI
+from .elastic_email_api import ElasticEmailAPI
 
-class HepsilojistikFulfillmentIntegration(BaseIntegration):
-    """Hepsilojistik Fulfillment Entegrasyonu - Yüksek Öncelik"""
-    
-    def __init__(self, config: Dict[str, Any]):
-        super().__init__(config)
-        self.base_url = "https://api.hepsilojistik.com/fulfillment/v1"
-        
-    async def connect(self) -> bool:
-        try:
-            self.logger.info("Hepsilojistik Fulfillment entegrasyonu bağlandı")
-            return True
-        except Exception as e:
-            self.logger.error(f"Hepsilojistik Fulfillment bağlantı hatası: {e}")
-            return False
-            
-    async def create_fulfillment_order(self, order_data: Dict) -> Dict:
-        try:
-            fulfillment_order = {
-                'fulfillment_id': f"HEP-{datetime.now().strftime('%Y%m%d%H%M%S')}",
-                'status': 'received',
-                'order_id': order_data.get('order_id')
-            }
-            self.logger.info(f"Hepsilojistik Fulfillment siparişi oluşturuldu: {fulfillment_order['fulfillment_id']}")
-            return fulfillment_order
-        except Exception as e:
-            self.logger.error(f"Hepsilojistik Fulfillment sipariş oluşturma hatası: {e}")
-            return {}
-            
-    async def get_inventory(self) -> Dict:
-        try:
-            inventory = {
-                'warehouse_id': 'HEP-MAIN',
-                'total_products': 2000,
-                'available_space': '75%'
-            }
-            return inventory
-        except Exception as e:
-            self.logger.error(f"Hepsilojistik Fulfillment envanter getirme hatası: {e}")
-            return {}
-            
-    async def get_products(self) -> List[Dict]:
-        return []
-        
-    async def update_stock(self, product_id: str, stock: int) -> bool:
-        return True
-        
-    async def update_price(self, product_id: str, price: float) -> bool:
-        return True
-        
-    async def get_orders(self) -> List[Dict]:
-        return []
 
-# ===== ENTEGRASYON YÖNETİCİSİ =====
+class IntegrationType(Enum):
+    """Integration types enumeration"""
+    MARKETPLACE = "marketplace"
+    ECOMMERCE = "ecommerce"
+    PAYMENT = "payment"
+    E_INVOICE = "e_invoice"
+    ACCOUNTING_ERP = "accounting_erp"
+    PRE_ACCOUNTING = "pre_accounting"
+    CARGO = "cargo"
+    FULFILLMENT = "fulfillment"
+    SMS = "sms"
+    EMAIL = "email"
+    SOCIAL_MEDIA = "social_media"
+    INTERNATIONAL = "international"
+    RETAIL = "retail"
+
 
 class IntegrationManager:
-    """Merkezi Entegrasyon Yöneticisi"""
+    """
+    Central manager for all integrations
+    Handles initialization, caching, and access to integration instances
+    """
+    
+    # Integration class mapping
+    INTEGRATION_CLASSES = {
+        # Marketplace APIs
+        'trendyol': TrendyolMarketplaceAPI,
+        'hepsiburada': HepsiburadaMarketplaceAPI,
+        'n11': N11MarketplaceAPI,
+        'amazon_tr': AmazonTRMarketplaceAPI,
+        'ciceksepeti': CiceksepetiMarketplaceAPI,
+        'pttavm': PTTAVMMarketplaceAPI,
+        'epttavm': EPttAvmAPI,
+        'morhipo': MorhipoAPI,
+        'boyner': BoynerAPI,
+        'evidea': EvideaAPI,
+        'koton': KotonAPI,
+        'lcwaikiki': LCWaikikiAPI,
+        'defacto': DefactoAPI,
+        'mavi': MaviAPI,
+        'teknosa': TeknosaAPI,
+        'vatan': VatanAPI,
+        'mediamarkt': MediaMarktAPI,
+        'carrefoursa': CarrefourSAAPI,
+        'migros_sanal_market': MigrosSanalMarketAPI,
+        'a101': A101API,
+        'sok_market': SokMarketAPI,
+        'gratis': GratisAPI,
+        'watsons': WatsonsAPI,
+        'rossmann': RossmannAPI,
+        'koçtaş': KoctasAPI,
+        'bauhaus': BauhausAPI,
+        'ikea': IkeaAPI,
+        'adidas': AdidasAPI,
+        'nike': NikeAPI,
+        'decathlon': DecathlonAPI,
+        'intersport': IntersportAPI,
+        
+        # E-Commerce Platforms
+        'ideasoft': IdeasoftAPI,
+        'tsoft': TSoftAPI,
+        'shopify': ShopifyAPI,
+        'woocommerce': WooCommerceAPI,
+        'magento': MagentoAPI,
+        'opencart': OpenCartAPI,
+        'prestashop': PrestaShopAPI,
+        
+        # International Marketplaces
+        'etsy': EtsyAPI,
+        'ebay': EbayAPI,
+        'aliexpress': AliExpressAPI,
+        'wish': WishAPI,
+        'walmart': WalmartAPI,
+        
+        # Social Media Stores
+        'facebook_shops': FacebookShopsAPI,
+        'instagram_shopping': InstagramShoppingAPI,
+        'tiktok_shop': TikTokShopAPI,
+        'pinterest_shopping': PinterestShoppingAPI,
+        
+        # Payment APIs
+        'iyzico': IyzicoPaymentAPI,
+        'paytr': PayTRPaymentAPI,
+        'stripe': StripePaymentAPI,
+        'paypal': PayPalPaymentAPI,
+        
+        # E-Invoice APIs
+        'uyumsoft_einvoice': UyumsoftEInvoiceAPI,
+        'logo_einvoice': LogoEInvoiceAPI,
+        'mikro_einvoice': MikroEInvoiceAPI,
+        'foriba': ForibaEInvoiceAPI,
+        'edmbilisim': EDMBilisimEInvoiceAPI,
+        'izibiz': IzibizEInvoiceAPI,
+        'fitbulut': FitbulutEInvoiceAPI,
+        'kolaysoft': KolaysoftEInvoiceAPI,
+        'nesbilgi': NesbilgiEInvoiceAPI,
+        'edonusum': EDonusumEInvoiceAPI,
+        'ingbank_einvoice': INGBankEInvoiceAPI,
+        'qnbfinansbank_einvoice': QNBFinansbankEInvoiceAPI,
+        'protel': ProtelEInvoiceAPI,
+        'sovos': SovosEInvoiceAPI,
+        'digital_planet': DigitalPlanetEInvoiceAPI,
+        
+        # Accounting/ERP APIs
+        'logo_tiger': LogoTigerAPI,
+        'netsis': NetsisAPI,
+        'mikro': MikroAPI,
+        'eta': ETAAPI,
+        'zirve': ZirveAPI,
+        'orka': OrkaAPI,
+        'akinsoft': AkinsoftAPI,
+        'link': LinkAPI,
+        'uyumsoft': UyumsoftAPI,
+        'sentez': SentezAPI,
+        'dia': DiaAPI,
+        'vega': VegaAPI,
+        'workcube': WorkcubeAPI,
+        
+        # Pre-Accounting APIs
+        'parasut': ParasutAPI,
+        'kolaybi': KolaybiAPI,
+        'muhasebetr': MuhasebeTRAPI,
+        'altinrota': AltinrotaAPI,
+        
+        # Cargo APIs
+        'yurtici_kargo': YurticiKargoAPI,
+        'aras_kargo': ArasKargoAPI,
+        'mng_kargo': MNGKargoAPI,
+        'ptt_kargo': PTTKargoAPI,
+        'ups_kargo': UPSKargoAPI,
+        'sendeo': SendeoAPI,
+        'surat_kargo': SuratCargoAPI,
+        'horoz_lojistik': HorozLojistikAPI,
+        'borusan_lojistik': BorusanLojistikAPI,
+        'ekol_lojistik': EkolLojistikAPI,
+        'netlog_lojistik': NetlogLojistikAPI,
+        'kargonet': KargonetAPI,
+        'kolay_gelsin': KolayGelsinAPI,
+        'trendyol_express': TrendyolExpressAPI,
+        'hepsijet': HepsiJetAPI,
+        'getir': GetirAPI,
+        'banabi': BanabiAPI,
+        
+        # Fulfillment APIs
+        'octopus': OctopusAPI,
+        'shiphero': ShipheroAPI,
+        'fulfillmentbox': FulfillmentBoxAPI,
+        'deposco': DeposcoAPI,
+        'shipbob': ShipBobAPI,
+        
+        # SMS APIs
+        'netgsm': NetGSMAPI,
+        'iletimerkezi': IletiMerkeziAPI,
+        'masgsm': MasGSMAPI,
+        'jetsms': JetSMSAPI,
+        'vatansms': VatanSMSAPI,
+        
+        # Email APIs
+        'sendgrid': SendGridAPI,
+        'mailchimp': MailChimpAPI,
+        'mailgun': MailgunAPI,
+        'sendinblue': SendinBlueAPI,
+        'elastic_email': ElasticEmailAPI
+    }
     
     def __init__(self):
-        self.integrations: Dict[str, BaseIntegration] = {}
-        self.logger = logging.getLogger("IntegrationManager")
-        self.ai_enabled = True
+        """Initialize Integration Manager"""
+        self.logger = logging.getLogger(__name__)
+        self.integrations = {}  # Cache for initialized integrations
+        self.credentials = {}   # Store for integration credentials
         
-    def register_integration(self, name: str, integration: BaseIntegration):
-        """Entegrasyon kaydet"""
-        self.integrations[name] = integration
-        self.logger.info(f"Entegrasyon kaydedildi: {name}")
+    def load_credentials_from_env(self):
+        """Load all integration credentials from environment variables"""
+        # Load marketplace credentials
+        for integration_name in self.INTEGRATION_CLASSES.keys():
+            prefix = integration_name.upper()
+            
+            # Common credential patterns
+            api_key = os.getenv(f'{prefix}_API_KEY')
+            api_secret = os.getenv(f'{prefix}_API_SECRET')
+            
+            if api_key:
+                self.credentials[integration_name] = {
+                    'api_key': api_key,
+                    'api_secret': api_secret,
+                    'username': os.getenv(f'{prefix}_USERNAME'),
+                    'password': os.getenv(f'{prefix}_PASSWORD'),
+                    'merchant_id': os.getenv(f'{prefix}_MERCHANT_ID'),
+                    'seller_id': os.getenv(f'{prefix}_SELLER_ID'),
+                    'supplier_id': os.getenv(f'{prefix}_SUPPLIER_ID'),
+                    'branch_id': os.getenv(f'{prefix}_BRANCH_ID'),
+                    'client_id': os.getenv(f'{prefix}_CLIENT_ID'),
+                    'client_secret': os.getenv(f'{prefix}_CLIENT_SECRET'),
+                    'refresh_token': os.getenv(f'{prefix}_REFRESH_TOKEN'),
+                    'store_url': os.getenv(f'{prefix}_STORE_URL'),
+                    'webhook_secret': os.getenv(f'{prefix}_WEBHOOK_SECRET')
+                }
+                
+                # Clean up None values
+                self.credentials[integration_name] = {
+                    k: v for k, v in self.credentials[integration_name].items() 
+                    if v is not None
+                }
+    
+    def set_credentials(self, integration_name: str, credentials: Dict[str, Any]):
+        """Set credentials for a specific integration"""
+        if integration_name not in self.INTEGRATION_CLASSES:
+            raise ValueError(f"Unknown integration: {integration_name}")
         
-    async def initialize_all(self):
-        """Tüm entegrasyonları başlat"""
-        results = {}
-        for name, integration in self.integrations.items():
-            try:
-                result = await integration.connect()
-                results[name] = result
-                if result:
-                    self.logger.info(f"✅ {name} başarıyla başlatıldı")
-                else:
-                    self.logger.error(f"❌ {name} başlatılamadı")
-            except Exception as e:
-                self.logger.error(f"❌ {name} başlatma hatası: {e}")
-                results[name] = False
-        return results
+        self.credentials[integration_name] = credentials
         
-    async def sync_all_products(self):
-        """Tüm entegrasyonlardan ürünleri senkronize et"""
-        all_products = []
-        for name, integration in self.integrations.items():
-            try:
-                products = await integration.get_products()
-                for product in products:
-                    product['source'] = name
-                all_products.extend(products)
-                self.logger.info(f"{name} - {len(products)} ürün senkronize edildi")
-            except Exception as e:
-                self.logger.error(f"{name} ürün senkronizasyon hatası: {e}")
-        return all_products
+        # If integration is already initialized, reinitialize with new credentials
+        if integration_name in self.integrations:
+            del self.integrations[integration_name]
+    
+    def get_integration(self, integration_name: str, 
+                       credentials: Optional[Dict[str, Any]] = None,
+                       sandbox: bool = False) -> BaseIntegration:
+        """
+        Get an integration instance
         
-    async def update_all_stocks(self, product_id: str, stock: int):
-        """Tüm entegrasyonlarda stok güncelle"""
-        results = {}
-        for name, integration in self.integrations.items():
-            try:
-                result = await integration.update_stock(product_id, stock)
-                results[name] = result
-            except Exception as e:
-                self.logger.error(f"{name} stok güncelleme hatası: {e}")
-                results[name] = False
-        return results
+        Args:
+            integration_name: Name of the integration
+            credentials: Optional credentials (uses stored if not provided)
+            sandbox: Whether to use sandbox/test mode
+            
+        Returns:
+            Integration instance
+        """
+        if integration_name not in self.INTEGRATION_CLASSES:
+            raise ValueError(f"Unknown integration: {integration_name}")
         
-    async def update_all_prices(self, product_id: str, price: float):
-        """Tüm entegrasyonlarda fiyat güncelle"""
-        results = {}
-        for name, integration in self.integrations.items():
-            try:
-                result = await integration.update_price(product_id, price)
-                results[name] = result
-            except Exception as e:
-                self.logger.error(f"{name} fiyat güncelleme hatası: {e}")
-                results[name] = False
-        return results
+        # Create cache key
+        cache_key = f"{integration_name}_{sandbox}"
         
-    async def get_all_orders(self):
-        """Tüm entegrasyonlardan siparişleri getir"""
-        all_orders = []
-        for name, integration in self.integrations.items():
-            try:
-                orders = await integration.get_orders()
-                for order in orders:
-                    order['source'] = name
-                all_orders.extend(orders)
-                self.logger.info(f"{name} - {len(orders)} sipariş getirildi")
-            except Exception as e:
-                self.logger.error(f"{name} sipariş getirme hatası: {e}")
-        return all_orders
+        # Check cache
+        if cache_key in self.integrations and not credentials:
+            return self.integrations[cache_key]
         
-    def get_integration_status(self) -> Dict:
-        """Entegrasyon durumlarını getir"""
-        status = {
-            'total_integrations': len(self.integrations),
-            'active_integrations': sum(1 for i in self.integrations.values() if i.is_active),
-            'integrations': {}
-        }
+        # Get credentials
+        if not credentials:
+            if integration_name not in self.credentials:
+                raise ValueError(f"No credentials found for {integration_name}")
+            credentials = self.credentials[integration_name]
         
-        for name, integration in self.integrations.items():
-            status['integrations'][name] = {
-                'active': integration.is_active,
-                'type': integration.__class__.__name__,
-                'last_sync': datetime.now().isoformat()
+        # Get integration class
+        integration_class = self.INTEGRATION_CLASSES[integration_name]
+        
+        # Initialize integration
+        try:
+            integration = integration_class(credentials=credentials, sandbox=sandbox)
+            
+            # Cache if using stored credentials
+            if not credentials or credentials == self.credentials.get(integration_name):
+                self.integrations[cache_key] = integration
+            
+            self.logger.info(f"Initialized {integration_name} integration")
+            return integration
+            
+        except Exception as e:
+            self.logger.error(f"Failed to initialize {integration_name}: {e}")
+            raise IntegrationError(f"Failed to initialize {integration_name}: {e}")
+    
+    def test_integration(self, integration_name: str, 
+                        credentials: Optional[Dict[str, Any]] = None,
+                        sandbox: bool = True) -> Dict[str, Any]:
+        """
+        Test an integration connection
+        
+        Returns:
+            Test result with success status and details
+        """
+        try:
+            integration = self.get_integration(integration_name, credentials, sandbox)
+            
+            # Test connection
+            is_valid = integration.validate_credentials()
+            
+            result = {
+                'success': is_valid,
+                'integration': integration_name,
+                'sandbox': sandbox,
+                'timestamp': datetime.now().isoformat()
             }
             
-        return status
-        
-    async def ai_optimize_pricing(self, product_data: Dict) -> float:
-        """AI destekli fiyat optimizasyonu"""
-        if not self.ai_enabled:
-            return product_data.get('current_price', 0.0)
+            # Add integration-specific test results
+            if hasattr(integration, 'get_test_info'):
+                result['details'] = integration.get_test_info()
             
-        try:
-            # AI algoritması ile optimal fiyat hesapla
-            current_price = product_data.get('current_price', 0.0)
-            competitor_prices = product_data.get('competitor_prices', [])
-            demand_score = product_data.get('demand_score', 50)
+            return result
             
-            if competitor_prices:
-                avg_competitor_price = sum(competitor_prices) / len(competitor_prices)
-                min_competitor_price = min(competitor_prices)
-                
-                # Basit AI algoritması
-                if demand_score > 80:  # Yüksek talep
-                    optimal_price = min(avg_competitor_price * 1.05, current_price * 1.1)
-                elif demand_score < 30:  # Düşük talep
-                    optimal_price = max(min_competitor_price * 0.95, current_price * 0.9)
-                else:  # Normal talep
-                    optimal_price = avg_competitor_price
-                    
-                self.logger.info(f"AI fiyat optimizasyonu: {current_price} -> {optimal_price}")
-                return optimal_price
-            else:
-                return current_price
-                
         except Exception as e:
-            self.logger.error(f"AI fiyat optimizasyon hatası: {e}")
-            return product_data.get('current_price', 0.0)
-            
-    async def ai_stock_prediction(self, product_data: Dict) -> int:
-        """AI destekli stok tahmini"""
-        if not self.ai_enabled:
-            return product_data.get('current_stock', 0)
-            
-        try:
-            # AI algoritması ile optimal stok hesapla
-            current_stock = product_data.get('current_stock', 0)
-            daily_sales = product_data.get('daily_sales', [])
-            lead_time = product_data.get('lead_time_days', 7)
-            
-            if daily_sales and len(daily_sales) > 0:
-                avg_daily_sales = sum(daily_sales) / len(daily_sales)
-                predicted_demand = avg_daily_sales * lead_time * 1.2  # %20 güvenlik marjı
-                
-                recommended_stock = max(int(predicted_demand), 10)  # Minimum 10 adet
-                
-                self.logger.info(f"AI stok tahmini: {current_stock} -> {recommended_stock}")
-                return recommended_stock
-            else:
-                # Eğer satış verisi yoksa, mevcut stokun %120'sini öner
-                recommended_stock = max(int(current_stock * 1.2), 10)
-                self.logger.info(f"AI stok tahmini (veri yok): {current_stock} -> {recommended_stock}")
-                return recommended_stock
-                
-        except Exception as e:
-            self.logger.error(f"AI stok tahmin hatası: {e}")
-            return product_data.get('current_stock', 0)
-
-# ===== ENTEGRASYON FABRİKASI =====
-
-class IntegrationFactory:
-    """Entegrasyon fabrikası - Dinamik entegrasyon oluşturma"""
+            return {
+                'success': False,
+                'integration': integration_name,
+                'error': str(e),
+                'timestamp': datetime.now().isoformat()
+            }
     
-    @staticmethod
-    def create_integration(integration_type: str, config: Dict[str, Any]) -> BaseIntegration:
-        """Entegrasyon türüne göre entegrasyon oluştur"""
+    def test_all_integrations(self, sandbox: bool = True) -> Dict[str, Dict[str, Any]]:
+        """Test all configured integrations"""
+        results = {}
         
-        integration_map = {
-            # Kritik Seviye
-            'pttavm': PttAvmIntegration,
-            'n11pro': N11ProIntegration,
-            'trendyol_efatura': TrendyolEFaturaIntegration,
-            'qnb_efatura': QNBEFaturaIntegration,
-            'nilvera_efatura': NilveraEFaturaIntegration,
-            'ptt_kargo': PTTKargoIntegration,
-            'oplog_fulfillment': OplogFulfillmentIntegration,
-            
-            # Yüksek Öncelik
-            'turkcell_pasaj': TurkcellPasajIntegration,
-            'getir_carsi': GetirCarsiIntegration,
-            'vodafone_hsy': VodafoneHerSeyYanimdaIntegration,
-            'foriba_efatura': ForibaEFaturaIntegration,
-            'hepsilojistik_fulfillment': HepsilojistikFulfillmentIntegration,
+        for integration_name in self.credentials.keys():
+            results[integration_name] = self.test_integration(integration_name, sandbox=sandbox)
+        
+        return results
+    
+    def get_integration_info(self, integration_name: str) -> Dict[str, Any]:
+        """Get information about an integration"""
+        if integration_name not in self.INTEGRATION_CLASSES:
+            raise ValueError(f"Unknown integration: {integration_name}")
+        
+        integration_class = self.INTEGRATION_CLASSES[integration_name]
+        
+        info = {
+            'name': integration_name,
+            'class': integration_class.__name__,
+            'module': integration_class.__module__,
+            'configured': integration_name in self.credentials,
+            'cached': any(key.startswith(integration_name) for key in self.integrations.keys())
         }
         
-        integration_class = integration_map.get(integration_type)
-        if integration_class:
-            return integration_class(config)
+        # Add docstring if available
+        if integration_class.__doc__:
+            info['description'] = integration_class.__doc__.strip()
+        
+        return info
+    
+    def list_integrations(self, integration_type: Optional[IntegrationType] = None) -> List[str]:
+        """List available integrations"""
+        all_integrations = list(self.INTEGRATION_CLASSES.keys())
+        
+        if not integration_type:
+            return all_integrations
+        
+        # Filter by type (this would need type metadata in INTEGRATION_CLASSES)
+        # For now, return all
+        return all_integrations
+    
+    def clear_cache(self, integration_name: Optional[str] = None):
+        """Clear integration cache"""
+        if integration_name:
+            # Clear specific integration
+            keys_to_remove = [k for k in self.integrations.keys() if k.startswith(integration_name)]
+            for key in keys_to_remove:
+                del self.integrations[key]
         else:
-            raise ValueError(f"Desteklenmeyen entegrasyon türü: {integration_type}")
+            # Clear all
+            self.integrations.clear()
+    
+    def get_statistics(self) -> Dict[str, Any]:
+        """Get integration manager statistics"""
+        return {
+            'total_integrations': len(self.INTEGRATION_CLASSES),
+            'configured_integrations': len(self.credentials),
+            'cached_instances': len(self.integrations),
+            'integration_types': {
+                'marketplace': len([k for k in self.INTEGRATION_CLASSES.keys() if 'marketplace' in k or k in ['trendyol', 'hepsiburada', 'n11', 'amazon_tr', 'ciceksepeti', 'pttavm']]),
+                'payment': len([k for k in self.INTEGRATION_CLASSES.keys() if 'payment' in k or k in ['iyzico', 'paytr', 'stripe', 'paypal']]),
+                'einvoice': len([k for k in self.INTEGRATION_CLASSES.keys() if 'einvoice' in k]),
+                'accounting': len([k for k in self.INTEGRATION_CLASSES.keys() if k in ['logo_tiger', 'netsis', 'mikro', 'eta', 'zirve', 'orka', 'akinsoft', 'link', 'uyumsoft', 'sentez', 'dia', 'vega', 'workcube', 'parasut', 'kolaybi', 'muhasebetr', 'altinrota']]),
+                'cargo': len([k for k in self.INTEGRATION_CLASSES.keys() if 'kargo' in k or 'cargo' in k or 'lojistik' in k or k in ['sendeo', 'kargonet', 'kolay_gelsin', 'trendyol_express', 'hepsijet', 'getir', 'banabi']]),
+                'fulfillment': len([k for k in self.INTEGRATION_CLASSES.keys() if k in ['octopus', 'shiphero', 'fulfillmentbox', 'deposco', 'shipbob']]),
+                'communication': len([k for k in self.INTEGRATION_CLASSES.keys() if k in ['netgsm', 'iletimerkezi', 'masgsm', 'jetsms', 'vatansms', 'sendgrid', 'mailchimp', 'mailgun', 'sendinblue', 'elastic_email']])
+            }
+        }
 
-# ===== KULLANIM ÖRNEĞİ =====
 
-async def main():
-    """Ana fonksiyon - Entegrasyon sistemini başlat"""
-    
-    # Entegrasyon yöneticisini oluştur
-    manager = IntegrationManager()
-    
-    # Kritik seviye entegrasyonları ekle
-    critical_integrations = [
-        ('pttavm', {'api_key': 'ptt_key', 'secret_key': 'ptt_secret'}),
-        ('n11pro', {'api_key': 'n11pro_key', 'secret_key': 'n11pro_secret'}),
-        ('trendyol_efatura', {'api_key': 'try_efatura_key', 'secret_key': 'try_efatura_secret'}),
-        ('qnb_efatura', {'api_key': 'qnb_key', 'secret_key': 'qnb_secret'}),
-        ('nilvera_efatura', {'api_key': 'nilvera_key', 'secret_key': 'nilvera_secret'}),
-        ('ptt_kargo', {'api_key': 'ptt_kargo_key', 'secret_key': 'ptt_kargo_secret'}),
-        ('oplog_fulfillment', {'api_key': 'oplog_key', 'secret_key': 'oplog_secret'}),
-    ]
-    
-    # Yüksek öncelik entegrasyonları ekle
-    high_priority_integrations = [
-        ('turkcell_pasaj', {'api_key': 'turkcell_key', 'secret_key': 'turkcell_secret'}),
-        ('getir_carsi', {'api_key': 'getir_key', 'secret_key': 'getir_secret'}),
-        ('vodafone_hsy', {'api_key': 'vodafone_key', 'secret_key': 'vodafone_secret'}),
-        ('foriba_efatura', {'api_key': 'foriba_key', 'secret_key': 'foriba_secret'}),
-        ('hepsilojistik_fulfillment', {'api_key': 'hepsi_key', 'secret_key': 'hepsi_secret'}),
-    ]
-    
-    # Tüm entegrasyonları kaydet
-    all_integrations = critical_integrations + high_priority_integrations
-    
-    for integration_type, config in all_integrations:
-        try:
-            integration = IntegrationFactory.create_integration(integration_type, config)
-            manager.register_integration(integration_type, integration)
-        except Exception as e:
-            logging.error(f"Entegrasyon oluşturma hatası {integration_type}: {e}")
-    
-    # Tüm entegrasyonları başlat
-    print("\n🚀 Entegrasyonlar başlatılıyor...")
-    results = await manager.initialize_all()
-    
-    # Sonuçları göster
-    print(f"\n📊 Entegrasyon Durumu:")
-    for name, status in results.items():
-        status_icon = "✅" if status else "❌"
-        print(f"{status_icon} {name}: {'Başarılı' if status else 'Başarısız'}")
-    
-    # Entegrasyon durumunu göster
-    status = manager.get_integration_status()
-    print(f"\n📈 Toplam Entegrasyon: {status['total_integrations']}")
-    print(f"📈 Aktif Entegrasyon: {status['active_integrations']}")
-    
-    # AI özelliklerini test et
-    print("\n🤖 AI Özellikleri Test Ediliyor...")
-    
-    # Fiyat optimizasyonu testi
-    product_data = {
-        'current_price': 100.0,
-        'competitor_prices': [95.0, 105.0, 98.0],
-        'demand_score': 75
-    }
-    optimal_price = await manager.ai_optimize_pricing(product_data)
-    print(f"💰 AI Fiyat Optimizasyonu: {product_data['current_price']} -> {optimal_price}")
-    
-    # Stok tahmini testi
-    stock_data = {
-        'current_stock': 50,
-        'daily_sales': [5, 7, 6, 8, 4, 9, 6],
-        'lead_time_days': 10
-    }
-    recommended_stock = await manager.ai_stock_prediction(stock_data)
-    print(f"📦 AI Stok Tahmini: {stock_data['current_stock']} -> {recommended_stock}")
-    
-    print("\n✅ Tüm entegrasyonlar başarıyla yüklendi ve test edildi!")
-            print("🎯 Gerçek entegrasyonlar hazır!")
+# Singleton instance
+integration_manager = IntegrationManager()
 
-if __name__ == "__main__":
-    # Logging ayarla
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    )
-    
-    # Ana fonksiyonu çalıştır
-    asyncio.run(main())
+
+def get_integration(integration_name: str, **kwargs) -> BaseIntegration:
+    """Convenience function to get integration instance"""
+    return integration_manager.get_integration(integration_name, **kwargs)
+
+
+def test_integration(integration_name: str, **kwargs) -> Dict[str, Any]:
+    """Convenience function to test integration"""
+    return integration_manager.test_integration(integration_name, **kwargs)
