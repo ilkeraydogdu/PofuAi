@@ -53,6 +53,9 @@ app.json.compact = False
 app.before_request(SessionMiddleware.handle)
 app.before_request(AuthMiddleware.handle)
 
+# Logging servisini başlat
+logger = LoggerService.get_logger()
+
 # Route'ları kaydet
 web_router['register_routes'](app)
 
@@ -78,9 +81,6 @@ except Exception as e:
 
 # Hata yönetimini aktifleştir
 app.register_error_handler(Exception, error_handler.handle_error)
-
-# Logging servisini başlat
-logger = LoggerService.get_logger()
 
 # Hata sayfaları için basit component
 class ErrorPageComponent:

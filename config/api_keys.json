@@ -1,0 +1,145 @@
+{
+  "development": {
+    "comment": "Development ortamı için test API anahtarları",
+    "marketplaces": {
+      "trendyol": {
+        "api_key": "test_trendyol_api_key_12345",
+        "secret_key": "test_trendyol_secret_67890",
+        "supplier_id": "test_supplier_001",
+        "base_url": "https://api.trendyol.com/sapigw",
+        "enabled": true
+      },
+      "hepsiburada": {
+        "api_key": "test_hepsiburada_key_abcde",
+        "secret_key": "test_hepsiburada_secret_fghij",
+        "merchant_id": "test_merchant_002",
+        "base_url": "https://mpop.hepsiburada.com",
+        "enabled": true
+      },
+      "n11": {
+        "api_key": "test_n11_api_key_xyz123",
+        "secret_key": "test_n11_secret_uvw456",
+        "base_url": "https://api.n11.com/ws",
+        "enabled": true
+      },
+      "amazon": {
+        "access_key": "test_amazon_access_key",
+        "secret_key": "test_amazon_secret_key",
+        "marketplace_id": "A1RKKUPIHCS9HS",
+        "seller_id": "test_seller_id",
+        "base_url": "https://mws-eu.amazonservices.com",
+        "enabled": false
+      }
+    },
+    "payment_systems": {
+      "iyzico": {
+        "api_key": "test_iyzico_api_key",
+        "secret_key": "test_iyzico_secret_key",
+        "base_url": "https://sandbox-api.iyzipay.com",
+        "enabled": true
+      },
+      "paytr": {
+        "merchant_id": "test_paytr_merchant",
+        "merchant_key": "test_paytr_key",
+        "merchant_salt": "test_paytr_salt",
+        "base_url": "https://www.paytr.com/odeme/api",
+        "enabled": true
+      },
+      "stripe": {
+        "publishable_key": "pk_test_stripe_publishable_key",
+        "secret_key": "sk_test_stripe_secret_key",
+        "webhook_secret": "whsec_test_webhook_secret",
+        "base_url": "https://api.stripe.com",
+        "enabled": false
+      }
+    },
+    "cargo_systems": {
+      "yurtici": {
+        "username": "test_yurtici_user",
+        "password": "test_yurtici_pass",
+        "customer_code": "test_customer_001",
+        "base_url": "https://api.yurticikargo.com",
+        "enabled": true
+      },
+      "aras": {
+        "username": "test_aras_user",
+        "password": "test_aras_pass",
+        "customer_code": "test_aras_001",
+        "base_url": "https://api.araskargo.com.tr",
+        "enabled": true
+      },
+      "mng": {
+        "username": "test_mng_user",
+        "password": "test_mng_pass",
+        "customer_code": "test_mng_001",
+        "base_url": "https://api.mngkargo.com.tr",
+        "enabled": true
+      }
+    },
+    "social_media": {
+      "facebook": {
+        "app_id": "test_facebook_app_id",
+        "app_secret": "test_facebook_app_secret",
+        "access_token": "test_facebook_access_token",
+        "page_id": "test_facebook_page_id",
+        "enabled": false
+      },
+      "instagram": {
+        "app_id": "test_instagram_app_id",
+        "app_secret": "test_instagram_app_secret",
+        "access_token": "test_instagram_access_token",
+        "business_account_id": "test_instagram_business_id",
+        "enabled": false
+      },
+      "twitter": {
+        "api_key": "test_twitter_api_key",
+        "api_secret": "test_twitter_api_secret",
+        "access_token": "test_twitter_access_token",
+        "access_token_secret": "test_twitter_token_secret",
+        "enabled": false
+      }
+    },
+    "ai_services": {
+      "openai": {
+        "api_key": "test_openai_api_key",
+        "organization": "test_openai_org",
+        "base_url": "https://api.openai.com/v1",
+        "enabled": false
+      },
+      "google_cloud": {
+        "project_id": "test_google_project",
+        "private_key": "test_google_private_key",
+        "client_email": "test@test-project.iam.gserviceaccount.com",
+        "enabled": false
+      }
+    },
+    "email_services": {
+      "smtp": {
+        "host": "smtp.gmail.com",
+        "port": 587,
+        "username": "test@example.com",
+        "password": "test_email_password",
+        "use_tls": true,
+        "enabled": true
+      },
+      "sendgrid": {
+        "api_key": "test_sendgrid_api_key",
+        "from_email": "noreply@example.com",
+        "enabled": false
+      }
+    }
+  },
+  "production": {
+    "comment": "Production ortamında gerçek API anahtarları kullanılmalı",
+    "security_note": "Bu dosyayı production'da environment variables ile değiştirin",
+    "marketplaces": {
+      "trendyol": {
+        "api_key": "${TRENDYOL_API_KEY}",
+        "secret_key": "${TRENDYOL_SECRET_KEY}",
+        "supplier_id": "${TRENDYOL_SUPPLIER_ID}",
+        "base_url": "https://api.trendyol.com/sapigw",
+        "enabled": true
+      }
+    }
+  }
+}
