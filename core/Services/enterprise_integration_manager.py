@@ -67,6 +67,7 @@ class IntegrationType(Enum):
     INVOICE = "invoice"
     SOCIAL_MEDIA = "social_media"
     ANALYTICS = "analytics"
+    PRICE_COMPARISON = "price_comparison"
 
 
 @dataclass
@@ -1226,6 +1227,105 @@ class EnterpriseIntegrationFactory:
                 'ai_features': ['competitor_analysis', 'sales_prediction'],
                 'supported_countries': ['TR'],
                 'supported_currencies': ['TRY']
+            },
+            'n11': {
+                'display_name': 'N11',
+                'type': IntegrationType.MARKETPLACE,
+                'priority': IntegrationPriority.HIGH,
+                'api_endpoint': 'https://api.n11.com/ws',
+                'rate_limit': 600,
+                'features': ['products', 'orders', 'stock', 'price'],
+                'ai_features': ['smart_pricing', 'sales_prediction'],
+                'supported_countries': ['TR'],
+                'supported_currencies': ['TRY']
+            },
+            'amazon': {
+                'display_name': 'Amazon Selling Partner API',
+                'type': IntegrationType.MARKETPLACE,
+                'priority': IntegrationPriority.CRITICAL,
+                'api_endpoint': 'https://sellingpartnerapi-na.amazon.com',
+                'rate_limit': 200,
+                'features': ['products', 'orders', 'stock', 'price', 'fba'],
+                'ai_features': ['demand_forecast', 'competitor_analysis', 'inventory_optimization'],
+                'supported_countries': ['US', 'CA', 'MX', 'BR', 'UK', 'DE', 'FR', 'IT', 'ES', 'NL', 'TR', 'AE', 'IN', 'JP', 'AU', 'SG'],
+                'supported_currencies': ['USD', 'CAD', 'MXN', 'BRL', 'GBP', 'EUR', 'TRY', 'AED', 'INR', 'JPY', 'AUD', 'SGD']
+            },
+            'ebay': {
+                'display_name': 'eBay Trading API',
+                'type': IntegrationType.MARKETPLACE,
+                'priority': IntegrationPriority.HIGH,
+                'api_endpoint': 'https://api.ebay.com',
+                'rate_limit': 5000,
+                'features': ['products', 'orders', 'stock', 'price', 'auctions'],
+                'ai_features': ['smart_pricing', 'demand_forecast', 'competitor_analysis'],
+                'supported_countries': ['US', 'UK', 'DE', 'FR', 'IT', 'ES', 'AU', 'CA'],
+                'supported_currencies': ['USD', 'GBP', 'EUR', 'AUD', 'CAD']
+            },
+            'aliexpress': {
+                'display_name': 'AliExpress Open Platform',
+                'type': IntegrationType.MARKETPLACE,
+                'priority': IntegrationPriority.HIGH,
+                'api_endpoint': 'https://api-sg.aliexpress.com/sync',
+                'rate_limit': 1000,
+                'features': ['products', 'orders', 'stock', 'price', 'logistics'],
+                'ai_features': ['smart_pricing', 'demand_forecast', 'competitor_analysis'],
+                'supported_countries': ['CN', 'US', 'RU', 'BR', 'ES', 'FR', 'UK', 'DE', 'IT', 'TR'],
+                'supported_currencies': ['USD', 'EUR', 'RUB', 'BRL', 'TRY']
+            },
+            'etsy': {
+                'display_name': 'Etsy Open API v3',
+                'type': IntegrationType.MARKETPLACE,
+                'priority': IntegrationPriority.MEDIUM,
+                'api_endpoint': 'https://api.etsy.com/v3/application',
+                'rate_limit': 10000,
+                'features': ['products', 'orders', 'stock', 'price', 'handmade'],
+                'ai_features': ['trend_analysis', 'smart_pricing', 'seasonal_forecast'],
+                'supported_countries': ['US', 'UK', 'CA', 'AU', 'DE', 'FR', 'IT', 'ES', 'NL', 'BE'],
+                'supported_currencies': ['USD', 'GBP', 'CAD', 'AUD', 'EUR']
+            },
+            'gittigidiyor': {
+                'display_name': 'GittiGidiyor',
+                'type': IntegrationType.MARKETPLACE,
+                'priority': IntegrationPriority.MEDIUM,
+                'api_endpoint': 'https://dev.gittigidiyor.com:8443/listingapi/ws',
+                'rate_limit': 500,
+                'features': ['products', 'orders', 'stock', 'price'],
+                'ai_features': ['smart_pricing', 'competitor_analysis'],
+                'supported_countries': ['TR'],
+                'supported_currencies': ['TRY']
+            },
+            'ciceksepeti': {
+                'display_name': 'Çiçeksepeti',
+                'type': IntegrationType.MARKETPLACE,
+                'priority': IntegrationPriority.MEDIUM,
+                'api_endpoint': 'https://api.ciceksepeti.com/v1',
+                'rate_limit': 300,
+                'features': ['products', 'orders', 'stock', 'price', 'flowers'],
+                'ai_features': ['seasonal_forecast', 'smart_pricing'],
+                'supported_countries': ['TR'],
+                'supported_currencies': ['TRY']
+            },
+            'akakce': {
+                'display_name': 'Akakçe Fiyat Karşılaştırma',
+                'type': IntegrationType.PRICE_COMPARISON,
+                'priority': IntegrationPriority.MEDIUM,
+                'api_endpoint': 'https://api.akakce.com/v1',
+                'rate_limit': 1000,
+                'features': ['price_comparison', 'products', 'analytics'],
+                'ai_features': ['competitor_analysis', 'price_optimization'],
+                'supported_countries': ['TR'],
+                'supported_currencies': ['TRY']
+            },
+            'cimri': {
+                'display_name': 'Cimri Fiyat Karşılaştırma',
+                'type': IntegrationType.PRICE_COMPARISON,
+                'priority': IntegrationPriority.MEDIUM,
+                'api_endpoint': 'https://api.cimri.com/v2',
+                'rate_limit': 500,
+                'features': ['price_comparison', 'products', 'orders', 'analytics'],
+                'ai_features': ['competitor_analysis', 'price_optimization'],
+                'supported_countries': ['TR'],
+                'supported_currencies': ['TRY']
             }
         }
         
@@ -1274,6 +1374,15 @@ async def main():
     critical_integrations = [
         ('trendyol', {'api_key': 'your_trendyol_api_key', 'secret_key': 'your_trendyol_secret'}),
         ('hepsiburada', {'api_key': 'your_hepsiburada_api_key'}),
+        ('n11', {'api_key': 'your_n11_api_key', 'secret_key': 'your_n11_secret'}),
+        ('amazon', {'client_id': 'your_amazon_client_id', 'client_secret': 'your_amazon_client_secret', 'refresh_token': 'your_amazon_refresh_token'}),
+        ('ebay', {'client_id': 'your_ebay_client_id', 'client_secret': 'your_ebay_client_secret', 'token': 'your_ebay_token'}),
+        ('aliexpress', {'app_key': 'your_aliexpress_app_key', 'app_secret': 'your_aliexpress_app_secret'}),
+        ('etsy', {'client_id': 'your_etsy_client_id', 'client_secret': 'your_etsy_client_secret'}),
+        ('gittigidiyor', {'api_key': 'your_gittigidiyor_api_key', 'secret_key': 'your_gittigidiyor_secret'}),
+        ('ciceksepeti', {'api_key': 'your_ciceksepeti_api_key', 'secret_key': 'your_ciceksepeti_secret', 'merchant_id': 'your_ciceksepeti_merchant_id'}),
+        ('akakce', {'api_key': 'your_akakce_api_key', 'secret_key': 'your_akakce_secret'}),
+        ('cimri', {'api_key': 'your_cimri_api_key', 'secret_key': 'your_cimri_secret', 'merchant_id': 'your_cimri_merchant_id'}),
     ]
     
     for name, credentials in critical_integrations:

@@ -194,6 +194,148 @@ INTEGRATIONS_DATA = {
             "is_coming_soon": False
         },
         {
+            "name": "amazon",
+            "display_name": "Amazon Selling Partner API",
+            "description": "Amazon global pazaryeri - SP-API ile tam entegrasyon",
+            "features": [
+                "Ürün yönetimi",
+                "Sipariş yönetimi",
+                "FBA entegrasyonu",
+                "Stok senkronizasyonu",
+                "Fiyat yönetimi",
+                "Raporlama",
+                "Advertising API"
+            ],
+            "ai_features": [
+                "Talep tahmini",
+                "Rekabet analizi",
+                "Envanter optimizasyonu",
+                "Dinamik fiyatlandırma",
+                "Satış performans analizi"
+            ],
+            "supported_countries": ["US", "CA", "MX", "BR", "UK", "DE", "FR", "IT", "ES", "NL", "TR", "AE", "IN", "JP", "AU", "SG"],
+            "supported_currencies": ["USD", "CAD", "MXN", "BRL", "GBP", "EUR", "TRY", "AED", "INR", "JPY", "AUD", "SGD"],
+            "is_premium": True,
+            "is_coming_soon": False
+        },
+        {
+            "name": "ebay",
+            "display_name": "eBay Trading API",
+            "description": "eBay global pazaryeri - Trading ve Inventory API entegrasyonu",
+            "features": [
+                "Ürün listeleme",
+                "Sipariş yönetimi",
+                "Açık artırma desteği",
+                "Stok yönetimi",
+                "Fiyat güncelleme",
+                "Kategori yönetimi",
+                "Kargo entegrasyonu"
+            ],
+            "ai_features": [
+                "Akıllı fiyatlandırma",
+                "Talep tahmini",
+                "Rekabet analizi",
+                "Satış optimizasyonu"
+            ],
+            "supported_countries": ["US", "UK", "DE", "FR", "IT", "ES", "AU", "CA"],
+            "supported_currencies": ["USD", "GBP", "EUR", "AUD", "CAD"],
+            "is_premium": True,
+            "is_coming_soon": False
+        },
+        {
+            "name": "aliexpress",
+            "display_name": "AliExpress Open Platform",
+            "description": "AliExpress uluslararası pazaryeri entegrasyonu",
+            "features": [
+                "Ürün yönetimi",
+                "Sipariş takibi",
+                "Stok senkronizasyonu",
+                "Fiyat yönetimi",
+                "Lojistik entegrasyonu",
+                "Kategori yönetimi",
+                "Promosyon yönetimi"
+            ],
+            "ai_features": [
+                "Akıllı fiyatlandırma",
+                "Talep tahmini",
+                "Rekabet analizi",
+                "Market trend analizi"
+            ],
+            "supported_countries": ["CN", "US", "RU", "BR", "ES", "FR", "UK", "DE", "IT", "TR"],
+            "supported_currencies": ["USD", "EUR", "RUB", "BRL", "TRY"],
+            "is_premium": True,
+            "is_coming_soon": False
+        },
+        {
+            "name": "etsy",
+            "display_name": "Etsy Open API v3",
+            "description": "Etsy el yapımı ürünler pazaryeri",
+            "features": [
+                "Ürün listeleme",
+                "Sipariş yönetimi",
+                "Stok takibi",
+                "Görsel yönetimi",
+                "Müşteri değerlendirmeleri",
+                "Kargo profilleri",
+                "Mağaza yönetimi"
+            ],
+            "ai_features": [
+                "Trend analizi",
+                "Akıllı fiyatlandırma",
+                "Mevsimsel tahmin",
+                "El yapımı ürün optimizasyonu"
+            ],
+            "supported_countries": ["US", "UK", "CA", "AU", "DE", "FR", "IT", "ES", "NL", "BE"],
+            "supported_currencies": ["USD", "GBP", "CAD", "AUD", "EUR"],
+            "is_premium": False,
+            "is_coming_soon": False
+        },
+        {
+            "name": "gittigidiyor",
+            "display_name": "GittiGidiyor",
+            "description": "GittiGidiyor Türkiye pazaryeri",
+            "features": [
+                "Ürün yönetimi",
+                "Sipariş takibi",
+                "Stok senkronizasyonu",
+                "Fiyat güncelleme",
+                "Kategori yönetimi",
+                "Mağaza ayarları"
+            ],
+            "ai_features": [
+                "Akıllı fiyatlandırma",
+                "Rekabet analizi",
+                "Satış tahmin"
+            ],
+            "supported_countries": ["TR"],
+            "supported_currencies": ["TRY"],
+            "is_premium": False,
+            "is_coming_soon": False
+        },
+        {
+            "name": "ciceksepeti",
+            "display_name": "Çiçeksepeti",
+            "description": "Çiçek ve hediye pazaryeri",
+            "features": [
+                "Ürün yönetimi",
+                "Sipariş takibi",
+                "Stok yönetimi",
+                "Özel gün yönetimi",
+                "Teslimat takibi",
+                "Kategori yönetimi"
+            ],
+            "ai_features": [
+                "Mevsimsel tahmin",
+                "Akıllı fiyatlandırma",
+                "Özel gün analizi",
+                "Çiçek trend analizi"
+            ],
+            "supported_countries": ["TR"],
+            "supported_currencies": ["TRY"],
+            "is_premium": False,
+            "is_coming_soon": False
+        },
+        {
             "name": "modanisa",
             "display_name": "Modanisa",
             "description": "Muhafazakar giyim e-ticaret platformu",
