@@ -1,0 +1,25 @@
+INFO [2025-08-01 20:36:43,642] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-08-01.log
+INFO [2025-08-01 20:36:43,782] [test_system.test_services:146]: Test log message
+INFO [2025-08-01 20:51:46,740] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-08-01.log
+INFO [2025-08-01 20:52:11,572] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-08-01.log
+INFO [2025-08-01 20:55:44,063] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-08-01.log
+INFO [2025-08-01 20:56:11,653] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-08-01.log
+INFO [2025-08-01 20:57:33,473] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-08-01.log
+INFO [2025-08-01 20:57:33,473] [app_fixed.<module>:49]: Logger başlatıldı
+INFO [2025-08-01 20:57:33,474] [app_fixed.<module>:61]: Middleware'ler yüklendi
+INFO [2025-08-01 20:58:26,498] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-08-01.log
+INFO [2025-08-01 20:58:26,499] [app_fixed.<module>:49]: Logger başlatıldı
+INFO [2025-08-01 20:58:26,499] [app_fixed.<module>:61]: Middleware'ler yüklendi
+INFO [2025-08-01 20:58:26,563] [app_fixed.<module>:69]: Web route'ları yüklendi
+WARNING [2025-08-01 20:58:26,576] [app_fixed.<module>:88]: Gelişmiş AI route'ları yüklenemedi: No module named 'torch'
+WARNING [2025-08-01 20:58:26,583] [app_fixed.<module>:98]: Kurumsal AI route'ları yüklenemedi: No module named 'aiohttp'
+INFO [2025-08-01 20:58:26,583] [app_fixed.<module>:106]: Hata yöneticisi aktifleştirildi
+INFO [2025-08-01 20:58:26,584] [app_fixed.<module>:179]: PofuAi uygulaması başlatılıyor...
+INFO [2025-08-01 20:58:26,713] [logger.init:101]: Logger başlatıldı - Seviye: DEBUG, Dosya: /workspace/storage/logs/app_2025-08-01.log
+INFO [2025-08-01 20:58:26,713] [app_fixed.<module>:49]: Logger başlatıldı
+INFO [2025-08-01 20:58:26,714] [app_fixed.<module>:61]: Middleware'ler yüklendi
+INFO [2025-08-01 20:58:26,774] [app_fixed.<module>:69]: Web route'ları yüklendi
+WARNING [2025-08-01 20:58:26,775] [app_fixed.<module>:88]: Gelişmiş AI route'ları yüklenemedi: No module named 'torch'
+WARNING [2025-08-01 20:58:26,776] [app_fixed.<module>:98]: Kurumsal AI route'ları yüklenemedi: No module named 'aiohttp'
+INFO [2025-08-01 20:58:26,776] [app_fixed.<module>:106]: Hata yöneticisi aktifleştirildi
+INFO [2025-08-01 20:58:26,777] [app_fixed.<module>:179]: PofuAi uygulaması başlatılıyor...

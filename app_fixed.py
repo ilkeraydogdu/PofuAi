@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-PofuAi Flask Application
+PofuAi Flask Application - Fixed Version
 
 Merkezi application dosyası ve routing konfigürasyonu
 """
@@ -11,13 +11,6 @@ import sys
 from flask import Flask, render_template, session, request, send_from_directory, redirect, g
 from werkzeug.exceptions import HTTPException
 from werkzeug.middleware.proxy_fix import ProxyFix
-from core.Route.web_routes import router as web_router
-from core.Services.logger import LoggerService
-from core.Services.error_handler import error_handler
-from app.Middleware.SessionMiddleware import SessionMiddleware
-from app.Middleware.AuthMiddleware import AuthMiddleware
-from app.Models.User import User
-import json
 
 # Proje kök dizini
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -49,17 +42,44 @@ app.config.update({
 # JSON formatını ayarla
 app.json.compact = False
 
-# Middleware'leri ekle
-app.before_request(SessionMiddleware.handle)
-app.before_request(AuthMiddleware.handle)
+# Logger'ı başlat (basit versiyon)
+try:
+    from core.Services.logger import LoggerService
+    logger = LoggerService.get_logger()
+    logger.info("Logger başlatıldı")
+except Exception as e:
+    print(f"Logger başlatılamadı: {e}")
+    import logging
+    logger = logging.getLogger(__name__)
 
-# Logging servisini başlat
-logger = LoggerService.get_logger()
+# Middleware'leri güvenli şekilde yükle
+try:
+    from app.Middleware.SessionMiddleware import SessionMiddleware
+    from app.Middleware.AuthMiddleware import AuthMiddleware
+    app.before_request(SessionMiddleware.handle)
+    app.before_request(AuthMiddleware.handle)
+    logger.info("Middleware'ler yüklendi")
+except Exception as e:
+    logger.warning(f"Middleware yükleme hatası: {e}")
 
-# Route'ları kaydet
-web_router['register_routes'](app)
+# Route'ları güvenli şekilde kaydet
+try:
+    from core.Route.web_routes import router as web_router
+    web_router['register_routes'](app)
+    logger.info("Web route'ları yüklendi")
+except Exception as e:
+    logger.error(f"Web route'ları yüklenemedi: {e}")
+    
+    # Basit fallback route'lar
+    @app.route('/')
+    def home():
+        return '<h1>PofuAi</h1><p>Uygulama çalışıyor, ancak bazı route\'lar yüklenemedi.</p><a href="/health">Sistem Durumu</a>'
+    
+    @app.route('/health')
+    def health():
+        return {'status': 'partial', 'message': 'Basic app running, some features unavailable'}
 
-# Gelişmiş AI route'larını kaydet
+# Gelişmiş AI route'larını güvenli şekilde kaydet
 try:
     from core.Route.advanced_ai_routes import register_advanced_ai_routes
     register_advanced_ai_routes(app)
@@ -69,7 +89,7 @@ except ImportError as e:
 except Exception as e:
     logger.error(f"Gelişmiş AI route'ları kaydedilirken hata: {e}")
 
-# Kurumsal AI route'larını kaydet
+# Kurumsal AI route'larını güvenli şekilde kaydet
 try:
     from core.Route.enterprise_ai_routes import register_enterprise_ai_routes
     register_enterprise_ai_routes(app)
@@ -79,8 +99,13 @@ except ImportError as e:
 except Exception as e:
     logger.error(f"Kurumsal AI route'ları kaydedilirken hata: {e}")
 
-# Hata yönetimini aktifleştir
-app.register_error_handler(Exception, error_handler.handle_error)
+# Hata yönetimini güvenli şekilde aktifleştir
+try:
+    from core.Services.error_handler import error_handler
+    app.register_error_handler(Exception, error_handler.handle_error)
+    logger.info("Hata yöneticisi aktifleştirildi")
+except Exception as e:
+    logger.warning(f"Hata yöneticisi yüklenemedi: {e}")
 
 # Hata sayfaları için basit component
 class ErrorPageComponent:
@@ -150,6 +175,11 @@ if __name__ == '__main__':
     session_dir = os.path.join(ROOT_DIR, 'storage', 'sessions')
     if not os.path.exists(session_dir):
         os.makedirs(session_dir)
-        
+    
+    logger.info("PofuAi uygulaması başlatılıyor...")
+    print("🚀 PofuAi uygulaması http://127.0.0.1:5000 adresinde çalışıyor")
+    print("🔧 Debug modu: AÇIK")
+    print("📝 Loglar: storage/logs/ dizininde")
+    
     # Geliştirme sunucusunu başlat
-    app.run(debug=True)
+    app.run(host='127.0.0.1', port=5000, debug=True)
