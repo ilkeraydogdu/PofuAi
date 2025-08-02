@@ -1,0 +1,483 @@
+{% extends 'layouts/customer_layout.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="page-content">
+  <!-- Welcome Section -->
+  <div class="welcome-section mb-4">
+    <div class="card bg-gradient-primary text-white">
+      <div class="card-body">
+        <div class="row align-items-center">
+          <div class="col-md-8">
+            <h4 class="text-white mb-1">Hoş Geldiniz, {{ customer.name }}!</h4>
+            <p class="text-white-50 mb-0">Hesabınızı yönetin, siparişlerinizi takip edin ve yeni ürünleri keşfedin.</p>
+          </div>
+          <div class="col-md-4 text-end">
+            <i class="material-icons-outlined" style="font-size: 48px; opacity: 0.3;">account_circle</i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- İstatistik Kartları -->
+  <div class="row mb-4">
+    <div class="col-12 col-md-6 col-lg-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <div class="widget-icon mx-auto mb-3 bg-light-primary text-primary">
+            <i class="material-icons-outlined">shopping_bag</i>
+          </div>
+          <h4 class="mb-1">{{ stats.total_orders or 0 }}</h4>
+          <p class="mb-0 text-muted">Toplam Sipariş</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <div class="widget-icon mx-auto mb-3 bg-light-success text-success">
+            <i class="material-icons-outlined">payments</i>
+          </div>
+          <h4 class="mb-1">₺{{ "{:,.0f}".format(stats.total_spent or 0) }}</h4>
+          <p class="mb-0 text-muted">Toplam Harcama</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <div class="widget-icon mx-auto mb-3 bg-light-danger text-danger">
+            <i class="material-icons-outlined">favorite</i>
+          </div>
+          <h4 class="mb-1">{{ stats.favorite_count or 0 }}</h4>
+          <p class="mb-0 text-muted">Favori Ürün</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <div class="widget-icon mx-auto mb-3 bg-light-warning text-warning">
+            <i class="material-icons-outlined">star</i>
+          </div>
+          <h4 class="mb-1">{{ stats.review_count or 0 }}</h4>
+          <p class="mb-0 text-muted">Değerlendirme</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Sol Kolon -->
+    <div class="col-12 col-lg-8">
+      <!-- Son Siparişler -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <div class="d-flex align-items-center">
+            <div>
+              <h6 class="mb-0">Son Siparişlerim</h6>
+            </div>
+            <div class="ms-auto">
+              <a href="/customer/orders" class="btn btn-sm btn-outline-primary">Tümünü Gör</a>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          {% if recent_orders %}
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Sipariş No</th>
+                  <th>Tarih</th>
+                  <th>Ürün Sayısı</th>
+                  <th>Tutar</th>
+                  <th>Durum</th>
+                  <th>İşlem</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for order in recent_orders %}
+                <tr>
+                  <td><strong>#{{ order.order_number }}</strong></td>
+                  <td>{{ order.created_at.strftime('%d.%m.%Y') }}</td>
+                  <td>{{ order.item_count }} ürün</td>
+                  <td><strong>₺{{ "{:,.2f}".format(order.total_amount) }}</strong></td>
+                  <td>
+                    {% if order.status == 'completed' %}
+                    <span class="badge bg-success">Teslim Edildi</span>
+                    {% elif order.status == 'processing' %}
+                    <span class="badge bg-info">Hazırlanıyor</span>
+                    {% elif order.status == 'shipped' %}
+                    <span class="badge bg-warning">Kargoda</span>
+                    {% elif order.status == 'pending' %}
+                    <span class="badge bg-secondary">Bekliyor</span>
+                    {% else %}
+                    <span class="badge bg-light text-dark">{{ order.status }}</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <a href="/customer/orders/{{ order.id }}" class="btn btn-sm btn-outline-primary">
+                      <i class="material-icons-outlined">visibility</i>
+                    </a>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="text-center py-4">
+            <i class="material-icons-outlined text-muted" style="font-size: 48px;">shopping_cart</i>
+            <p class="text-muted mt-2">Henüz sipariş vermemişsiniz</p>
+            <a href="/products" class="btn btn-primary">Alışverişe Başla</a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Ürün Önerileri -->
+      <div class="card">
+        <div class="card-header">
+          <div class="d-flex align-items-center">
+            <div>
+              <h6 class="mb-0">Size Özel Öneriler</h6>
+            </div>
+            <div class="ms-auto">
+              <a href="/products" class="btn btn-sm btn-outline-primary">Daha Fazla</a>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          {% if recommendations %}
+          <div class="row">
+            {% for product in recommendations %}
+            <div class="col-12 col-md-6 col-lg-4 mb-3">
+              <div class="card product-card">
+                <div class="card-img-top-wrapper">
+                  <img src="{{ product.image_url or '/static/assets/images/products/default.jpg' }}" 
+                       class="card-img-top" alt="{{ product.name }}">
+                  <div class="product-actions">
+                    <button class="btn btn-sm btn-light" onclick="addToFavorites({{ product.id }})">
+                      <i class="material-icons-outlined">favorite_border</i>
+                    </button>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <h6 class="card-title">{{ product.name[:30] }}{% if product.name|length > 30 %}...{% endif %}</h6>
+                  <p class="card-text text-muted small">{{ product.description[:50] }}{% if product.description|length > 50 %}...{% endif %}</p>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span class="h6 text-primary mb-0">₺{{ "{:,.2f}".format(product.price) }}</span>
+                    <a href="/products/{{ product.id }}" class="btn btn-sm btn-primary">İncele</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="text-center py-4">
+            <i class="material-icons-outlined text-muted" style="font-size: 48px;">lightbulb</i>
+            <p class="text-muted mt-2">Henüz öneri bulunmuyor</p>
+            <p class="small text-muted">Alışveriş geçmişinize göre öneriler oluşturacağız</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Sağ Kolon -->
+    <div class="col-12 col-lg-4">
+      <!-- Hızlı İşlemler -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h6 class="mb-0">Hızlı İşlemler</h6>
+        </div>
+        <div class="card-body">
+          <div class="d-grid gap-2">
+            <a href="/customer/orders" class="btn btn-outline-primary">
+              <i class="material-icons-outlined me-2">shopping_bag</i>Siparişlerimi Görüntüle
+            </a>
+            <a href="/customer/favorites" class="btn btn-outline-danger">
+              <i class="material-icons-outlined me-2">favorite</i>Favori Ürünlerim
+            </a>
+            <a href="/customer/profile" class="btn btn-outline-info">
+              <i class="material-icons-outlined me-2">person</i>Profil Ayarları
+            </a>
+            <a href="/customer/addresses" class="btn btn-outline-success">
+              <i class="material-icons-outlined me-2">location_on</i>Adres Defteri
+            </a>
+            <a href="/customer/support" class="btn btn-outline-warning">
+              <i class="material-icons-outlined me-2">support_agent</i>Destek Al
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Favori Ürünler -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <div class="d-flex align-items-center">
+            <div>
+              <h6 class="mb-0">Favori Ürünlerim</h6>
+            </div>
+            <div class="ms-auto">
+              <a href="/customer/favorites" class="btn btn-sm btn-outline-primary">Tümü</a>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          {% if favorites %}
+          {% for favorite in favorites[:4] %}
+          <div class="d-flex align-items-center mb-3">
+            <div class="flex-shrink-0">
+              <img src="{{ favorite.image_url or '/static/assets/images/products/default.jpg' }}" 
+                   class="rounded" width="50" height="50" alt="{{ favorite.name }}">
+            </div>
+            <div class="flex-grow-1 ms-3">
+              <div class="fw-bold">{{ favorite.name[:25] }}{% if favorite.name|length > 25 %}...{% endif %}</div>
+              <div class="text-primary fw-bold">₺{{ "{:,.2f}".format(favorite.price) }}</div>
+            </div>
+            <div>
+              <a href="/products/{{ favorite.id }}" class="btn btn-sm btn-outline-primary">
+                <i class="material-icons-outlined">visibility</i>
+              </a>
+            </div>
+          </div>
+          {% endfor %}
+          {% else %}
+          <div class="text-center py-3">
+            <i class="material-icons-outlined text-muted" style="font-size: 36px;">favorite_border</i>
+            <p class="text-muted mt-2 mb-0">Henüz favori ürün yok</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Bildirimler -->
+      <div class="card">
+        <div class="card-header">
+          <div class="d-flex align-items-center">
+            <div>
+              <h6 class="mb-0">Son Bildirimler</h6>
+            </div>
+            <div class="ms-auto">
+              <a href="/customer/notifications" class="btn btn-sm btn-outline-primary">Tümü</a>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          {% if notifications %}
+          {% for notification in notifications %}
+          <div class="alert alert-{{ 'info' if notification.priority == 'normal' else notification.priority }} alert-dismissible fade show" role="alert">
+            <div class="d-flex">
+              <div class="flex-shrink-0">
+                <i class="material-icons-outlined me-2">{{ notification.icon or 'notifications' }}</i>
+              </div>
+              <div class="flex-grow-1">
+                <div class="fw-bold">{{ notification.title }}</div>
+                <div class="small">{{ notification.message[:50] }}{% if notification.message|length > 50 %}...{% endif %}</div>
+                <div class="small text-muted">{{ notification.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
+              </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+          {% endfor %}
+          {% else %}
+          <div class="text-center py-3">
+            <i class="material-icons-outlined text-muted" style="font-size: 36px;">notifications_none</i>
+            <p class="text-muted mt-2 mb-0">Yeni bildirim yok</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.welcome-section .card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+}
+
+.widget-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.product-card {
+  transition: transform 0.2s;
+  border: 1px solid #e0e0e0;
+}
+
+.product-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.card-img-top-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-img-top {
+  height: 150px;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.product-card:hover .card-img-top {
+  transform: scale(1.05);
+}
+
+.product-actions {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.product-card:hover .product-actions {
+  opacity: 1;
+}
+
+.bg-light-primary {
+  background-color: rgba(13, 110, 253, 0.1) !important;
+}
+
+.bg-light-success {
+  background-color: rgba(25, 135, 84, 0.1) !important;
+}
+
+.bg-light-danger {
+  background-color: rgba(220, 53, 69, 0.1) !important;
+}
+
+.bg-light-warning {
+  background-color: rgba(255, 193, 7, 0.1) !important;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Favorilere ekleme
+function addToFavorites(productId) {
+    fetch('/customer/favorites/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            product_id: productId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Ürün favorilere eklendi', 'success');
+        } else {
+            showToast('Hata: ' + data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Bir hata oluştu', 'error');
+    });
+}
+
+// Toast bildirimi
+function showToast(message, type) {
+    const toastHtml = `
+        <div class="toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">${message}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    `;
+    
+    let toastContainer = document.querySelector('.toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+        document.body.appendChild(toastContainer);
+    }
+    
+    const toastElement = document.createElement('div');
+    toastElement.innerHTML = toastHtml;
+    toastContainer.appendChild(toastElement.firstElementChild);
+    
+    const toast = new bootstrap.Toast(toastElement.firstElementChild);
+    toast.show();
+}
+
+// Gerçek zamanlı güncellemeler
+if (typeof io !== 'undefined') {
+    const socket = io('/customer');
+    
+    socket.on('connect', function() {
+        console.log('Customer dashboard WebSocket connected');
+    });
+    
+    socket.on('order_update', function(data) {
+        showToast('Sipariş durumu güncellendi: #' + data.order_number, 'success');
+        // Sayfa yenilenmeden sipariş listesini güncelle
+        updateOrderStatus(data.order_id, data.status);
+    });
+    
+    socket.on('new_notification', function(data) {
+        showToast(data.title, 'info');
+        // Bildirim sayısını güncelle
+        updateNotificationCount();
+    });
+}
+
+function updateOrderStatus(orderId, status) {
+    // Sipariş durumunu güncelle
+    const orderRow = document.querySelector(`[data-order-id="${orderId}"]`);
+    if (orderRow) {
+        const statusCell = orderRow.querySelector('.order-status');
+        if (statusCell) {
+            statusCell.innerHTML = getStatusBadge(status);
+        }
+    }
+}
+
+function getStatusBadge(status) {
+    const badges = {
+        'completed': '<span class="badge bg-success">Teslim Edildi</span>',
+        'processing': '<span class="badge bg-info">Hazırlanıyor</span>',
+        'shipped': '<span class="badge bg-warning">Kargoda</span>',
+        'pending': '<span class="badge bg-secondary">Bekliyor</span>'
+    };
+    
+    return badges[status] || `<span class="badge bg-light text-dark">${status}</span>`;
+}
+
+function updateNotificationCount() {
+    // Bildirim sayısını güncelle
+    fetch('/customer/api/notification-count')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const countElement = document.querySelector('.notification-count');
+                if (countElement) {
+                    countElement.textContent = data.count;
+                }
+            }
+        });
+}
+</script>
+{% endblock %}

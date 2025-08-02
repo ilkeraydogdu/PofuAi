@@ -1,0 +1,753 @@
+{% extends 'layouts/admin_layout.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/apexcharts@latest/dist/apexcharts.css" rel="stylesheet">
+<style>
+.stats-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    transition: transform 0.3s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+}
+
+.stats-card .card-body {
+    padding: 1.5rem;
+}
+
+.stats-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+}
+
+.chart-card {
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+}
+
+.alert-item {
+    border-left: 4px solid;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    transition: all 0.3s ease;
+}
+
+.alert-item:hover {
+    background: #e9ecef;
+    transform: translateX(5px);
+}
+
+.alert-warning {
+    border-left-color: #ffc107;
+}
+
+.alert-info {
+    border-left-color: #17a2b8;
+}
+
+.alert-danger {
+    border-left-color: #dc3545;
+}
+
+.performance-meter {
+    position: relative;
+    height: 20px;
+    background: #e9ecef;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.performance-bar {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.5s ease;
+}
+
+.performance-good { background: linear-gradient(90deg, #28a745, #20c997); }
+.performance-warning { background: linear-gradient(90deg, #ffc107, #fd7e14); }
+.performance-critical { background: linear-gradient(90deg, #dc3545, #e83e8c); }
+
+.activity-item {
+    border-bottom: 1px solid #e9ecef;
+    padding: 15px 0;
+    transition: background 0.3s ease;
+}
+
+.activity-item:hover {
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin: 0 -15px;
+    padding: 15px;
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    margin-right: 15px;
+}
+
+.bg-primary-light { background: rgba(13, 110, 253, 0.1); color: #0d6efd; }
+.bg-success-light { background: rgba(25, 135, 84, 0.1); color: #198754; }
+.bg-warning-light { background: rgba(255, 193, 7, 0.1); color: #ffc107; }
+.bg-danger-light { background: rgba(220, 53, 69, 0.1); color: #dc3545; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-content">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="mb-1">Gelişmiş Admin Dashboard</h4>
+            <p class="text-muted mb-0">Sistem durumu ve performans metrikleri</p>
+        </div>
+        <div>
+            <button class="btn btn-outline-primary me-2" onclick="refreshDashboard()">
+                <i class="material-icons-outlined">refresh</i> Yenile
+            </button>
+            <button class="btn btn-primary" onclick="exportReport()">
+                <i class="material-icons-outlined">download</i> Rapor Al
+            </button>
+        </div>
+    </div>
+
+    <!-- İstatistik Kartları -->
+    <div class="row mb-4">
+        <div class="col-12 col-md-6 col-lg-3 mb-3">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <div class="stats-icon mx-auto mb-3">
+                        <i class="material-icons-outlined">people</i>
+                    </div>
+                    <h3 class="mb-1">{{ dashboard_data.stats.total_users or 0 }}</h3>
+                    <p class="mb-0">Toplam Kullanıcı</p>
+                    <small class="text-white-50">{{ dashboard_data.stats.active_users or 0 }} aktif</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-md-6 col-lg-3 mb-3">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <div class="stats-icon mx-auto mb-3">
+                        <i class="material-icons-outlined">inventory</i>
+                    </div>
+                    <h3 class="mb-1">{{ dashboard_data.stats.total_products or 0 }}</h3>
+                    <p class="mb-0">Toplam Ürün</p>
+                    <small class="text-white-50">Aktif ürünler</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-md-6 col-lg-3 mb-3">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <div class="stats-icon mx-auto mb-3">
+                        <i class="material-icons-outlined">shopping_cart</i>
+                    </div>
+                    <h3 class="mb-1">{{ dashboard_data.stats.total_orders or 0 }}</h3>
+                    <p class="mb-0">Toplam Sipariş</p>
+                    <small class="text-white-50">{{ dashboard_data.stats.today_orders or 0 }} bugün</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-md-6 col-lg-3 mb-3">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <div class="stats-icon mx-auto mb-3">
+                        <i class="material-icons-outlined">payments</i>
+                    </div>
+                    <h3 class="mb-1">₺{{ "{:,.0f}".format(dashboard_data.stats.total_revenue or 0) }}</h3>
+                    <p class="mb-0">Toplam Gelir</p>
+                    <small class="text-white-50">₺{{ "{:,.0f}".format(dashboard_data.stats.monthly_revenue or 0) }} bu ay</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Sol Kolon -->
+        <div class="col-12 col-lg-8">
+            <!-- Satış Grafiği -->
+            <div class="card chart-card mb-4">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">Satış Analizi</h6>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button type="button" class="btn btn-outline-primary active" onclick="loadSalesChart(7)">7 Gün</button>
+                            <button type="button" class="btn btn-outline-primary" onclick="loadSalesChart(30)">30 Gün</button>
+                            <button type="button" class="btn btn-outline-primary" onclick="loadSalesChart(90)">90 Gün</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="salesChart" style="height: 350px;"></div>
+                </div>
+            </div>
+
+            <!-- Kullanıcı Büyümesi -->
+            <div class="card chart-card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">Kullanıcı Büyümesi</h6>
+                </div>
+                <div class="card-body">
+                    <div id="userGrowthChart" style="height: 300px;"></div>
+                </div>
+            </div>
+
+            <!-- En Çok Satan Ürünler -->
+            <div class="card chart-card">
+                <div class="card-header">
+                    <h6 class="mb-0">En Çok Satan Ürünler</h6>
+                </div>
+                <div class="card-body">
+                    {% if dashboard_data.charts.top_products %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Ürün</th>
+                                    <th>Satış</th>
+                                    <th>Gelir</th>
+                                    <th>Fiyat</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product in dashboard_data.charts.top_products %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold">{{ product.name[:30] }}{% if product.name|length > 30 %}...{% endif %}</div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ product.sales_count }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-success fw-bold">₺{{ "{:,.0f}".format(product.total_revenue) }}</span>
+                                    </td>
+                                    <td>₺{{ "{:,.2f}".format(product.price) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="material-icons-outlined text-muted" style="font-size: 48px;">trending_up</i>
+                        <p class="text-muted mt-2">Henüz satış verisi yok</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sağ Kolon -->
+        <div class="col-12 col-lg-4">
+            <!-- Sistem Uyarıları -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">Sistem Uyarıları</h6>
+                </div>
+                <div class="card-body">
+                    {% if dashboard_data.alerts %}
+                    {% for alert in dashboard_data.alerts %}
+                    <div class="alert-item alert-{{ alert.type }} p-3">
+                        <div class="d-flex align-items-center">
+                            <i class="material-icons-outlined me-2">{{ alert.icon }}</i>
+                            <div>
+                                <div class="fw-bold">{{ alert.title }}</div>
+                                <small class="text-muted">{{ alert.message }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center py-3">
+                        <i class="material-icons-outlined text-success" style="font-size: 36px;">check_circle</i>
+                        <p class="text-muted mt-2 mb-0">Tüm sistemler normal</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Performans Metrikleri -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">Sistem Performansı</h6>
+                </div>
+                <div class="card-body">
+                    {% if dashboard_data.performance %}
+                    <!-- CPU -->
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="small fw-bold">CPU Kullanımı</span>
+                            <span class="small">{{ "%.1f"|format(dashboard_data.performance.cpu.percent) }}%</span>
+                        </div>
+                        <div class="performance-meter">
+                            <div class="performance-bar performance-{{ dashboard_data.performance.cpu.status }}" 
+                                 style="width: {{ dashboard_data.performance.cpu.percent }}%"></div>
+                        </div>
+                    </div>
+
+                    <!-- RAM -->
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="small fw-bold">RAM Kullanımı</span>
+                            <span class="small">{{ "%.1f"|format(dashboard_data.performance.memory.percent) }}%</span>
+                        </div>
+                        <div class="performance-meter">
+                            <div class="performance-bar performance-{{ dashboard_data.performance.memory.status }}" 
+                                 style="width: {{ dashboard_data.performance.memory.percent }}%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Disk -->
+                    <div class="mb-0">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="small fw-bold">Disk Kullanımı</span>
+                            <span class="small">{{ "%.1f"|format(dashboard_data.performance.disk.percent) }}%</span>
+                        </div>
+                        <div class="performance-meter">
+                            <div class="performance-bar performance-{{ dashboard_data.performance.disk.status }}" 
+                                 style="width: {{ dashboard_data.performance.disk.percent }}%"></div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Sipariş Durumu -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">Sipariş Durumu</h6>
+                </div>
+                <div class="card-body">
+                    <div id="orderStatusChart" style="height: 250px;"></div>
+                </div>
+            </div>
+
+            <!-- Son Aktiviteler -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">Son Aktiviteler</h6>
+                        <a href="/admin/audit-logs" class="btn btn-sm btn-outline-primary">Tümü</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if dashboard_data.activities %}
+                    {% for activity in dashboard_data.activities %}
+                    <div class="activity-item d-flex align-items-start">
+                        <div class="activity-icon bg-primary-light">
+                            <i class="material-icons-outlined">{{ activity.icon or 'history' }}</i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-bold small">{{ activity.action }}</div>
+                            <div class="text-muted small">{{ activity.user_name or 'Sistem' }}</div>
+                            <div class="text-muted small">{{ activity.created_at.strftime('%d.%m.%Y %H:%M') if activity.created_at else '' }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center py-3">
+                        <i class="material-icons-outlined text-muted" style="font-size: 36px;">history</i>
+                        <p class="text-muted mt-2 mb-0">Aktivite yok</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@latest/dist/apexcharts.min.js"></script>
+<script>
+// Global chart variables
+let salesChart, userGrowthChart, orderStatusChart;
+
+// Initialize dashboard
+$(document).ready(function() {
+    initializeCharts();
+    startRealTimeUpdates();
+});
+
+function initializeCharts() {
+    // Sales Chart
+    const salesData = {{ dashboard_data.charts.sales_chart | tojson | safe }};
+    
+    const salesOptions = {
+        series: [{
+            name: 'Siparişler',
+            type: 'column',
+            data: salesData.orders || []
+        }, {
+            name: 'Gelir (₺)',
+            type: 'line',
+            data: salesData.revenue || []
+        }],
+        chart: {
+            height: 350,
+            type: 'line',
+            toolbar: { show: false },
+            animations: { enabled: true, easing: 'easeinout', speed: 800 }
+        },
+        colors: ['#667eea', '#764ba2'],
+        stroke: { width: [0, 2], curve: 'smooth' },
+        plotOptions: {
+            bar: { columnWidth: '50%', borderRadius: 4 }
+        },
+        fill: {
+            type: ['solid', 'gradient'],
+            gradient: {
+                shade: 'light',
+                type: 'horizontal',
+                shadeIntensity: 0.25,
+                gradientToColors: undefined,
+                inverseColors: true,
+                opacityFrom: 0.85,
+                opacityTo: 0.85,
+            }
+        },
+        labels: salesData.labels || [],
+        markers: { size: 0 },
+        xaxis: { type: 'datetime' },
+        yaxis: [{
+            title: { text: 'Siparişler' },
+        }, {
+            opposite: true,
+            title: { text: 'Gelir (₺)' }
+        }],
+        tooltip: {
+            shared: true,
+            intersect: false,
+            y: {
+                formatter: function (y) {
+                    if (typeof y !== "undefined") {
+                        return y.toFixed(0);
+                    }
+                    return y;
+                }
+            }
+        }
+    };
+
+    salesChart = new ApexCharts(document.querySelector("#salesChart"), salesOptions);
+    salesChart.render();
+
+    // User Growth Chart
+    const userGrowthData = {{ dashboard_data.charts.user_growth | tojson | safe }};
+    
+    const userGrowthOptions = {
+        series: [{
+            name: 'Yeni Kullanıcılar',
+            data: userGrowthData.data || []
+        }],
+        chart: {
+            height: 300,
+            type: 'area',
+            toolbar: { show: false },
+            animations: { enabled: true, easing: 'easeinout', speed: 800 }
+        },
+        colors: ['#28a745'],
+        fill: {
+            type: 'gradient',
+            gradient: {
+                shadeIntensity: 1,
+                opacityFrom: 0.7,
+                opacityTo: 0.9,
+                stops: [0, 90, 100]
+            }
+        },
+        dataLabels: { enabled: false },
+        stroke: { curve: 'smooth', width: 2 },
+        xaxis: {
+            categories: userGrowthData.labels || [],
+            type: 'datetime'
+        },
+        tooltip: {
+            x: { format: 'dd/MM/yy' }
+        }
+    };
+
+    userGrowthChart = new ApexCharts(document.querySelector("#userGrowthChart"), userGrowthOptions);
+    userGrowthChart.render();
+
+    // Order Status Chart
+    const orderStatusData = {{ dashboard_data.charts.order_status | tojson | safe }};
+    
+    const orderStatusOptions = {
+        series: orderStatusData.data || [],
+        chart: {
+            height: 250,
+            type: 'donut',
+            animations: { enabled: true, easing: 'easeinout', speed: 800 }
+        },
+        colors: ['#28a745', '#ffc107', '#17a2b8', '#dc3545', '#6f42c1'],
+        labels: orderStatusData.labels || [],
+        responsive: [{
+            breakpoint: 480,
+            options: {
+                chart: { width: 200 },
+                legend: { position: 'bottom' }
+            }
+        }],
+        legend: {
+            position: 'bottom',
+            horizontalAlign: 'center'
+        }
+    };
+
+    orderStatusChart = new ApexCharts(document.querySelector("#orderStatusChart"), orderStatusOptions);
+    orderStatusChart.render();
+}
+
+function loadSalesChart(days) {
+    // Update active button
+    $('.btn-group .btn').removeClass('active');
+    event.target.classList.add('active');
+    
+    // Load new data
+    fetch(`/admin/api/sales-chart?days=${days}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                salesChart.updateSeries([{
+                    name: 'Siparişler',
+                    data: data.data.orders
+                }, {
+                    name: 'Gelir (₺)',
+                    data: data.data.revenue
+                }]);
+                salesChart.updateOptions({
+                    xaxis: { categories: data.data.labels }
+                });
+            }
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+function refreshDashboard() {
+    // Show loading
+    const btn = event.target.closest('button');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="material-icons-outlined">hourglass_empty</i> Yenileniyor...';
+    btn.disabled = true;
+    
+    // Reload page after a short delay
+    setTimeout(() => {
+        location.reload();
+    }, 1000);
+}
+
+function exportReport() {
+    // Export dashboard data as PDF or Excel
+    fetch('/admin/api/export-dashboard-report', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.blob())
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `dashboard-report-${new Date().toISOString().split('T')[0]}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        
+        showToast('Rapor başarıyla indirildi', 'success');
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Rapor indirilemedi', 'error');
+    });
+}
+
+function startRealTimeUpdates() {
+    // WebSocket connection for real-time updates
+    if (typeof io !== 'undefined') {
+        const socket = io('/admin');
+        
+        socket.on('dashboard_update', function(data) {
+            // Update stats cards
+            updateStatsCards(data.stats);
+            
+            // Update charts if needed
+            if (data.charts) {
+                updateCharts(data.charts);
+            }
+            
+            // Update alerts
+            if (data.alerts) {
+                updateAlerts(data.alerts);
+            }
+        });
+        
+        socket.on('system_alert', function(data) {
+            showToast(data.message, data.type);
+            
+            // Add to alerts section
+            addSystemAlert(data);
+        });
+    }
+    
+    // Fallback: periodic updates every 30 seconds
+    setInterval(updateDashboardStats, 30000);
+}
+
+function updateDashboardStats() {
+    fetch('/admin/api/dashboard-stats')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateStatsCards(data.data);
+            }
+        })
+        .catch(error => console.error('Error updating stats:', error));
+}
+
+function updateStatsCards(stats) {
+    // Update stat values with animation
+    Object.keys(stats).forEach(key => {
+        const element = document.querySelector(`[data-stat="${key}"]`);
+        if (element) {
+            animateValue(element, parseInt(element.textContent.replace(/[^\d]/g, '')), stats[key], 1000);
+        }
+    });
+}
+
+function updateCharts(chartData) {
+    // Update charts with new data
+    if (chartData.sales_chart && salesChart) {
+        salesChart.updateSeries([{
+            name: 'Siparişler',
+            data: chartData.sales_chart.orders
+        }, {
+            name: 'Gelir (₺)',
+            data: chartData.sales_chart.revenue
+        }]);
+    }
+}
+
+function updateAlerts(alerts) {
+    const alertsContainer = document.querySelector('.card-body .alert-item').parentElement;
+    
+    // Clear existing alerts
+    alertsContainer.innerHTML = '';
+    
+    if (alerts.length > 0) {
+        alerts.forEach(alert => {
+            const alertElement = document.createElement('div');
+            alertElement.className = `alert-item alert-${alert.type} p-3`;
+            alertElement.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="material-icons-outlined me-2">${alert.icon}</i>
+                    <div>
+                        <div class="fw-bold">${alert.title}</div>
+                        <small class="text-muted">${alert.message}</small>
+                    </div>
+                </div>
+            `;
+            alertsContainer.appendChild(alertElement);
+        });
+    } else {
+        alertsContainer.innerHTML = `
+            <div class="text-center py-3">
+                <i class="material-icons-outlined text-success" style="font-size: 36px;">check_circle</i>
+                <p class="text-muted mt-2 mb-0">Tüm sistemler normal</p>
+            </div>
+        `;
+    }
+}
+
+function addSystemAlert(alert) {
+    const alertsContainer = document.querySelector('.card-body .alert-item').parentElement;
+    
+    const alertElement = document.createElement('div');
+    alertElement.className = `alert-item alert-${alert.type} p-3`;
+    alertElement.innerHTML = `
+        <div class="d-flex align-items-center">
+            <i class="material-icons-outlined me-2">${alert.icon}</i>
+            <div>
+                <div class="fw-bold">${alert.title}</div>
+                <small class="text-muted">${alert.message}</small>
+            </div>
+        </div>
+    `;
+    
+    // Add to top
+    alertsContainer.insertBefore(alertElement, alertsContainer.firstChild);
+    
+    // Remove "no alerts" message if exists
+    const noAlertsMsg = alertsContainer.querySelector('.text-center');
+    if (noAlertsMsg) {
+        noAlertsMsg.remove();
+    }
+}
+
+function animateValue(element, start, end, duration) {
+    const range = end - start;
+    const increment = end > start ? 1 : -1;
+    const stepTime = Math.abs(Math.floor(duration / range));
+    let current = start;
+    
+    const timer = setInterval(() => {
+        current += increment;
+        element.textContent = current.toLocaleString();
+        
+        if (current === end) {
+            clearInterval(timer);
+        }
+    }, stepTime);
+}
+
+function showToast(message, type) {
+    const toastHtml = `
+        <div class="toast align-items-center text-white bg-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'} border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">${message}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    `;
+    
+    let toastContainer = document.querySelector('.toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+        document.body.appendChild(toastContainer);
+    }
+    
+    const toastElement = document.createElement('div');
+    toastElement.innerHTML = toastHtml;
+    toastContainer.appendChild(toastElement.firstElementChild);
+    
+    const toast = new bootstrap.Toast(toastElement.firstElementChild);
+    toast.show();
+}
+</script>
+{% endblock %}

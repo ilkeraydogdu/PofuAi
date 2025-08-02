@@ -1,0 +1,458 @@
+{% extends 'layouts/vendor_layout.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="page-content">
+  <!-- Breadcrumb -->
+  <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+    <div class="breadcrumb-title pe-3">Satıcı Paneli</div>
+    <div class="ps-3">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0 p-0">
+          <li class="breadcrumb-item"><a href="/vendor"><i class="material-icons-outlined">home</i></a></li>
+          <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+        </ol>
+      </nav>
+    </div>
+    <div class="ms-auto">
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">
+        <i class="material-icons-outlined me-2">add</i>Yeni Ürün Ekle
+      </button>
+    </div>
+  </div>
+
+  <!-- İstatistik Kartları -->
+  <div class="row">
+    <div class="col-12 col-lg-3 col-xl-3">
+      <div class="card radius-10 bg-gradient-primary">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="">
+              <p class="mb-1 text-white-50">Toplam Ürün</p>
+              <h4 class="mb-0 text-white">{{ stats.total_products or 0 }}</h4>
+              <p class="mb-0 text-white-50 small">
+                <span class="text-success">{{ stats.active_products or 0 }}</span> aktif
+              </p>
+            </div>
+            <div class="ms-auto fs-2 text-white">
+              <i class="material-icons-outlined">inventory_2</i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-lg-3 col-xl-3">
+      <div class="card radius-10 bg-gradient-success">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="">
+              <p class="mb-1 text-white-50">Toplam Sipariş</p>
+              <h4 class="mb-0 text-white">{{ stats.total_orders or 0 }}</h4>
+              <p class="mb-0 text-white-50 small">Bu ay</p>
+            </div>
+            <div class="ms-auto fs-2 text-white">
+              <i class="material-icons-outlined">shopping_cart</i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-lg-3 col-xl-3">
+      <div class="card radius-10 bg-gradient-info">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="">
+              <p class="mb-1 text-white-50">Aylık Gelir</p>
+              <h4 class="mb-0 text-white">₺{{ "{:,.2f}".format(stats.monthly_revenue or 0) }}</h4>
+              <p class="mb-0 text-white-50 small">Bu ay</p>
+            </div>
+            <div class="ms-auto fs-2 text-white">
+              <i class="material-icons-outlined">payments</i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-lg-3 col-xl-3">
+      <div class="card radius-10 bg-gradient-warning">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="">
+              <p class="mb-1 text-white-50">Satış Oranı</p>
+              <h4 class="mb-0 text-white">%{{ ((stats.total_orders / (stats.total_products or 1)) * 100) | round(1) }}</h4>
+              <p class="mb-0 text-white-50 small">Ürün başına</p>
+            </div>
+            <div class="ms-auto fs-2 text-white">
+              <i class="material-icons-outlined">trending_up</i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ana İçerik -->
+  <div class="row">
+    <!-- Sol Kolon -->
+    <div class="col-12 col-lg-8">
+      <!-- Gelir Grafiği -->
+      <div class="card radius-10">
+        <div class="card-header">
+          <div class="d-flex align-items-center">
+            <div>
+              <h6 class="mb-0">Gelir Analizi</h6>
+            </div>
+            <div class="dropdown ms-auto">
+              <a class="dropdown-toggle dropdown-toggle-nocaret" href="#" data-bs-toggle="dropdown">
+                <i class="material-icons-outlined">more_vert</i>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/vendor/analytics">Detaylı Analiz</a></li>
+                <li><a class="dropdown-item" href="/vendor/analytics?export=pdf">PDF İndir</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <canvas id="revenueChart" height="300"></canvas>
+        </div>
+      </div>
+
+      <!-- Son Siparişler -->
+      <div class="card radius-10 mt-3">
+        <div class="card-header">
+          <div class="d-flex align-items-center">
+            <div>
+              <h6 class="mb-0">Son Siparişler</h6>
+            </div>
+            <div class="ms-auto">
+              <a href="/vendor/orders" class="btn btn-sm btn-outline-primary">Tümünü Gör</a>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          {% if recent_orders %}
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Sipariş No</th>
+                  <th>Müşteri</th>
+                  <th>Tutar</th>
+                  <th>Durum</th>
+                  <th>Tarih</th>
+                  <th>İşlem</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for order in recent_orders %}
+                <tr>
+                  <td><strong>#{{ order.order_number }}</strong></td>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <img src="/static/assets/images/avatars/default.png" class="rounded-circle me-2" width="32" height="32">
+                      <div>
+                        <div class="fw-bold">{{ order.customer_name }}</div>
+                        <div class="text-muted small">{{ order.customer_email }}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><strong>₺{{ "{:,.2f}".format(order.total_amount) }}</strong></td>
+                  <td>
+                    {% if order.status == 'completed' %}
+                    <span class="badge bg-success">Tamamlandı</span>
+                    {% elif order.status == 'processing' %}
+                    <span class="badge bg-info">İşleniyor</span>
+                    {% elif order.status == 'pending' %}
+                    <span class="badge bg-warning">Bekliyor</span>
+                    {% else %}
+                    <span class="badge bg-secondary">{{ order.status }}</span>
+                    {% endif %}
+                  </td>
+                  <td>{{ order.created_at.strftime('%d.%m.%Y') }}</td>
+                  <td>
+                    <div class="btn-group btn-group-sm">
+                      <a href="/vendor/orders/{{ order.id }}" class="btn btn-outline-primary">
+                        <i class="material-icons-outlined">visibility</i>
+                      </a>
+                      <a href="/vendor/orders/{{ order.id }}/edit" class="btn btn-outline-secondary">
+                        <i class="material-icons-outlined">edit</i>
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="text-center py-4">
+            <i class="material-icons-outlined text-muted" style="font-size: 48px;">shopping_cart</i>
+            <p class="text-muted mt-2">Henüz sipariş bulunmuyor</p>
+            <a href="/vendor/products/add" class="btn btn-primary">İlk Ürününüzü Ekleyin</a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Sağ Kolon -->
+    <div class="col-12 col-lg-4">
+      <!-- Hızlı İşlemler -->
+      <div class="card radius-10">
+        <div class="card-header">
+          <h6 class="mb-0">Hızlı İşlemler</h6>
+        </div>
+        <div class="card-body">
+          <div class="d-grid gap-2">
+            <a href="/vendor/products/add" class="btn btn-primary">
+              <i class="material-icons-outlined me-2">add</i>Yeni Ürün Ekle
+            </a>
+            <a href="/vendor/orders" class="btn btn-success">
+              <i class="material-icons-outlined me-2">shopping_cart</i>Siparişleri Görüntüle
+            </a>
+            <a href="/vendor/analytics" class="btn btn-info">
+              <i class="material-icons-outlined me-2">analytics</i>Analitik Raporlar
+            </a>
+            <a href="/vendor/integrations" class="btn btn-warning">
+              <i class="material-icons-outlined me-2">integration_instructions</i>Entegrasyonlar
+            </a>
+            <a href="/vendor/messages" class="btn btn-secondary">
+              <i class="material-icons-outlined me-2">message</i>Müşteri Mesajları
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- En İyi Performans Gösteren Ürünler -->
+      <div class="card radius-10 mt-3">
+        <div class="card-header">
+          <h6 class="mb-0">En İyi Ürünler</h6>
+        </div>
+        <div class="card-body">
+          {% if product_performance %}
+          {% for product in product_performance[:5] %}
+          <div class="d-flex align-items-center mb-3">
+            <div class="flex-shrink-0">
+              <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                <i class="material-icons-outlined text-white">inventory_2</i>
+              </div>
+            </div>
+            <div class="flex-grow-1 ms-3">
+              <div class="fw-bold">{{ product.name[:30] }}{% if product.name|length > 30 %}...{% endif %}</div>
+              <div class="text-muted small">{{ product.total_sold or 0 }} satış</div>
+            </div>
+            <div class="text-end">
+              <div class="fw-bold text-success">₺{{ "{:,.0f}".format(product.total_revenue or 0) }}</div>
+            </div>
+          </div>
+          {% endfor %}
+          {% else %}
+          <div class="text-center py-3">
+            <i class="material-icons-outlined text-muted" style="font-size: 36px;">inventory_2</i>
+            <p class="text-muted mt-2 mb-0">Henüz satış verisi yok</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Bildirimler -->
+      <div class="card radius-10 mt-3">
+        <div class="card-header">
+          <h6 class="mb-0">Bildirimler</h6>
+        </div>
+        <div class="card-body">
+          {% if notifications %}
+          {% for notification in notifications %}
+          <div class="alert alert-{{ notification.type }} alert-dismissible fade show" role="alert">
+            <i class="material-icons-outlined me-2">
+              {% if notification.type == 'info' %}info{% elif notification.type == 'warning' %}warning{% else %}notification_important{% endif %}
+            </i>
+            {{ notification.message }}
+            <div class="small text-muted mt-1">{{ notification.time }}</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+          {% endfor %}
+          {% else %}
+          <div class="text-center py-3">
+            <i class="material-icons-outlined text-muted" style="font-size: 36px;">notifications_none</i>
+            <p class="text-muted mt-2 mb-0">Yeni bildirim yok</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Yeni Ürün Modal -->
+<div class="modal fade" id="addProductModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Hızlı Ürün Ekleme</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="quickAddProductForm">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Ürün Adı</label>
+                <input type="text" class="form-control" name="name" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Fiyat</label>
+                <div class="input-group">
+                  <span class="input-group-text">₺</span>
+                  <input type="number" class="form-control" name="price" step="0.01" required>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Açıklama</label>
+            <textarea class="form-control" name="description" rows="3"></textarea>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Kategori</label>
+                <select class="form-select" name="category_id">
+                  <option value="">Kategori Seçin</option>
+                  <!-- Kategoriler buraya yüklenecek -->
+                </select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Stok</label>
+                <input type="number" class="form-control" name="stock" value="1" min="0">
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+        <button type="button" class="btn btn-primary" id="saveQuickProduct">Kaydet</button>
+        <a href="/vendor/products/add" class="btn btn-outline-primary">Detaylı Ekleme</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/assets/js/chart.js"></script>
+<script>
+// Gelir Grafiği
+const revenueCtx = document.getElementById('revenueChart');
+if (revenueCtx) {
+    const revenueData = {{ revenue_analysis.monthly_revenue | tojson | safe }};
+    
+    new Chart(revenueCtx, {
+        type: 'line',
+        data: {
+            labels: ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'],
+            datasets: [{
+                label: 'Aylık Gelir (₺)',
+                data: revenueData.map(item => item[1] || 0),
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '₺' + value.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Hızlı ürün ekleme
+document.getElementById('saveQuickProduct').addEventListener('click', function() {
+    const form = document.getElementById('quickAddProductForm');
+    const formData = new FormData(form);
+    
+    fetch('/vendor/products/add', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Hata: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Bir hata oluştu');
+    });
+});
+
+// Gerçek zamanlı güncelleme (WebSocket)
+if (typeof io !== 'undefined') {
+    const socket = io();
+    
+    socket.on('new_order', function(data) {
+        // Yeni sipariş bildirimi
+        showNotification('Yeni sipariş alındı: #' + data.order_number, 'success');
+        updateOrderStats();
+    });
+    
+    socket.on('stock_alert', function(data) {
+        // Stok uyarısı
+        showNotification('Stok seviyesi düşük: ' + data.product_name, 'warning');
+    });
+}
+
+function showNotification(message, type) {
+    // Bildirim gösterme fonksiyonu
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    const notificationContainer = document.querySelector('.card-body .alert');
+    if (notificationContainer) {
+        notificationContainer.parentNode.insertBefore(alertDiv, notificationContainer);
+    }
+}
+
+function updateOrderStats() {
+    // İstatistikleri güncelle
+    fetch('/vendor/api/stats')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.querySelector('[data-stat="total_orders"]').textContent = data.stats.total_orders;
+                document.querySelector('[data-stat="monthly_revenue"]').textContent = '₺' + data.stats.monthly_revenue.toLocaleString();
+            }
+        });
+}
+</script>
+{% endblock %}
