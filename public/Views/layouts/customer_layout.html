@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Müşteri Paneli{% endblock %} - PofuAi</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="/static/assets/images/favicon-32x32.png" type="image/png">
+    
+    <!-- CSS -->
+    <link href="/static/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/assets/css/bootstrap-extended.css" rel="stylesheet">
+    <link href="/static/assets/sass/main.css" rel="stylesheet">
+    <link href="/static/assets/sass/dark-theme.css" rel="stylesheet">
+    <link href="/static/assets/sass/blue-theme.css" rel="stylesheet">
+    <link href="/static/assets/sass/responsive.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Socket.IO for real-time updates -->
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <!--wrapper-->
+    <div class="wrapper">
+        <!--sidebar wrapper -->
+        <div class="sidebar-wrapper" data-simplebar="true">
+            <div class="sidebar-header">
+                <div>
+                    <img src="/static/assets/images/logo-icon.png" class="logo-icon" alt="logo icon">
+                </div>
+                <div>
+                    <h4 class="logo-text">PofuAi</h4>
+                    <p class="logo-subtitle">Müşteri Paneli</p>
+                </div>
+                <div class="toggle-icon ms-auto">
+                    <i class="material-icons-outlined">menu</i>
+                </div>
+            </div>
+            
+            <!--navigation-->
+            <ul class="metismenu" id="menu">
+                <li>
+                    <a href="/customer">
+                        <div class="parent-icon"><i class="material-icons-outlined">dashboard</i></div>
+                        <div class="menu-title">Dashboard</div>
+                    </a>
+                </li>
+                
+                <li>
+                    <a href="javascript:;" class="has-arrow">
+                        <div class="parent-icon"><i class="material-icons-outlined">shopping_bag</i></div>
+                        <div class="menu-title">Siparişlerim</div>
+                    </a>
+                    <ul>
+                        <li><a href="/customer/orders"><i class="material-icons-outlined">circle</i>Tüm Siparişler</a></li>
+                        <li><a href="/customer/orders?status=pending"><i class="material-icons-outlined">circle</i>Bekleyen</a></li>
+                        <li><a href="/customer/orders?status=processing"><i class="material-icons-outlined">circle</i>Hazırlanan</a></li>
+                        <li><a href="/customer/orders?status=shipped"><i class="material-icons-outlined">circle</i>Kargoda</a></li>
+                        <li><a href="/customer/orders?status=completed"><i class="material-icons-outlined">circle</i>Teslim Edilen</a></li>
+                    </ul>
+                </li>
+                
+                <li>
+                    <a href="/customer/favorites">
+                        <div class="parent-icon">
+                            <i class="material-icons-outlined">favorite</i>
+                        </div>
+                        <div class="menu-title">Favori Ürünler</div>
+                    </a>
+                </li>
+                
+                <li>
+                    <a href="/customer/reviews">
+                        <div class="parent-icon"><i class="material-icons-outlined">star</i></div>
+                        <div class="menu-title">Değerlendirmelerim</div>
+                    </a>
+                </li>
+                
+                <li>
+                    <a href="javascript:;" class="has-arrow">
+                        <div class="parent-icon"><i class="material-icons-outlined">person</i></div>
+                        <div class="menu-title">Hesabım</div>
+                    </a>
+                    <ul>
+                        <li><a href="/customer/profile"><i class="material-icons-outlined">circle</i>Profil Bilgileri</a></li>
+                        <li><a href="/customer/addresses"><i class="material-icons-outlined">circle</i>Adres Defteri</a></li>
+                        <li><a href="/customer/notifications"><i class="material-icons-outlined">circle</i>Bildirimler</a></li>
+                        <li><a href="/customer/settings"><i class="material-icons-outlined">circle</i>Hesap Ayarları</a></li>
+                    </ul>
+                </li>
+                
+                <li class="menu-label">Alışveriş</li>
+                <li>
+                    <a href="/products">
+                        <div class="parent-icon"><i class="material-icons-outlined">shopping_cart</i></div>
+                        <div class="menu-title">Ürünleri İncele</div>
+                    </a>
+                </li>
+                <li>
+                    <a href="/categories">
+                        <div class="parent-icon"><i class="material-icons-outlined">category</i></div>
+                        <div class="menu-title">Kategoriler</div>
+                    </a>
+                </li>
+                <li>
+                    <a href="/deals">
+                        <div class="parent-icon"><i class="material-icons-outlined">local_offer</i></div>
+                        <div class="menu-title">Fırsatlar</div>
+                    </a>
+                </li>
+                
+                <li class="menu-label">Destek</li>
+                <li>
+                    <a href="/customer/support">
+                        <div class="parent-icon"><i class="material-icons-outlined">support_agent</i></div>
+                        <div class="menu-title">Yardım & Destek</div>
+                    </a>
+                </li>
+                <li>
+                    <a href="/faq">
+                        <div class="parent-icon"><i class="material-icons-outlined">help</i></div>
+                        <div class="menu-title">Sık Sorulan Sorular</div>
+                    </a>
+                </li>
+            </ul>
+            <!--end navigation-->
+        </div>
+        <!--end sidebar wrapper -->
+        
+        <!--start header -->
+        <header>
+            <div class="topbar d-flex align-items-center">
+                <nav class="navbar navbar-expand gap-3">
+                    <div class="mobile-toggle-menu">
+                        <i class="material-icons-outlined">menu</i>
+                    </div>
+                    
+                    <!-- Search -->
+                    <div class="search-bar flex-grow-1">
+                        <div class="position-relative search-bar-box">
+                            <input type="text" class="form-control search-control" placeholder="Ürün ara...">
+                            <span class="position-absolute top-50 search-show translate-middle-y">
+                                <i class="material-icons-outlined">search</i>
+                            </span>
+                            <span class="position-absolute top-50 search-close translate-middle-y">
+                                <i class="material-icons-outlined">close</i>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Top Menu -->
+                    <div class="top-menu ms-auto">
+                        <ul class="navbar-nav align-items-center gap-1">
+                            <!-- Shopping Cart -->
+                            <li class="nav-item dropdown dropdown-large">
+                                <a class="nav-link dropdown-toggle dropdown-toggle-nocaret position-relative" href="#" data-bs-toggle="dropdown">
+                                    <span class="alert-count">3</span>
+                                    <i class="material-icons-outlined">shopping_cart</i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-end">
+                                    <a href="javascript:;">
+                                        <div class="msg-header">
+                                            <p class="msg-header-title">Sepetim</p>
+                                            <p class="msg-header-badge">3 Ürün</p>
+                                        </div>
+                                    </a>
+                                    <div class="header-notifications-list">
+                                        <a class="dropdown-item" href="javascript:;">
+                                            <div class="d-flex align-items-center">
+                                                <img src="/static/assets/images/products/product-1.jpg" class="rounded me-3" width="40" height="40">
+                                                <div class="flex-grow-1">
+                                                    <h6 class="msg-name">iPhone 14 Pro <span class="msg-time float-end">₺45,000</span></h6>
+                                                    <p class="msg-info">Adet: 1</p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <a href="/cart">
+                                        <div class="text-center msg-footer">
+                                            <button class="btn btn-primary w-100">Sepeti Görüntüle</button>
+                                        </div>
+                                    </a>
+                                </div>
+                            </li>
+                            
+                            <!-- Notifications -->
+                            <li class="nav-item dropdown dropdown-large">
+                                <a class="nav-link dropdown-toggle dropdown-toggle-nocaret position-relative" href="#" data-bs-toggle="dropdown">
+                                    <span class="alert-count notification-count">5</span>
+                                    <i class="material-icons-outlined">notifications</i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-end">
+                                    <a href="javascript:;">
+                                        <div class="msg-header">
+                                            <p class="msg-header-title">Bildirimler</p>
+                                            <p class="msg-header-badge">5 Yeni</p>
+                                        </div>
+                                    </a>
+                                    <div class="header-notifications-list">
+                                        <a class="dropdown-item" href="javascript:;">
+                                            <div class="d-flex align-items-center">
+                                                <div class="notify bg-light-success text-success">
+                                                    <i class="material-icons-outlined">local_shipping</i>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <h6 class="msg-name">Siparişiniz Kargoya Verildi <span class="msg-time float-end">1 sa</span></h6>
+                                                    <p class="msg-info">#12345 numaralı siparişiniz</p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                        <a class="dropdown-item" href="javascript:;">
+                                            <div class="d-flex align-items-center">
+                                                <div class="notify bg-light-primary text-primary">
+                                                    <i class="material-icons-outlined">local_offer</i>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <h6 class="msg-name">Özel İndirim <span class="msg-time float-end">3 sa</span></h6>
+                                                    <p class="msg-info">Favori ürünlerinizde %20 indirim</p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <a href="/customer/notifications">
+                                        <div class="text-center msg-footer">
+                                            <button class="btn btn-primary w-100">Tüm Bildirimleri Gör</button>
+                                        </div>
+                                    </a>
+                                </div>
+                            </li>
+                            
+                            <!-- User Menu -->
+                            <li class="nav-item dropdown dropdown-user-setting">
+                                <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" href="#" data-bs-toggle="dropdown">
+                                    <div class="user-setting">
+                                        <img src="/static/assets/images/avatars/avatar-2.png" class="user-img" alt="">
+                                    </div>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <div class="d-flex flex-column align-items-center text-center p-3 border-bottom">
+                                                <img src="/static/assets/images/avatars/avatar-2.png" class="rounded-circle" width="60" height="60" alt="">
+                                                <div class="mt-3">
+                                                    <h6 class="mb-0">{{ customer.name if customer else 'Müşteri' }}</h6>
+                                                    <p class="mb-0 text-muted">{{ customer.email if customer else 'customer@example.com' }}</p>
+                                                    <div class="mt-2">
+                                                        <span class="badge bg-success">Aktif Üye</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li><a class="dropdown-item" href="/customer/profile"><i class="material-icons-outlined">person</i><span>Profil</span></a></li>
+                                    <li><a class="dropdown-item" href="/customer/orders"><i class="material-icons-outlined">shopping_bag</i><span>Siparişlerim</span></a></li>
+                                    <li><a class="dropdown-item" href="/customer/favorites"><i class="material-icons-outlined">favorite</i><span>Favorilerim</span></a></li>
+                                    <li><a class="dropdown-item" href="/customer/addresses"><i class="material-icons-outlined">location_on</i><span>Adreslerim</span></a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="/auth/logout"><i class="material-icons-outlined">power_settings_new</i><span>Çıkış Yap</span></a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </header>
+        <!--end header -->
+        
+        <!--start page wrapper -->
+        <div class="page-wrapper">
+            {% block content %}{% endblock %}
+        </div>
+        <!--end page wrapper -->
+        
+        <!--start overlay-->
+        <div class="overlay toggle-icon"></div>
+        <!--end overlay-->
+        
+        <!--Start Back To Top Button-->
+        <a href="javaScript:;" class="back-to-top">
+            <i class="material-icons-outlined">keyboard_arrow_up</i>
+        </a>
+        <!--End Back To Top Button-->
+        
+        <!--start footer -->
+        <footer class="page-footer">
+            <p class="mb-0">Copyright © 2025. PofuAi Müşteri Paneli. Tüm hakları saklıdır.</p>
+        </footer>
+        <!--end footer -->
+    </div>
+    <!--end wrapper-->
+    
+    <!-- Bootstrap JS -->
+    <script src="/static/assets/js/bootstrap.bundle.min.js"></script>
+    
+    <!--plugins-->
+    <script src="/static/assets/js/jquery.min.js"></script>
+    <script src="/static/assets/plugins/simplebar/js/simplebar.min.js"></script>
+    <script src="/static/assets/plugins/metismenu/js/metisMenu.min.js"></script>
+    <script src="/static/assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js"></script>
+    
+    <!--app JS-->
+    <script src="/static/assets/js/app.js"></script>
+    
+    <!-- Customer Panel Specific JS -->
+    <script>
+        // Real-time updates
+        $(document).ready(function() {
+            // WebSocket bağlantısı
+            if (typeof io !== 'undefined') {
+                const socket = io('/customer');
+                
+                socket.on('connect', function() {
+                    console.log('Customer panel WebSocket connected');
+                });
+                
+                socket.on('order_update', function(data) {
+                    updateNotificationCount('orders', 1);
+                    showToast('Sipariş durumu güncellendi: #' + data.order_number, 'success');
+                });
+                
+                socket.on('price_drop', function(data) {
+                    updateNotificationCount('notifications', 1);
+                    showToast('Favori ürününüzde fiyat düşüşü: ' + data.product_name, 'info');
+                });
+                
+                socket.on('new_notification', function(data) {
+                    updateNotificationCount('notifications', 1);
+                    showToast(data.title, 'info');
+                });
+                
+                socket.on('cart_reminder', function(data) {
+                    showToast('Sepetinizdeki ürünler sizi bekliyor!', 'warning');
+                });
+            }
+            
+            // Search functionality
+            $('.search-control').on('keyup', function() {
+                const query = $(this).val();
+                if (query.length > 2) {
+                    performProductSearch(query);
+                }
+            });
+            
+            // Auto-hide alerts after 5 seconds
+            setTimeout(function() {
+                $('.alert').fadeOut();
+            }, 5000);
+        });
+        
+        function updateNotificationCount(type, increment) {
+            if (type === 'notifications') {
+                const countElement = document.querySelector('.notification-count');
+                if (countElement) {
+                    const currentCount = parseInt(countElement.textContent) || 0;
+                    countElement.textContent = currentCount + increment;
+                }
+            }
+        }
+        
+        function showToast(message, type) {
+            // Toast bildirimi göster
+            const toastHtml = `
+                <div class="toast align-items-center text-white bg-${type === 'success' ? 'success' : type === 'warning' ? 'warning' : type === 'info' ? 'info' : 'primary'} border-0" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">${message}</div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `;
+            
+            // Toast container yoksa oluştur
+            let toastContainer = document.querySelector('.toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+                document.body.appendChild(toastContainer);
+            }
+            
+            const toastElement = document.createElement('div');
+            toastElement.innerHTML = toastHtml;
+            toastContainer.appendChild(toastElement.firstElementChild);
+            
+            // Toast'ı göster
+            const toast = new bootstrap.Toast(toastElement.firstElementChild);
+            toast.show();
+        }
+        
+        function performProductSearch(query) {
+            // Ürün arama fonksiyonu
+            fetch(`/api/products/search?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Arama sonuçlarını göster
+                    displaySearchResults(data.products);
+                })
+                .catch(error => {
+                    console.error('Search error:', error);
+                });
+        }
+        
+        function displaySearchResults(products) {
+            // Arama sonuçlarını dropdown olarak göster
+            const searchDropdown = document.getElementById('searchDropdown');
+            if (!searchDropdown) {
+                // Dropdown oluştur
+                const dropdown = document.createElement('div');
+                dropdown.id = 'searchDropdown';
+                dropdown.className = 'search-dropdown position-absolute bg-white border rounded shadow-sm';
+                dropdown.style.cssText = 'top: 100%; left: 0; right: 0; z-index: 1000; max-height: 300px; overflow-y: auto;';
+                
+                document.querySelector('.search-bar-box').appendChild(dropdown);
+            }
+            
+            const dropdown = document.getElementById('searchDropdown');
+            
+            if (products && products.length > 0) {
+                dropdown.innerHTML = products.map(product => `
+                    <a href="/products/${product.id}" class="dropdown-item d-flex align-items-center p-2 border-bottom">
+                        <img src="${product.image_url || '/static/assets/images/products/default.jpg'}" 
+                             class="rounded me-2" width="30" height="30" alt="${product.name}">
+                        <div class="flex-grow-1">
+                            <div class="fw-bold">${product.name}</div>
+                            <div class="text-primary small">₺${product.price}</div>
+                        </div>
+                    </a>
+                `).join('');
+                dropdown.style.display = 'block';
+            } else {
+                dropdown.innerHTML = '<div class="p-3 text-muted text-center">Ürün bulunamadı</div>';
+                dropdown.style.display = 'block';
+            }
+        }
+        
+        // Search dropdown'ı gizle
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.search-bar-box').length) {
+                $('#searchDropdown').hide();
+            }
+        });
+        
+        // Page loading indicator
+        $(document).on('click', 'a[href^="/customer/"], a[href^="/products/"]', function(e) {
+            if (!$(this).hasClass('no-loading')) {
+                showLoadingIndicator();
+            }
+        });
+        
+        function showLoadingIndicator() {
+            const loadingHtml = `
+                <div id="loading-indicator" class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background: rgba(255,255,255,0.8); z-index: 9999;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Yükleniyor...</span>
+                    </div>
+                </div>
+            `;
+            
+            if (!document.getElementById('loading-indicator')) {
+                document.body.insertAdjacentHTML('beforeend', loadingHtml);
+            }
+        }
+        
+        function hideLoadingIndicator() {
+            const indicator = document.getElementById('loading-indicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+        
+        // Hide loading indicator when page is loaded
+        $(window).on('load', function() {
+            hideLoadingIndicator();
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
