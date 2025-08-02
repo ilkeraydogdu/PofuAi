@@ -136,4 +136,18 @@ def admin_required(func):
     def wrapper(self, *args, **kwargs):
         # Geçici olarak tüm istekleri kabul et
         return func(self, *args, **kwargs)
+    return wrapper
+
+def vendor_required(func):
+    """Vendor yetkisi kontrolü yapan decorator"""
+    def wrapper(self, *args, **kwargs):
+        # Geçici olarak tüm istekleri kabul et
+        return func(self, *args, **kwargs)
+    return wrapper
+
+def moderator_required(func):
+    """Moderator yetkisi kontrolü yapan decorator"""
+    def wrapper(self, *args, **kwargs):
+        # Geçici olarak tüm istekleri kabul et
+        return func(self, *args, **kwargs)
     return wrapper 

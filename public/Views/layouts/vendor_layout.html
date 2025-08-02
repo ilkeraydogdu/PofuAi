@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Satıcı Paneli{% endblock %} - PofuAi</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="/static/assets/images/favicon-32x32.png" type="image/png">
+    
+    <!-- CSS -->
+    <link href="/static/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/assets/css/bootstrap-extended.css" rel="stylesheet">
+    <link href="/static/assets/sass/main.css" rel="stylesheet">
+    <link href="/static/assets/sass/dark-theme.css" rel="stylesheet">
+    <link href="/static/assets/sass/blue-theme.css" rel="stylesheet">
+    <link href="/static/assets/sass/semi-dark.css" rel="stylesheet">
+    <link href="/static/assets/sass/bordered-theme.css" rel="stylesheet">
+    <link href="/static/assets/sass/responsive.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Socket.IO for real-time updates -->
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <!--wrapper-->
+    <div class="wrapper">
+        <!--sidebar wrapper -->
+        <div class="sidebar-wrapper" data-simplebar="true">
+            <div class="sidebar-header">
+                <div>
+                    <img src="/static/assets/images/logo-icon.png" class="logo-icon" alt="logo icon">
+                </div>
+                <div>
+                    <h4 class="logo-text">PofuAi</h4>
+                    <p class="logo-subtitle">Satıcı Paneli</p>
+                </div>
+                <div class="toggle-icon ms-auto">
+                    <i class="material-icons-outlined">menu</i>
+                </div>
+            </div>
+            
+            <!--navigation-->
+            <ul class="metismenu" id="menu">
+                <li>
+                    <a href="/vendor">
+                        <div class="parent-icon"><i class="material-icons-outlined">dashboard</i></div>
+                        <div class="menu-title">Dashboard</div>
+                    </a>
+                </li>
+                
+                <li>
+                    <a href="javascript:;" class="has-arrow">
+                        <div class="parent-icon"><i class="material-icons-outlined">inventory_2</i></div>
+                        <div class="menu-title">Ürün Yönetimi</div>
+                    </a>
+                    <ul>
+                        <li><a href="/vendor/products"><i class="material-icons-outlined">circle</i>Tüm Ürünler</a></li>
+                        <li><a href="/vendor/products/add"><i class="material-icons-outlined">circle</i>Yeni Ürün Ekle</a></li>
+                        <li><a href="/vendor/products/categories"><i class="material-icons-outlined">circle</i>Kategoriler</a></li>
+                        <li><a href="/vendor/products/bulk"><i class="material-icons-outlined">circle</i>Toplu İşlemler</a></li>
+                    </ul>
+                </li>
+                
+                <li>
+                    <a href="javascript:;" class="has-arrow">
+                        <div class="parent-icon"><i class="material-icons-outlined">shopping_cart</i></div>
+                        <div class="menu-title">Sipariş Yönetimi</div>
+                    </a>
+                    <ul>
+                        <li><a href="/vendor/orders"><i class="material-icons-outlined">circle</i>Tüm Siparişler</a></li>
+                        <li><a href="/vendor/orders?status=pending"><i class="material-icons-outlined">circle</i>Bekleyen Siparişler</a></li>
+                        <li><a href="/vendor/orders?status=processing"><i class="material-icons-outlined">circle</i>İşlenen Siparişler</a></li>
+                        <li><a href="/vendor/orders?status=completed"><i class="material-icons-outlined">circle</i>Tamamlanan</a></li>
+                    </ul>
+                </li>
+                
+                <li>
+                    <a href="/vendor/analytics">
+                        <div class="parent-icon"><i class="material-icons-outlined">analytics</i></div>
+                        <div class="menu-title">Analitik & Raporlar</div>
+                    </a>
+                </li>
+                
+                <li>
+                    <a href="javascript:;" class="has-arrow">
+                        <div class="parent-icon"><i class="material-icons-outlined">integration_instructions</i></div>
+                        <div class="menu-title">Entegrasyonlar</div>
+                    </a>
+                    <ul>
+                        <li><a href="/vendor/integrations"><i class="material-icons-outlined">circle</i>Aktif Entegrasyonlar</a></li>
+                        <li><a href="/vendor/integrations/marketplace"><i class="material-icons-outlined">circle</i>Pazaryerleri</a></li>
+                        <li><a href="/vendor/integrations/social"><i class="material-icons-outlined">circle</i>Sosyal Medya</a></li>
+                        <li><a href="/vendor/integrations/settings"><i class="material-icons-outlined">circle</i>Entegrasyon Ayarları</a></li>
+                    </ul>
+                </li>
+                
+                <li>
+                    <a href="/vendor/messages">
+                        <div class="parent-icon">
+                            <i class="material-icons-outlined">message</i>
+                            <span class="badge bg-danger" id="unread-messages">3</span>
+                        </div>
+                        <div class="menu-title">Müşteri Mesajları</div>
+                    </a>
+                </li>
+                
+                <li>
+                    <a href="javascript:;" class="has-arrow">
+                        <div class="parent-icon"><i class="material-icons-outlined">account_circle</i></div>
+                        <div class="menu-title">Hesap Yönetimi</div>
+                    </a>
+                    <ul>
+                        <li><a href="/vendor/profile"><i class="material-icons-outlined">circle</i>Profil Bilgileri</a></li>
+                        <li><a href="/vendor/settings"><i class="material-icons-outlined">circle</i>Satıcı Ayarları</a></li>
+                        <li><a href="/vendor/billing"><i class="material-icons-outlined">circle</i>Faturalandırma</a></li>
+                        <li><a href="/vendor/security"><i class="material-icons-outlined">circle</i>Güvenlik</a></li>
+                    </ul>
+                </li>
+                
+                <li class="menu-label">Destek & Yardım</li>
+                <li>
+                    <a href="/vendor/help">
+                        <div class="parent-icon"><i class="material-icons-outlined">help</i></div>
+                        <div class="menu-title">Yardım Merkezi</div>
+                    </a>
+                </li>
+                <li>
+                    <a href="/vendor/support">
+                        <div class="parent-icon"><i class="material-icons-outlined">support_agent</i></div>
+                        <div class="menu-title">Teknik Destek</div>
+                    </a>
+                </li>
+            </ul>
+            <!--end navigation-->
+        </div>
+        <!--end sidebar wrapper -->
+        
+        <!--start header -->
+        <header>
+            <div class="topbar d-flex align-items-center">
+                <nav class="navbar navbar-expand gap-3">
+                    <div class="mobile-toggle-menu">
+                        <i class="material-icons-outlined">menu</i>
+                    </div>
+                    
+                    <!-- Search -->
+                    <div class="search-bar flex-grow-1">
+                        <div class="position-relative search-bar-box">
+                            <input type="text" class="form-control search-control" placeholder="Ürün, sipariş veya müşteri ara...">
+                            <span class="position-absolute top-50 search-show translate-middle-y">
+                                <i class="material-icons-outlined">search</i>
+                            </span>
+                            <span class="position-absolute top-50 search-close translate-middle-y">
+                                <i class="material-icons-outlined">close</i>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Top Menu -->
+                    <div class="top-menu ms-auto">
+                        <ul class="navbar-nav align-items-center gap-1">
+                            <!-- Quick Actions -->
+                            <li class="nav-item dropdown dropdown-app">
+                                <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" data-bs-toggle="dropdown" href="javascript:;">
+                                    <i class="material-icons-outlined">apps</i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-end p-0 border-0">
+                                    <div class="app-container p-2 my-2">
+                                        <div class="row gx-0 gy-2 row-cols-3 justify-content-center p-2">
+                                            <div class="col">
+                                                <a href="/vendor/products/add">
+                                                    <div class="app-box text-center">
+                                                        <div class="app-icon">
+                                                            <i class="material-icons-outlined">add_box</i>
+                                                        </div>
+                                                        <div class="app-name">
+                                                            <p class="mb-0 mt-1">Ürün Ekle</p>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                            <div class="col">
+                                                <a href="/vendor/orders">
+                                                    <div class="app-box text-center">
+                                                        <div class="app-icon">
+                                                            <i class="material-icons-outlined">shopping_bag</i>
+                                                        </div>
+                                                        <div class="app-name">
+                                                            <p class="mb-0 mt-1">Siparişler</p>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                            <div class="col">
+                                                <a href="/vendor/analytics">
+                                                    <div class="app-box text-center">
+                                                        <div class="app-icon">
+                                                            <i class="material-icons-outlined">analytics</i>
+                                                        </div>
+                                                        <div class="app-name">
+                                                            <p class="mb-0 mt-1">Raporlar</p>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            
+                            <!-- Notifications -->
+                            <li class="nav-item dropdown dropdown-large">
+                                <a class="nav-link dropdown-toggle dropdown-toggle-nocaret position-relative" href="#" data-bs-toggle="dropdown">
+                                    <span class="alert-count">8</span>
+                                    <i class="material-icons-outlined">notifications</i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-end">
+                                    <a href="javascript:;">
+                                        <div class="msg-header">
+                                            <p class="msg-header-title">Bildirimler</p>
+                                            <p class="msg-header-badge">8 Yeni</p>
+                                        </div>
+                                    </a>
+                                    <div class="header-notifications-list">
+                                        <a class="dropdown-item" href="javascript:;">
+                                            <div class="d-flex align-items-center">
+                                                <div class="notify bg-light-primary text-primary">
+                                                    <i class="material-icons-outlined">shopping_cart</i>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <h6 class="msg-name">Yeni Sipariş <span class="msg-time float-end">2 dk</span></h6>
+                                                    <p class="msg-info">#12345 numaralı sipariş alındı</p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                        <a class="dropdown-item" href="javascript:;">
+                                            <div class="d-flex align-items-center">
+                                                <div class="notify bg-light-warning text-warning">
+                                                    <i class="material-icons-outlined">inventory</i>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <h6 class="msg-name">Stok Uyarısı <span class="msg-time float-end">15 dk</span></h6>
+                                                    <p class="msg-info">iPhone 14 Pro stoku azalıyor</p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <a href="javascript:;">
+                                        <div class="text-center msg-footer">
+                                            <button class="btn btn-primary w-100">Tüm Bildirimleri Gör</button>
+                                        </div>
+                                    </a>
+                                </div>
+                            </li>
+                            
+                            <!-- User Menu -->
+                            <li class="nav-item dropdown dropdown-user-setting">
+                                <a class="nav-link dropdown-toggle dropdown-toggle-nocaret" href="#" data-bs-toggle="dropdown">
+                                    <div class="user-setting">
+                                        <img src="/static/assets/images/avatars/avatar-1.png" class="user-img" alt="">
+                                    </div>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <div class="d-flex flex-column align-items-center text-center p-3 border-bottom">
+                                                <img src="/static/assets/images/avatars/avatar-1.png" class="rounded-circle" width="60" height="60" alt="">
+                                                <div class="mt-3">
+                                                    <h6 class="mb-0">{{ vendor.name if vendor else 'Satıcı' }}</h6>
+                                                    <p class="mb-0 text-muted">{{ vendor.email if vendor else 'vendor@example.com' }}</p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li><a class="dropdown-item" href="/vendor/profile"><i class="material-icons-outlined">person</i><span>Profil</span></a></li>
+                                    <li><a class="dropdown-item" href="/vendor/settings"><i class="material-icons-outlined">settings</i><span>Ayarlar</span></a></li>
+                                    <li><a class="dropdown-item" href="/vendor/billing"><i class="material-icons-outlined">account_balance_wallet</i><span>Faturalandırma</span></a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="/auth/logout"><i class="material-icons-outlined">power_settings_new</i><span>Çıkış Yap</span></a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </header>
+        <!--end header -->
+        
+        <!--start page wrapper -->
+        <div class="page-wrapper">
+            {% block content %}{% endblock %}
+        </div>
+        <!--end page wrapper -->
+        
+        <!--start overlay-->
+        <div class="overlay toggle-icon"></div>
+        <!--end overlay-->
+        
+        <!--Start Back To Top Button-->
+        <a href="javaScript:;" class="back-to-top">
+            <i class="material-icons-outlined">keyboard_arrow_up</i>
+        </a>
+        <!--End Back To Top Button-->
+        
+        <!--start footer -->
+        <footer class="page-footer">
+            <p class="mb-0">Copyright © 2025. PofuAi Satıcı Paneli. Tüm hakları saklıdır.</p>
+        </footer>
+        <!--end footer -->
+    </div>
+    <!--end wrapper-->
+    
+    <!-- Bootstrap JS -->
+    <script src="/static/assets/js/bootstrap.bundle.min.js"></script>
+    
+    <!--plugins-->
+    <script src="/static/assets/js/jquery.min.js"></script>
+    <script src="/static/assets/plugins/simplebar/js/simplebar.min.js"></script>
+    <script src="/static/assets/plugins/metismenu/js/metisMenu.min.js"></script>
+    <script src="/static/assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js"></script>
+    
+    <!--app JS-->
+    <script src="/static/assets/js/app.js"></script>
+    
+    <!-- Vendor Panel Specific JS -->
+    <script>
+        // Real-time updates
+        $(document).ready(function() {
+            // WebSocket bağlantısı
+            if (typeof io !== 'undefined') {
+                const socket = io('/vendor');
+                
+                socket.on('connect', function() {
+                    console.log('Vendor panel WebSocket connected');
+                });
+                
+                socket.on('new_order', function(data) {
+                    updateNotificationCount('orders', 1);
+                    showToast('Yeni sipariş alındı: #' + data.order_number, 'success');
+                });
+                
+                socket.on('stock_alert', function(data) {
+                    updateNotificationCount('alerts', 1);
+                    showToast('Stok uyarısı: ' + data.product_name, 'warning');
+                });
+                
+                socket.on('new_message', function(data) {
+                    updateNotificationCount('messages', 1);
+                    showToast('Yeni müşteri mesajı', 'info');
+                });
+            }
+            
+            // Search functionality
+            $('.search-control').on('keyup', function() {
+                const query = $(this).val();
+                if (query.length > 2) {
+                    performSearch(query);
+                }
+            });
+        });
+        
+        function updateNotificationCount(type, increment) {
+            const countElement = document.querySelector('.alert-count');
+            if (countElement) {
+                const currentCount = parseInt(countElement.textContent) || 0;
+                countElement.textContent = currentCount + increment;
+            }
+            
+            if (type === 'messages') {
+                const messagesBadge = document.getElementById('unread-messages');
+                if (messagesBadge) {
+                    const currentCount = parseInt(messagesBadge.textContent) || 0;
+                    messagesBadge.textContent = currentCount + increment;
+                }
+            }
+        }
+        
+        function showToast(message, type) {
+            // Toast bildirimi göster
+            const toastHtml = `
+                <div class="toast align-items-center text-white bg-${type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'info'} border-0" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">${message}</div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `;
+            
+            // Toast container yoksa oluştur
+            let toastContainer = document.querySelector('.toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+                document.body.appendChild(toastContainer);
+            }
+            
+            const toastElement = document.createElement('div');
+            toastElement.innerHTML = toastHtml;
+            toastContainer.appendChild(toastElement.firstElementChild);
+            
+            // Toast'ı göster
+            const toast = new bootstrap.Toast(toastElement.firstElementChild);
+            toast.show();
+        }
+        
+        function performSearch(query) {
+            // Arama fonksiyonu
+            fetch(`/vendor/api/search?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Arama sonuçlarını göster
+                    console.log('Search results:', data);
+                })
+                .catch(error => {
+                    console.error('Search error:', error);
+                });
+        }
+        
+        // Page loading indicator
+        $(document).on('click', 'a[href^="/vendor/"]', function(e) {
+            if (!$(this).hasClass('no-loading')) {
+                showLoadingIndicator();
+            }
+        });
+        
+        function showLoadingIndicator() {
+            const loadingHtml = `
+                <div id="loading-indicator" class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background: rgba(255,255,255,0.8); z-index: 9999;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Yükleniyor...</span>
+                    </div>
+                </div>
+            `;
+            
+            if (!document.getElementById('loading-indicator')) {
+                document.body.insertAdjacentHTML('beforeend', loadingHtml);
+            }
+        }
+        
+        function hideLoadingIndicator() {
+            const indicator = document.getElementById('loading-indicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+        
+        // Hide loading indicator when page is loaded
+        $(window).on('load', function() {
+            hideLoadingIndicator();
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
