@@ -911,7 +911,7 @@ async def main():
     print(f"📦 AI Stok Tahmini: {stock_data['current_stock']} -> {recommended_stock}")
     
     print("\n✅ Tüm entegrasyonlar başarıyla yüklendi ve test edildi!")
-            print("🎯 Gerçek entegrasyonlar hazır!")
+    print("🎯 Gerçek entegrasyonlar hazır!")
 
 if __name__ == "__main__":
     # Logging ayarla

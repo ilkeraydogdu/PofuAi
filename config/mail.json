@@ -4,7 +4,7 @@
   "port": 465,
   "encryption": "ssl",
   "username": "mail@ilkeraydogdu.com.tr",
-  "password": "ilkN.2801",
+  "password": "YOUR_EMAIL_PASSWORD_HERE",
   "from": {
     "address": "mail@ilkeraydogdu.com.tr",
     "name": "İLKER AYDOĞDU"
