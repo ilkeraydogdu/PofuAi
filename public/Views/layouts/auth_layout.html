@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr" data-bs-theme="blue-theme">
+<html lang="tr" data-bs-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,105 +12,161 @@
     <link href="/static/assets/css/pace.min.css" rel="stylesheet">
     <script src="/static/assets/js/pace.min.js"></script>
     
-    <!-- Plugins -->
-    <link href="/static/assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css" rel="stylesheet">
-    <link href="/static/assets/plugins/metismenu/metisMenu.min.css" rel="stylesheet">
-    <link href="/static/assets/plugins/metismenu/mm-vertical.css" rel="stylesheet">
-    
     <!-- Bootstrap CSS -->
     <link href="/static/assets/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/static/assets/css/bootstrap-extended.css" rel="stylesheet">
     
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Material+Icons+Outlined" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css">
     
-    <!-- Theme CSS -->
-    <link href="/static/sass/main.css" rel="stylesheet">
-    <link href="/static/sass/blue-theme.css" rel="stylesheet">
-    <link href="/static/sass/dark-theme.css" rel="stylesheet">
-    <link href="/static/sass/responsive.css" rel="stylesheet">
+    <!-- Animate CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     
-    <style>
-        .separator {
-            display: flex;
-            align-items: center;
-            text-align: center;
-            margin: 20px 0;
-        }
-        
-        .separator .line {
-            flex: 1;
-            border-bottom: 1px solid var(--bs-border-color);
-        }
-        
-        .separator p {
-            padding: 0 10px;
-            color: var(--bs-secondary-color);
-        }
-        
-        .btn-filter {
-            background-color: var(--bs-tertiary-bg);
-            border: 1px solid var(--bs-border-color);
-        }
-        
-        .btn-filter:hover {
-            background-color: var(--bs-secondary-bg);
-        }
-    </style>
+    <!-- Custom Auth CSS -->
+    <link href="/static/assets/css/auth-modern.css" rel="stylesheet">
     
     {% block head_extra %}{% endblock %}
     {% block extra_css %}{% endblock %}
 </head>
-<body>
-    {% block body %}
-    <div class="mx-3 mx-lg-0">
-        <div class="card my-5 col-xl-9 col-xxl-8 mx-auto rounded-4 overflow-hidden p-4">
-            <div class="row g-4">
-                <div class="col-lg-6 d-flex">
-                    <div class="card-body">
-                        {% block auth_form %}
-                        <!-- Auth form içeriği buraya gelecek -->
-                        {% endblock %}
+<body class="auth-body">
+    <!-- Background Animation -->
+    <div class="auth-background">
+        <div class="gradient-bg"></div>
+        <div class="animated-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+            <div class="shape shape-4"></div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="auth-wrapper">
+        <div class="container-fluid h-100">
+            <div class="row h-100">
+                <!-- Left Side - Form Section -->
+                <div class="col-lg-5 col-md-6 d-flex align-items-center justify-content-center p-0">
+                    <div class="auth-form-container animate__animated animate__fadeInLeft">
+                        <div class="auth-form-wrapper">
+                            <!-- Logo -->
+                            <div class="auth-logo mb-4">
+                                <img src="/static/assets/images/logo1.png" alt="Logo" class="logo-img">
+                                <h2 class="brand-name">PofuAI</h2>
+                            </div>
+
+                            <!-- Dynamic Form Content -->
+                            {% block auth_form %}
+                            <!-- Auth form content will be here -->
+                            {% endblock %}
+
+                            <!-- Footer Links -->
+                            <div class="auth-footer mt-5">
+                                <div class="footer-links">
+                                    <a href="#" class="footer-link">Gizlilik Politikası</a>
+                                    <span class="separator">•</span>
+                                    <a href="#" class="footer-link">Kullanım Koşulları</a>
+                                    <span class="separator">•</span>
+                                    <a href="#" class="footer-link">Yardım</a>
+                                </div>
+                                <div class="copyright mt-3">
+                                    © 2025 PofuAI. Tüm hakları saklıdır.
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="col-lg-6 d-lg-flex d-none">
-                    <div class="p-3 rounded-4 w-100 d-flex align-items-center justify-content-center {% block auth_bg_color %}bg-grd-primary{% endblock %}">
-                        <img src="{% block auth_image %}/static/assets/images/auth/login1.png{% endblock %}" class="img-fluid" alt="">
+
+                <!-- Right Side - Image/Marketing Section -->
+                <div class="col-lg-7 col-md-6 d-none d-md-flex align-items-center justify-content-center p-0">
+                    <div class="auth-image-container animate__animated animate__fadeInRight">
+                        <div class="auth-image-wrapper">
+                            <!-- Marketing Content -->
+                            <div class="marketing-content">
+                                {% block marketing_content %}
+                                <div class="marketing-header">
+                                    <h1 class="marketing-title">{% block marketing_title %}E-Ticaretin Geleceğine Hoş Geldiniz{% endblock %}</h1>
+                                    <p class="marketing-subtitle">{% block marketing_subtitle %}Yapay zeka destekli çözümlerle işinizi büyütün{% endblock %}</p>
+                                </div>
+
+                                <!-- Features -->
+                                <div class="features-grid">
+                                    <div class="feature-item">
+                                        <div class="feature-icon">
+                                            <i class="bi bi-shield-check"></i>
+                                        </div>
+                                        <h3>Güvenli Altyapı</h3>
+                                        <p>256-bit SSL şifreleme ile verileriniz güvende</p>
+                                    </div>
+                                    <div class="feature-item">
+                                        <div class="feature-icon">
+                                            <i class="bi bi-lightning-charge"></i>
+                                        </div>
+                                        <h3>Hızlı İşlem</h3>
+                                        <p>Saniyeler içinde hesap oluşturun ve başlayın</p>
+                                    </div>
+                                    <div class="feature-item">
+                                        <div class="feature-icon">
+                                            <i class="bi bi-graph-up-arrow"></i>
+                                        </div>
+                                        <h3>Büyüme Odaklı</h3>
+                                        <p>İşinizi büyütmek için ihtiyacınız olan tüm araçlar</p>
+                                    </div>
+                                    <div class="feature-item">
+                                        <div class="feature-icon">
+                                            <i class="bi bi-headset"></i>
+                                        </div>
+                                        <h3>7/24 Destek</h3>
+                                        <p>Her zaman yanınızdayız</p>
+                                    </div>
+                                </div>
+
+                                <!-- Testimonial Slider -->
+                                <div class="testimonial-section">
+                                    <div class="testimonial-card">
+                                        <div class="stars">
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                        </div>
+                                        <p class="testimonial-text">"PofuAI sayesinde satışlarımız %300 arttı. Harika bir platform!"</p>
+                                        <div class="testimonial-author">
+                                            <img src="https://ui-avatars.com/api/?name=Ahmet+Yilmaz&background=6366f1&color=fff" alt="Avatar" class="author-avatar">
+                                            <div>
+                                                <h4>Ahmet Yılmaz</h4>
+                                                <p>E-Ticaret Girişimcisi</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endblock %}
+                            </div>
+
+                            <!-- Decorative Image -->
+                            <div class="auth-illustration">
+                                {% block auth_image %}
+                                <img src="/static/assets/images/auth/ecommerce-illustration.svg" alt="E-commerce" class="illustration-img">
+                                {% endblock %}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    {% endblock %}
-    
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
     <!-- jQuery -->
     <script src="/static/assets/js/jquery.min.js"></script>
     
     <!-- Bootstrap Bundle JS -->
     <script src="/static/assets/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Auth Form JS -->
-    <script>
-        $(document).ready(function () {
-            // Password show/hide functionality for all password fields
-            $("[id^=show_hide_]").each(function() {
-                $(this).find("a").on('click', function (event) {
-                    event.preventDefault();
-                    if ($(this).siblings('input').attr("type") == "text") {
-                        $(this).siblings('input').attr('type', 'password');
-                        $(this).find('i').addClass("bi-eye-slash-fill");
-                        $(this).find('i').removeClass("bi-eye-fill");
-                    } else if ($(this).siblings('input').attr("type") == "password") {
-                        $(this).siblings('input').attr('type', 'text');
-                        $(this).find('i').removeClass("bi-eye-slash-fill");
-                        $(this).find('i').addClass("bi-eye-fill");
-                    }
-                });
-            });
-        });
-    </script>
+    <!-- Modern Auth JS -->
+    <script src="/static/assets/js/auth-modern.js"></script>
     
     {% block extra_js %}{% endblock %}
 </body>

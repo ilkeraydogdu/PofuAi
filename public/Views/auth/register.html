@@ -1,89 +1,534 @@
 {% extends "layouts/auth_layout.html" %}
 
-{% block title %}PofuAi | Kayıt{% endblock %}
+{% block title %}PofuAI | Üye Ol{% endblock %}
 
-{% block auth_bg_color %}bg-grd-info{% endblock %}
-{% block auth_image %}/static/assets/images/auth/register1.png{% endblock %}
+{% block marketing_title %}Hemen Üye Olun{% endblock %}
+{% block marketing_subtitle %}Özel fırsatlardan yararlanmak için kayıt olun{% endblock %}
 
 {% block head_extra %}
-<link rel="stylesheet" href="/static/assets/css/register-form.css">
+<style>
+    .wizard-step {
+        display: none;
+    }
+    .wizard-step.active {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+    .step-content {
+        min-height: 300px;
+    }
+</style>
 {% endblock %}
 
 {% block auth_form %}
-<img src="/static/assets/images/logo1.png" class="mb-4" width="145" alt="">
-<h4 class="fw-bold">{{ messages.form_title }}</h4>
-<p class="mb-0">{{ messages.form_subtitle }}</p>
+<!-- Welcome Message -->
+<div class="auth-header mb-4">
+    <h1 class="auth-title">Hesap Oluştur</h1>
+    <p class="auth-subtitle">Birkaç adımda üyeliğinizi tamamlayın</p>
+</div>
 
-<!-- Bilgilendirme mesajı -->
-{% if messages.info_title and messages.info_message %}
-<div class="alert alert-info border-0 bg-info alert-dismissible fade show py-2 mt-3">
-    <div class="d-flex align-items-center">
-        <div class="font-35 text-white"><i class="bi bi-envelope-check"></i></div>
-        <div class="ms-3">
-            <h6 class="mb-0 text-white">{{ messages.info_title }}</h6>
-            <div class="text-white">{{ messages.info_message }}</div>
+<!-- Progress Steps -->
+<div class="progress-steps mb-4">
+    <div class="step active" data-step="1">
+        <div class="step-circle">1</div>
+        <div class="step-label">Kişisel Bilgiler</div>
+    </div>
+    <div class="step" data-step="2">
+        <div class="step-circle">2</div>
+        <div class="step-label">İletişim</div>
+    </div>
+    <div class="step" data-step="3">
+        <div class="step-circle">3</div>
+        <div class="step-label">Güvenlik</div>
+    </div>
+</div>
+
+<!-- Registration Form -->
+<form class="auth-form" method="POST" action="/auth/register" id="registerForm">
+    <!-- Step 1: Personal Information -->
+    <div class="wizard-step active" data-step="1">
+        <div class="step-content">
+            <!-- Name Input -->
+            <div class="form-group">
+                <label for="firstName" class="form-label">Adınız</label>
+                <div class="input-group">
+                    <i class="bi bi-person input-icon-left"></i>
+                    <input 
+                        type="text" 
+                        class="form-control with-icon-left" 
+                        id="firstName" 
+                        name="first_name" 
+                        placeholder="Adınız" 
+                        required
+                        autocomplete="given-name"
+                    >
+                </div>
+            </div>
+
+            <!-- Surname Input -->
+            <div class="form-group">
+                <label for="lastName" class="form-label">Soyadınız</label>
+                <div class="input-group">
+                    <i class="bi bi-person input-icon-left"></i>
+                    <input 
+                        type="text" 
+                        class="form-control with-icon-left" 
+                        id="lastName" 
+                        name="last_name" 
+                        placeholder="Soyadınız" 
+                        required
+                        autocomplete="family-name"
+                    >
+                </div>
+            </div>
+
+            <!-- Birth Date -->
+            <div class="form-group">
+                <label for="birthDate" class="form-label">Doğum Tarihi (Opsiyonel)</label>
+                <div class="input-group">
+                    <i class="bi bi-calendar input-icon-left"></i>
+                    <input 
+                        type="date" 
+                        class="form-control with-icon-left" 
+                        id="birthDate" 
+                        name="birth_date"
+                        autocomplete="bday"
+                    >
+                </div>
+            </div>
+
+            <!-- Gender Selection -->
+            <div class="form-group">
+                <label class="form-label">Cinsiyet (Opsiyonel)</label>
+                <div class="d-flex gap-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="gender" id="genderMale" value="male">
+                        <label class="form-check-label" for="genderMale">
+                            Erkek
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="gender" id="genderFemale" value="female">
+                        <label class="form-check-label" for="genderFemale">
+                            Kadın
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="gender" id="genderOther" value="other">
+                        <label class="form-check-label" for="genderOther">
+                            Belirtmek İstemiyorum
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="d-flex justify-content-end mt-4">
+            <button type="button" class="btn btn-primary" onclick="nextStep(1)">
+                İleri <i class="bi bi-arrow-right"></i>
+            </button>
         </div>
     </div>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-</div>
-{% endif %}
 
-<div class="form-body mt-4">
-    <form class="row g-3" method="POST" action="/auth/register" id="registerForm">
-        <div class="col-12">
-            <label for="inputName" class="form-label">Ad Soyad</label>
-            <input type="text" class="form-control" id="inputName" name="name" placeholder="Ad Soyad" required>
-            <div class="validation-message" id="nameValidation"></div>
-        </div>
-        <div class="col-12">
-            <label for="inputEmailAddress" class="form-label">E-posta</label>
-            <input type="email" class="form-control" id="inputEmailAddress" name="email" placeholder="ornek@email.com" required>
-            <div class="validation-message" id="emailValidation"></div>
-        </div>
-        <div class="col-12">
-            <label for="inputPhone" class="form-label">Telefon Numarası</label>
-            <input type="tel" class="form-control" id="inputPhone" name="phone" placeholder="05XX XXX XX XX" required>
-            <div class="validation-message" id="phoneValidation"></div>
-        </div>
-        
-        <!-- Spam Koruması - Basit Doğrulama -->
-        <div class="col-12 mt-3" id="securityVerification" style="display: none;">
-            <div class="captcha-container">
+    <!-- Step 2: Contact Information -->
+    <div class="wizard-step" data-step="2">
+        <div class="step-content">
+            <!-- Email Input -->
+            <div class="form-group">
+                <label for="email" class="form-label">E-posta Adresi</label>
                 <div class="input-group">
-                    <span class="input-group-text bg-info text-white" id="captchaQuestionLabel">
-                        Hesaplayın
+                    <i class="bi bi-envelope input-icon-left"></i>
+                    <input 
+                        type="email" 
+                        class="form-control with-icon-left" 
+                        id="email" 
+                        name="email" 
+                        placeholder="ornek@email.com" 
+                        required
+                        autocomplete="email"
+                    >
+                </div>
+                <div class="validation-message"></div>
+            </div>
+
+            <!-- Phone Input -->
+            <div class="form-group">
+                <label for="phone" class="form-label">Telefon Numarası</label>
+                <div class="input-group">
+                    <i class="bi bi-telephone input-icon-left"></i>
+                    <input 
+                        type="tel" 
+                        class="form-control with-icon-left" 
+                        id="phone" 
+                        name="phone" 
+                        placeholder="0500 000 00 00" 
+                        required
+                        autocomplete="tel"
+                    >
+                </div>
+                <div class="validation-message"></div>
+            </div>
+
+            <!-- Address (Optional) -->
+            <div class="form-group">
+                <label for="address" class="form-label">Adres (Opsiyonel)</label>
+                <div class="input-group">
+                    <i class="bi bi-geo-alt input-icon-left"></i>
+                    <textarea 
+                        class="form-control with-icon-left" 
+                        id="address" 
+                        name="address" 
+                        rows="3"
+                        placeholder="Adresiniz"
+                        autocomplete="street-address"
+                    ></textarea>
+                </div>
+            </div>
+
+            <!-- Newsletter -->
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="newsletter" name="newsletter" checked>
+                <label class="form-check-label" for="newsletter">
+                    Kampanya ve fırsatlardan haberdar olmak istiyorum
+                </label>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="d-flex justify-content-between mt-4">
+            <button type="button" class="btn btn-secondary" onclick="previousStep(2)">
+                <i class="bi bi-arrow-left"></i> Geri
+            </button>
+            <button type="button" class="btn btn-primary" onclick="nextStep(2)">
+                İleri <i class="bi bi-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Step 3: Security -->
+    <div class="wizard-step" data-step="3">
+        <div class="step-content">
+            <!-- Password Input -->
+            <div class="form-group">
+                <label for="password" class="form-label">Şifre</label>
+                <div class="input-group">
+                    <i class="bi bi-lock input-icon-left"></i>
+                    <input 
+                        type="password" 
+                        class="form-control with-icon-left" 
+                        id="password" 
+                        name="password" 
+                        placeholder="••••••••" 
+                        required
+                        autocomplete="new-password"
+                    >
+                    <span class="input-group-text">
+                        <i class="bi bi-eye-slash-fill"></i>
                     </span>
-                    <input type="text" class="form-control" id="captchaAnswer" name="captcha_answer" placeholder="Cevabınız" required>
-                    <input type="hidden" id="captchaExpectedAnswer" name="captcha_expected">
-                    <input type="hidden" id="captchaOperation" name="captcha_operation">
                 </div>
-                <div class="form-text">
-                    <i class="bi bi-shield-check"></i> 
-                    Güvenlik doğrulaması
+                <div class="password-requirements mt-2">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle"></i>
+                        En az 8 karakter, bir büyük harf ve bir rakam içermelidir
+                    </small>
                 </div>
             </div>
+
+            <!-- Confirm Password -->
+            <div class="form-group">
+                <label for="confirmPassword" class="form-label">Şifre Tekrar</label>
+                <div class="input-group">
+                    <i class="bi bi-lock input-icon-left"></i>
+                    <input 
+                        type="password" 
+                        class="form-control with-icon-left" 
+                        id="confirmPassword" 
+                        name="password_confirm" 
+                        placeholder="••••••••" 
+                        required
+                        autocomplete="new-password"
+                    >
+                    <span class="input-group-text">
+                        <i class="bi bi-eye-slash-fill"></i>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Terms and Conditions -->
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="terms" name="terms" required>
+                <label class="form-check-label" for="terms">
+                    <a href="#" class="auth-link" data-bs-toggle="modal" data-bs-target="#termsModal">Kullanım Koşulları</a> ve 
+                    <a href="#" class="auth-link" data-bs-toggle="modal" data-bs-target="#privacyModal">Gizlilik Politikası</a>'nı 
+                    okudum ve kabul ediyorum
+                </label>
+            </div>
+
+            <!-- KVKK -->
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="kvkk" name="kvkk" required>
+                <label class="form-check-label" for="kvkk">
+                    <a href="#" class="auth-link" data-bs-toggle="modal" data-bs-target="#kvkkModal">KVKK Aydınlatma Metni</a>'ni okudum
+                </label>
+            </div>
+
+            <!-- reCAPTCHA -->
+            <div class="form-group mt-3">
+                <div class="g-recaptcha" data-sitekey="your-site-key"></div>
+            </div>
         </div>
+
+        <!-- Navigation -->
+        <div class="d-flex justify-content-between mt-4">
+            <button type="button" class="btn btn-secondary" onclick="previousStep(3)">
+                <i class="bi bi-arrow-left"></i> Geri
+            </button>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-circle"></i> Üyeliği Tamamla
+            </button>
+        </div>
+    </div>
+</form>
+
+<!-- Alternative Registration -->
+<div class="text-center mt-4">
+    <p class="mb-0">
+        Zaten üye misiniz? 
+        <a href="/auth/login" class="auth-link">Giriş Yapın</a>
+    </p>
+</div>
+
+<!-- Social Registration -->
+<div class="social-login">
+    <div class="divider">
+        <span class="divider-line"></span>
+        <span class="divider-text">veya hızlı kayıt</span>
+        <span class="divider-line"></span>
+    </div>
+
+    <div class="social-buttons">
+        <button class="btn btn-social btn-google" data-provider="Google">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+            Google ile Kayıt
+        </button>
         
-        <div class="col-12">
-            <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" name="terms" required>
-                <label class="form-check-label" for="flexSwitchCheckChecked">Kullanım koşullarını okudum ve kabul ediyorum</label>
+        <button class="btn btn-social btn-facebook" data-provider="Facebook">
+            <i class="bi bi-facebook"></i>
+            Facebook ile Kayıt
+        </button>
+    </div>
+</div>
+
+<!-- Modals for Terms, Privacy, KVKK -->
+<!-- Terms Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Kullanım Koşulları</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Kullanım koşulları metni buraya gelecek...</p>
             </div>
         </div>
-        <div class="col-12">
-            <div class="d-grid">
-                <button type="submit" class="btn btn-grd-info" id="submitButton">{{ messages.submit_button }}</button>
+    </div>
+</div>
+
+<!-- Privacy Modal -->
+<div class="modal fade" id="privacyModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Gizlilik Politikası</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Gizlilik politikası metni buraya gelecek...</p>
             </div>
         </div>
-        <div class="col-12">
-            <div class="text-start">
-                <p class="mb-0">Zaten hesabınız var mı? <a href="/auth/login" class="fw-bold text-info">Giriş yapın</a></p>
+    </div>
+</div>
+
+<!-- KVKK Modal -->
+<div class="modal fade" id="kvkkModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">KVKK Aydınlatma Metni</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>KVKK aydınlatma metni buraya gelecek...</p>
             </div>
         </div>
-    </form>
+    </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<script src="/static/assets/js/register-form.js"></script>
+<script>
+let currentStep = 1;
+const totalSteps = 3;
+
+function showStep(step) {
+    // Hide all steps
+    document.querySelectorAll('.wizard-step').forEach(s => {
+        s.classList.remove('active');
+    });
+    
+    // Show current step
+    document.querySelector(`.wizard-step[data-step="${step}"]`).classList.add('active');
+    
+    // Update progress indicators
+    document.querySelectorAll('.progress-steps .step').forEach(s => {
+        const stepNum = parseInt(s.dataset.step);
+        s.classList.remove('active', 'completed');
+        
+        if (stepNum < step) {
+            s.classList.add('completed');
+        } else if (stepNum === step) {
+            s.classList.add('active');
+        }
+    });
+    
+    // Update progress line
+    const progressLine = document.querySelector('.progress-line');
+    if (progressLine) {
+        const percentage = ((step - 1) / (totalSteps - 1)) * 100;
+        progressLine.style.width = `${percentage}%`;
+    }
+}
+
+function validateStep(step) {
+    const stepElement = document.querySelector(`.wizard-step[data-step="${step}"]`);
+    const inputs = stepElement.querySelectorAll('input[required], select[required], textarea[required]');
+    let isValid = true;
+    
+    inputs.forEach(input => {
+        if (!input.value.trim()) {
+            input.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            input.classList.remove('is-invalid');
+        }
+    });
+    
+    // Special validation for step 2 (email and phone)
+    if (step === 2) {
+        const email = document.getElementById('email');
+        const phone = document.getElementById('phone');
+        
+        if (email && !validateEmailFormat(email.value)) {
+            email.classList.add('is-invalid');
+            isValid = false;
+        }
+        
+        if (phone && !validatePhoneFormat(phone.value)) {
+            phone.classList.add('is-invalid');
+            isValid = false;
+        }
+    }
+    
+    // Special validation for step 3 (passwords)
+    if (step === 3) {
+        const password = document.getElementById('password');
+        const confirmPassword = document.getElementById('confirmPassword');
+        
+        if (password && confirmPassword) {
+            if (password.value.length < 8) {
+                password.classList.add('is-invalid');
+                isValid = false;
+                AuthModern.showToast('Şifre en az 8 karakter olmalıdır', 'error');
+            }
+            
+            if (password.value !== confirmPassword.value) {
+                confirmPassword.classList.add('is-invalid');
+                isValid = false;
+                AuthModern.showToast('Şifreler eşleşmiyor', 'error');
+            }
+        }
+        
+        // Check terms and KVKK
+        const terms = document.getElementById('terms');
+        const kvkk = document.getElementById('kvkk');
+        
+        if (!terms.checked || !kvkk.checked) {
+            isValid = false;
+            AuthModern.showToast('Lütfen tüm sözleşmeleri kabul edin', 'error');
+        }
+    }
+    
+    return isValid;
+}
+
+function nextStep(step) {
+    if (validateStep(step)) {
+        if (step < totalSteps) {
+            currentStep = step + 1;
+            showStep(currentStep);
+        }
+    } else {
+        AuthModern.showToast('Lütfen tüm zorunlu alanları doldurun', 'error');
+    }
+}
+
+function previousStep(step) {
+    if (step > 1) {
+        currentStep = step - 1;
+        showStep(currentStep);
+    }
+}
+
+function validateEmailFormat(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function validatePhoneFormat(phone) {
+    const digitsOnly = phone.replace(/\D/g, '');
+    return /^0(5)[0-9]{9}$/.test(digitsOnly);
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    showStep(1);
+    
+    // Handle form submission
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (validateStep(3)) {
+            // Show loading
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner"></span> İşleniyor...';
+            
+            // Submit form
+            setTimeout(() => {
+                this.submit();
+            }, 1000);
+        }
+    });
+    
+    // Add input event listeners for real-time validation
+    document.querySelectorAll('.form-control').forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.hasAttribute('required') && !this.value.trim()) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+    });
+});
+</script>
+
+<!-- Google reCAPTCHA -->
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
 {% endblock %} 
