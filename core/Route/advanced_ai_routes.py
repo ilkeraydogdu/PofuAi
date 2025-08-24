@@ -22,22 +22,22 @@ controller = AdvancedAIController()
 
 # Sosyal Medya Şablon Routes
 @advanced_ai_bp.route('/generate-template', methods=['POST'])
-async def generate_social_template():
+def generate_social_template():
     """
     Sosyal medya şablonu oluştur
     
     Tüm kullanıcılar kullanabilir (rol bazlı kısıtlamalar uygulanır)
     """
-    return await controller.generate_social_template()
+    return controller.generate_social_template()
 
 @advanced_ai_bp.route('/batch-generate-templates', methods=['POST'])
-async def batch_generate_templates():
+def batch_generate_templates():
     """
     Toplu şablon oluşturma
     
     Moderator+ kullanıcılar için
     """
-    return await controller.batch_generate_templates()
+    return controller.batch_generate_templates()
 
 @advanced_ai_bp.route('/template-types', methods=['GET'])
 def get_template_types():
@@ -69,23 +69,23 @@ def preview_template(filename):
 
 # AI Ürün Düzenleme Routes (Admin Özel)
 @advanced_ai_bp.route('/edit-product', methods=['POST'])
-async def edit_product_with_ai():
+def edit_product_with_ai():
     """
     AI ile ürün düzenleme
     
     Sadece admin kullanıcılar için
     """
-    return await controller.edit_product_with_ai()
+    return controller.edit_product_with_ai()
 
 # İçerik Analizi Routes
 @advanced_ai_bp.route('/analyze-content', methods=['POST'])
-async def analyze_user_content():
+def analyze_user_content():
     """
     Kişiselleştirilmiş içerik analizi
     
     Tüm kullanıcılar kendi içeriklerini, adminler tüm kullanıcıları analiz edebilir
     """
-    return await controller.analyze_user_content()
+    return controller.analyze_user_content()
 
 # AI Sistem Yönetimi Routes
 @advanced_ai_bp.route('/advanced-metrics', methods=['GET'])
@@ -108,7 +108,7 @@ def get_ai_permissions():
 
 # Kullanıcı AI Geçmişi Routes
 @advanced_ai_bp.route('/user-history', methods=['GET'])
-async def get_user_ai_history():
+def get_user_ai_history():
     """
     Kullanıcının AI geçmişini al
     
@@ -119,7 +119,7 @@ async def get_user_ai_history():
     
     Tüm giriş yapmış kullanıcılar için
     """
-    return await controller.get_user_ai_history()
+    return controller.get_user_ai_history()
 
 # Route kayıt fonksiyonu
 def register_advanced_ai_routes(app):

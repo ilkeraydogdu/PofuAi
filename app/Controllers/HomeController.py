@@ -58,7 +58,7 @@ class HomeController(BaseController):
                 'current_user': session.get('user', {})
             }
             
-            return render_template('home/index.html', **data)
+            return render_template('home/dashboard.html', **data)
             
         except Exception as e:
             return error_handler.handle_error(e, self.request)

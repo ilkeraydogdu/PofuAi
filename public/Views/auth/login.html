@@ -1,47 +1,157 @@
-{% extends "layouts/auth_layout.html" %}
-
-{% block title %}PofuAi | Giriş{% endblock %}
-
-{% block auth_bg_color %}bg-grd-primary{% endblock %}
-{% block auth_image %}/static/assets/images/auth/login1.png{% endblock %}
-
-{% block auth_form %}
-<img src="/static/assets/images/logo1.png" class="mb-4" width="145" alt="">
-<h4 class="fw-bold">{{ messages.form_title }}</h4>
-<p class="mb-0">{{ messages.form_subtitle }}</p>
-
-<div class="form-body mt-4">
-    <form class="row g-3" method="POST" action="/auth/login">
-        <div class="col-12">
-            <label for="inputEmailAddress" class="form-label">E-posta</label>
-            <input type="email" class="form-control" id="inputEmailAddress" name="email" placeholder="ornek@email.com" required>
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giriş Yap - PofuAI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .login-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .login-header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .login-header p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .form-footer {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .form-footer a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .alert {
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .alert-error {
+            background-color: #fee;
+            color: #c33;
+            border: 1px solid #fcc;
+        }
+        
+        .alert-success {
+            background-color: #efe;
+            color: #3c3;
+            border: 1px solid #cfc;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>PofuAI</h1>
+            <p>AI-Powered E-Commerce Platform</p>
         </div>
-        <div class="col-12">
-            <label for="inputChoosePassword" class="form-label">Şifre</label>
-            <div class="input-group" id="show_hide_password">
-                <input type="password" class="form-control border-end-0" id="inputChoosePassword" name="password" placeholder="Şifrenizi girin" required>
-                <a href="javascript:;" class="input-group-text bg-transparent"><i class="bi bi-eye-slash-fill"></i></a>
+        
+        <form method="POST" action="/auth/login">
+            <div class="form-group">
+                <label for="email">E-posta Adresi</label>
+                <input type="email" id="email" name="email" required placeholder="ornek@email.com">
             </div>
-        </div>
-        <div class="col-md-6">
-            <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" name="remember_me">
-                <label class="form-check-label" for="flexSwitchCheckChecked">{{ ui.get_message('auth.login.remember_me') }}</label>
+            
+            <div class="form-group">
+                <label for="password">Şifre</label>
+                <input type="password" id="password" name="password" required placeholder="••••••••">
             </div>
+            
+            <button type="submit" class="btn">Giriş Yap</button>
+        </form>
+        
+        <div class="form-footer">
+            <p>Hesabınız yok mu? <a href="/auth/register">Kayıt Ol</a></p>
+            <p style="margin-top: 10px;"><a href="/auth/forgot-password">Şifremi Unuttum</a></p>
         </div>
-        <div class="col-md-6 text-end">
-            <a href="/auth/forgot-password">{{ ui.get_message('auth.login.forgot_password') }}</a>
+        
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; color: #999; font-size: 12px;">
+            <p>Demo Giriş Bilgileri:</p>
+            <p><strong>Email:</strong> admin@example.com</p>
+            <p><strong>Şifre:</strong> password123</p>
         </div>
-        <div class="col-12">
-            <div class="d-grid">
-                <button type="submit" class="btn btn-grd-primary">{{ messages.submit_button }}</button>
-            </div>
-        </div>
-        <div class="col-12">
-            <div class="text-start">
-                <p class="mb-0">Hesabınız yok mu? <a href="/auth/register" class="fw-bold text-primary">Kayıt olun</a></p>
-            </div>
-        </div>
-    </form>
-</div>
-{% endblock %} 
+    </div>
+</body>
+</html> 
